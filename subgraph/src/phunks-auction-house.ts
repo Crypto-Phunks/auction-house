@@ -1,96 +1,100 @@
-import { BigInt } from "@graphprotocol/graph-ts"
+import { BigInt, log } from '@graphprotocol/graph-ts';
 import {
-  PhunksAuctionHouse,
-  AuctionBid,
   AuctionCreated,
-  AuctionDurationUpdated,
+  AuctionBid,
   AuctionExtended,
-  AuctionMinBidIncrementPercentageUpdated,
-  AuctionReservePriceUpdated,
   AuctionSettled,
-  AuctionTimeBufferUpdated,
-  OwnershipTransferred,
-  Paused,
-  Unpaused
-} from "../generated/PhunksAuctionHouse/PhunksAuctionHouse"
-import { ExampleEntity } from "../generated/schema"
+} from '../generated/PhunksAuctionHouse/PhunksAuctionHouse';
 
-export function handleAuctionBid(event: AuctionBid): void {
-  // Entities can be loaded from the store using a string ID; this ID
-  // needs to be unique across all entities of the same type
-  let entity = ExampleEntity.load(event.transaction.from.toHex())
+import { Phunk, Auction, Bid, Account } from '../generated/schema';
+import { getOrCreateAccount } from './utils/helpers';
 
-  // Entities only exist after they have been saved to the store;
-  // `null` checks allow to create entities on demand
-  if (!entity) {
-    entity = new ExampleEntity(event.transaction.from.toHex())
+export function handleAuctionCreated(event: AuctionCreated): void {
+  let phunkId = event.params.phunkId.toString();
 
-    // Entity fields can be set using simple assignments
-    entity.count = BigInt.fromI32(0)
+  let phunk = Phunk.load(phunkId);
+  if (phunk == null) {
+    log.error('[handleAuctionCreated] Phunk #{} not found. Hash: {}', [
+      phunkId,
+      event.transaction.hash.toHex(),
+    ]);
+    return;
   }
 
-  // BigInt and BigDecimal math are supported
-  entity.count = entity.count + BigInt.fromI32(1)
+  let auctionId = event.params.auctionId.toString();
+  let auction = new Auction(auctionId);
 
-  // Entity fields can be set based on event parameters
-  entity.phunkId = event.params.phunkId
-  entity.auctionId = event.params.auctionId
-
-  // Entities can be written to the store with `.save()`
-  entity.save()
-
-  // Note: If a handler doesn't require existing field values, it is faster
-  // _not_ to load the entity from the store. Instead, create it fresh with
-  // `new Entity(...)`, set the fields that should be updated and save the
-  // entity back to the store. Fields that were not set or unset remain
-  // unchanged, allowing for partial updates to be applied.
-
-  // It is also possible to access smart contracts from mappings. For
-  // example, the contract that has emitted the event can be connected to
-  // with:
-  //
-  // let contract = Contract.bind(event.address)
-  //
-  // The following functions can then be called on this contract to access
-  // state variables and other data:
-  //
-  // - contract.auction(...)
-  // - contract.auctionId(...)
-  // - contract.duration(...)
-  // - contract.minBidIncrementPercentage(...)
-  // - contract.owner(...)
-  // - contract.paused(...)
-  // - contract.phunks(...)
-  // - contract.reservePrice(...)
-  // - contract.timeBuffer(...)
-  // - contract.treasuryWallet(...)
-  // - contract.weth(...)
+  auction.phunk = phunk.id;
+  auction.id = auctionId;
+  auction.blockNumber = event.block.number;
+  auction.amount = BigInt.fromI32(0);
+  // auction.attributes = event.params.attributes;
+  // auction.image = event.params.image.toHexString();
+  auction.startTime = event.params.startTime;
+  auction.endTime = event.params.endTime;
+  auction.settled = false;
+  auction.save();
 }
 
-export function handleAuctionCreated(event: AuctionCreated): void {}
+export function handleAuctionBid(event: AuctionBid): void {
+  let bidderAddress = event.params.sender.toHex();
+  let auctionId = event.params.auctionId.toString();
 
-export function handleAuctionDurationUpdated(
-  event: AuctionDurationUpdated
-): void {}
+  let bidder = getOrCreateAccount(bidderAddress);
 
-export function handleAuctionExtended(event: AuctionExtended): void {}
+  let auction = Auction.load(auctionId);
+  if (auction == null) {
+    log.error('[handleAuctionBid] Auction not found for Auction #{}. Hash: {}', [
+      auctionId,
+      event.transaction.hash.toHex(),
+    ]);
+    return;
+  }
 
-export function handleAuctionMinBidIncrementPercentageUpdated(
-  event: AuctionMinBidIncrementPercentageUpdated
-): void {}
+  auction.amount = event.params.value;
+  auction.bidder = bidder.id;
+  auction.save();
 
-export function handleAuctionReservePriceUpdated(
-  event: AuctionReservePriceUpdated
-): void {}
+  // Save Bid
+  let bid = new Bid(event.transaction.hash.toHex());
+  bid.bidder = bidderAddress;
+  bid.amount = auction.amount;
+  bid.phunk = auction.phunk;
+  bid.txIndex = event.transaction.index;
+  bid.blockNumber = event.block.number;
+  bid.blockTimestamp = event.block.timestamp;
+  bid.auction = auction.id;
+  bid.save();
+}
 
-export function handleAuctionSettled(event: AuctionSettled): void {}
+export function handleAuctionExtended(event: AuctionExtended): void {
+  let auctionId = event.params.auctionId.toString();
 
-export function handleAuctionTimeBufferUpdated(
-  event: AuctionTimeBufferUpdated
-): void {}
+  let auction = Auction.load(auctionId);
+  if (auction == null) {
+    log.error('[handleAuctionExtended] Auction not found for Auction #{}. Hash: {}', [
+      auctionId,
+      event.transaction.hash.toHex(),
+    ]);
+    return;
+  }
 
-export function handleOwnershipTransferred(event: OwnershipTransferred): void {}
+  auction.endTime = event.params.endTime;
+  auction.save();
+}
 
-export function handlePaused(event: Paused): void {}
+export function handleAuctionSettled(event: AuctionSettled): void {
+  let auctionId = event.params.auctionId.toString();
 
-export function handleUnpaused(event: Unpaused): void {}
+  let auction = Auction.load(auctionId);
+  if (auction == null) {
+    log.error('[handleAuctionSettled] Auction not found for Auction #{}. Hash: {}', [
+      auctionId,
+      event.transaction.hash.toHex(),
+    ]);
+    return;
+  }
+
+  auction.settled = true;
+  auction.save();
+}
