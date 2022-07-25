@@ -1,0 +1,46 @@
+<button
+  class="prev-auction"
+  [class.active]="currentAuction?.id !== '1'"
+  (click)="prevAuction()">
+
+  &#60;
+</button>
+
+<button
+  class="next-auction"
+  [class.active]="currentAuction?.settled"
+  (click)="nextAuction()">
+
+  &#62;
+</button>
+
+<h1>CryptoPhunk</h1>
+
+<h2>
+  {{ ((currentAuction?.phunkId || '0000') | number : '4.0')?.replace(',', '') }}
+</h2>
+
+<ng-container *ngIf="phunkAttributes?.length">
+  <div class="one-of-label">
+    One of <span class="pink">{{ traits[phunkAttributes[0]] || 0 }}</span> {{ phunkAttributes[0] || '????' }} phunks
+  </div>
+
+  <div class="trait-count-label">
+    <span class="pink">
+      {{ phunkAttributes.length ? phunkAttributes.length - 1 : 0 }}
+    </span> trait{{ phunkAttributes.length - 1 > 1 ? 's' : '' }}
+  </div>
+</ng-container>
+
+<div class="trait-wrapper">
+  <ng-container
+    *ngFor="let trait of phunkAttributes; let i = index">
+
+    <div
+      class="trait"
+      *ngIf="i">
+
+      <span class="pink">{{ trait }} </span>{{ ((traits[trait]) / 10000) | percent : '1.1-1' }}
+    </div>
+  </ng-container>
+</div>

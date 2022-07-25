@@ -1,0 +1,32 @@
+// -----------------------------------------------------------------------------
+// This file contains all application-wide Sass variables.
+// -----------------------------------------------------------------------------
+
+$primary-font-stack: 'Montserrat', sans-serif !default;
+$secondary-font-stack: 'Retro Computer', sans-serif !default;
+
+:root {
+  --background: 255, 255, 255;
+
+  --text-color: 0, 0, 0;
+  --dark-text: 0, 0, 0;
+
+  --black: 0, 0, 0;
+  --white: 255, 255, 255;
+  --pink: 255, 4, 180;
+
+  // --punk-pink: 255, 156, 238;
+  // --punk-green: 149, 223, 178;
+  // --punk-purple: 167, 154, 255;
+
+  // --blue: 99, 133, 150;
+  // --shale: 149, 85, 79;
+  // --purple: 142, 111, 182;
+
+  --max-width: 130rem;
+}
+
+$medium: 1040px;
+$small: 800px;
+
+$base-url: '/assets/' !default;

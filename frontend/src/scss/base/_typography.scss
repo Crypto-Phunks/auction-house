@@ -1,0 +1,46 @@
+/**
+ * Basic typography style for copy text
+ */
+
+// Usage: @extend %h1; etc.
+%h1 {}
+
+%h2 {}
+
+%h3 {}
+
+%h4 {}
+
+%h5 {}
+
+
+h1, h2, h3, h4 {
+  padding: 0;
+  margin: 0;
+  line-height: 1;
+  font-size: 1.6rem;
+}
+
+h3 {
+  font-family: $secondary-font-stack;
+  color: rgba(var(--text-color), 1);
+  font-size: 2rem;
+  font-weight: normal;
+}
+
+.pink {
+  font-weight: 700;
+  color: rgba(var(--pink), 1);
+  text-decoration: none;
+}
+
+.bold {
+  font-weight: 700;
+}
+
+p {
+  a {
+    color: rgba(var(--pink), 1);
+    text-decoration: underline;
+  }
+}

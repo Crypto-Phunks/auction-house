@@ -1,0 +1,29 @@
+.tippy-box {
+
+  border-radius: 0;
+
+  .tippy-content {
+    font-family: $secondary-font-stack;
+    font-weight: normal;
+    font-size: 1.2rem;
+    padding: .5rem 1rem;
+    text-align: center;
+  }
+
+  &[data-theme="phunks"] {
+
+    background-color: rgba(var(--pink), 1);
+    box-shadow: none;
+
+    > .tippy-svg-arrow {
+      svg {
+        display: block;
+        fill: rgba(var(--text-color), 1);
+      }
+    }
+
+    .tippy-content {
+      color: rgba(var(--white), 1);
+    }
+  }
+}

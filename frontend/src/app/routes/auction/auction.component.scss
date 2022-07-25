@@ -1,0 +1,157 @@
+@import '../../../scss/abstracts/variables';
+@import '../../../scss/abstracts/mixins';
+
+:host {
+  display: block;
+}
+
+.head-wrapper {
+  padding-top: 16rem;
+
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+
+  @include trans();
+
+  .inner {
+    position: relative;
+    
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+  
+    width: 100%;
+    max-width: var(--max-width);
+    padding: 0 5rem 0 0;
+  
+    margin: 0 auto;
+  }
+
+  @media (max-width: $small) {
+    padding-top: 12rem;
+    .inner {
+      flex-direction: column-reverse;
+      align-items: center;
+      padding: 0 2rem 2rem;
+
+      phunk-image {
+        transform-origin: 50% 100%;
+        transform: scale(.5);
+        height: 30rem !important;
+      }
+    }
+  }
+}
+
+.copy-wrapper {
+  width: 100%;
+  max-width: var(--max-width);
+  padding: 8rem 5rem;
+
+  margin: 0 auto;
+
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  .left {
+    width: 100%;
+    max-width: calc(100% - 48rem);
+
+    p {
+
+      strong {
+        font-weight: 600;
+      }
+
+      a {
+        font-weight: 600;
+        color: rgba(var(--pink), 1);
+        text-decoration: none;
+      }
+
+      &:first-child {
+        padding-top: 0;
+        margin-top: 0;
+
+        font-weight: 600;
+
+        &::first-letter {
+          float: left;
+
+          font-family: $secondary-font-stack;
+          color: rgba(var(--pink), 1);
+          line-height: .9;
+          margin-right: 1rem;
+          font-size: 8rem;
+          font-weight: bold;
+        }
+      }
+    }
+  }
+
+  .right {
+    width: 100%;
+    max-width: 44rem;
+
+    h3 {
+      margin: 2rem 0;
+      
+      &:first-child {
+        margin-top: 0;
+      }
+    }
+
+    ul {
+      li {
+        padding-bottom: 1rem;
+
+        a {
+          font-family: $secondary-font-stack;
+          font-size: 1.2rem;
+          color: rgba(var(--pink), 1);
+          font-weight: normal;
+          text-decoration: none;
+          
+          display: flex;
+          align-items: center;
+
+          svg {
+            margin-left: 1rem;
+            opacity: .5;
+          }
+        }
+      }
+    }
+  }
+
+  p {
+    font-size: 1.6rem;
+    line-height: 1.5;
+  }
+
+  @media (max-width: $small) {
+
+    // display: flex;
+    // align-items: flex-end;
+    // justify-content: space-between;
+
+    padding: 8rem 2rem;
+
+    flex-direction: column;
+
+    .left,
+    .right {
+      max-width: 100%;
+    }
+
+    .right {
+      padding-top: 4rem;
+      margin-top: 2rem;
+      border-top: 2px solid rgba(var(--text-color), .25);
+    }
+
+  }
+
+}

@@ -1,0 +1,103 @@
+@import '../../../scss/abstracts/variables';
+@import '../../../scss/abstracts/mixins';
+
+:host {
+  display: block;
+
+  position: fixed;
+  z-index: 9999;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 9rem;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  @media (max-width: $small) {
+    height: calc(9rem + env(safe-area-inset-top));
+    padding-top: env(safe-area-inset-top);
+  }
+}
+
+.inner {
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  width: 100%;
+  max-width: var(--max-width);
+  padding: 0 5rem;
+
+  @media (max-width: $small) {
+    padding: 2rem;
+  }
+}
+
+.logo {
+
+  svg {
+    display: block;
+  }
+
+  @media (max-width: $small) {
+
+    width: 30rem;
+    overflow: hidden;
+
+    svg {
+      path {
+        &#wordmark {
+          display: none;
+        }
+      }
+    }
+  }
+}
+
+nav {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+
+  button {
+    color: rgba(var(--text-color), 1);
+    background-color: rgba(var(--background), 1);
+    padding: 1rem 2rem;
+
+    &.mode {
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      background: none;
+
+      svg {
+        width: 2rem;
+        path {
+          display: none;
+          fill: rgba(var(--text-color), 1);
+        }
+      }
+
+      &.dark {
+        svg {
+          path#sun {
+            display: block;
+          }
+        }
+      }
+
+      &.light {
+        svg {
+          path#moon {
+            display: block;
+          }
+        }
+      }
+    }
+  }
+}

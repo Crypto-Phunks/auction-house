@@ -1,0 +1,106 @@
+@import '../../../scss/abstracts/variables';
+@import '../../../scss/abstracts/mixins';
+
+:host {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+
+  width: 100%;
+  max-width: 44rem;
+}
+
+.prev-auction,
+.next-auction {
+  position: absolute;
+  top: 6rem;
+  left: 0;
+
+  font-family: $secondary-font-stack;
+  font-size: 5rem;
+
+  @include trans($duration: 0s);
+  color: rgba(var(--text-color), .25);
+  pointer-events: none;
+
+  &:active {
+    color: rgba(var(--text-color), 1);
+  }
+
+  &.active {
+    color: rgba(var(--text-color), 1);
+    pointer-events: all;
+  }
+
+  @media (max-width: $small) {
+    top: 4rem;
+    font-size: 3rem;
+  }
+}
+
+.next-auction {
+  transform: translate(calc(100%), 0);
+}
+
+h1, h2 {
+  padding: 0;
+  margin: 0;
+
+  font-family: $secondary-font-stack;
+  font-weight: normal;
+  line-height: auto;
+  text-align: right;
+}
+
+h1 {
+  font-size: 3.6rem;
+  padding-bottom: 1rem;
+
+  @media (max-width: $small) {
+    font-size: 2.6rem;
+  }
+}
+
+h2 {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+
+  font-size: 9.8rem;
+  color: rgba(var(--pink), 1);
+
+  @media (max-width: $small) {
+    font-size: 5rem;
+  }
+}
+
+.one-of-label,
+.trait-count-label,
+.trait-wrapper {
+  font-family: $secondary-font-stack;
+  font-size: 1.4rem;
+
+  padding-top: 2rem;
+
+  .pink {
+    color: rgba(var(--pink), 1);
+  }
+}
+
+.trait-count-label {
+  padding-top: 1rem;
+}
+
+.trait-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+
+  .trait {
+    font-weight: normal;
+    text-align: right;
+    padding-bottom: .5rem;
+  }
+}

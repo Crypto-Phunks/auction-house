@@ -1,0 +1,101 @@
+@import '../../../scss/abstracts/variables';
+@import '../../../scss/abstracts/mixins';
+
+:host {
+  display: block;
+  max-width: 100%;
+}
+
+.auction-slider-wrapper {
+  // border: 1px solid red;
+  
+  width: 100%;
+  max-width: var(--max-width);
+  padding: 3rem 4rem 0;
+  padding-right: 53rem;
+  margin: 0 auto;
+
+  .inner {
+    position: relative;
+
+    .slider-head {
+      padding: 0 0 2rem 1.5rem;
+    }
+  }
+
+  @media (max-width: $medium) {
+    padding-top: 12rem;
+    padding-right: 4rem;
+  }
+
+  @media (max-width: $small) {
+    padding-top: 3rem;
+  }
+
+  .next-slide,
+  .prev-slide {
+    position: absolute;
+    z-index: 10;
+    
+    top: 7rem;
+    left: 0;
+    width: 4rem;
+    height: 6rem;
+
+    transform: translate(-100%, 0);
+    opacity: 1;
+
+    &.disabled {
+      cursor: default;
+      opacity: .25;
+    }
+  }
+
+  .next-slide {
+    left: auto;
+    right: 0;
+
+    transform: translate(100%, 0);
+  }
+
+  .slide-item {
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    cursor: pointer;
+
+    phunk-image {
+      background-color: rgba(var(--text-color), .05);
+    }
+
+    .auction-details {
+
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+
+      padding-top: 1rem;
+
+      font-family: $secondary-font-stack;
+      font-weight: normal;
+      text-align: center;
+
+      .phunk-id {
+        color: rgba(var(--pink), 1);
+        padding-bottom: .5rem;
+      }
+
+      .time-ago {
+        font-size: 1rem;
+      }
+
+      .winning-bid {
+        .address {
+          font-size: 1.2rem;
+        }
+      }
+    }
+  }
+}

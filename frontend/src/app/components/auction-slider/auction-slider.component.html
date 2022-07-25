@@ -1,0 +1,62 @@
+<div class="auction-slider-wrapper">
+
+  <div class="inner">
+
+    <div class="slider-head">
+      <h3>Auction history</h3>
+    </div>
+
+    <button
+      class="prev-slide"
+      (click)="prevSlide()"
+      [class.disabled]="swiper?.swiperRef?.isEnd">
+
+      <svg height="25" viewBox="0 0 15 25" width="15" xmlns="http://www.w3.org/2000/svg"><path d="m15 20v5h-5v-5zm-5-5v5h-5v-5zm-5-5v5h-5v-5zm5-5v5h-5v-5zm5-5v5h-5v-5z" fill="rgba(var(--text-color), 1)" fill-rule="evenodd"/></svg>
+    </button>
+
+    <button
+      class="next-slide"
+      (click)="nextSlide()"
+      [class.disabled]="swiper?.swiperRef?.isBeginning">
+
+      <svg height="25" viewBox="0 0 15 25" width="15" xmlns="http://www.w3.org/2000/svg"><path d="m0 20v5h5v-5zm5-5v5h5v-5zm5-5v5h5v-5zm-5-5v5h5v-5zm-5-5v5h5v-5z" fill="rgba(var(--text-color), 1)" fill-rule="evenodd"/></svg>
+    </button>
+
+    <swiper
+      #swiper
+      [config]="sliderConfig"
+      dir="rtl"
+      (slideChange)="onSlideChange()">
+
+      <ng-container *ngFor="let auction of auctionData; let i = index">
+        <ng-template swiperSlide>
+
+          <div
+            class="slide-item"
+            (click)="goToAuction(auction.id)">
+
+            <phunk-image
+              [currentAuction]="auction"
+              [dimensions]="{width: 120, height: 120}"
+              [animate]="false"
+              [addBackground]="true">
+            </phunk-image>
+
+            <div
+              class="auction-details"
+              dir="ltr">
+              
+              <div class="phunk-id">
+                #{{ auction?.phunkId }}
+              </div>
+              
+              <div class="time-ago">
+                {{ auction.endTime | timeago : true }}
+              </div>
+            </div>
+          </div>
+        </ng-template>
+      </ng-container>
+    </swiper>
+  </div>
+</div>
