@@ -1,0 +1,10 @@
+{
+  "mainnet": {
+    "PhunksAuctionHouse": {
+      "address": "0x4d9ec67490e933bfaafce70819835d838b3c03e3"
+    },
+    "CryptoPhunksV2": {
+      "address": "0xf07468ead8cf26c752c676e43c814fee9c8cf402"
+    }
+  }
+}
