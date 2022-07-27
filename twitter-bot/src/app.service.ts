@@ -73,7 +73,7 @@ export class AppService {
     const receipt = await event.getTransactionReceipt();
     const ens = await this.web3Svc.provider.lookupAddress(receipt?.from);
 
-    const text = `📢 Phunk #${phunkId.toString()} has been put up for auction\n\nStarted by: ${ens ?? this.shortenAddress(receipt?.from)}\nAuction Ends: ${format(date, 'PPpp')} GMT\n\nTime remaining:\n${timeLeft.days !== '00' ? timeLeft.days + ' days\n' : ''}${timeLeft.hours !== '00' ? timeLeft.hours + ' hours\n' : ''}${timeLeft.minutes !== '00' ? timeLeft.minutes + ' minutes\n' : ''}${timeLeft.seconds !== '00' ? timeLeft.seconds + ' seconds\n\n' : ''}https://testnet.phunks.auction/auction/${auctionId.toString()}`;
+    const text = `📢 Phunk #${phunkId.toString()} has been put up for auction\n\nStarted by: ${ens ?? this.shortenAddress(receipt?.from)}\nAuction Ends: ${format(date, 'PPpp')} GMT\n\nTime remaining:\n${timeLeft.days !== '00' ? timeLeft.days + ' days\n' : ''}${timeLeft.hours !== '00' ? timeLeft.hours + ' hours\n' : ''}${timeLeft.minutes !== '00' ? timeLeft.minutes + ' minutes\n' : ''}${timeLeft.seconds !== '00' ? timeLeft.seconds + ' seconds\n\n' : ''}https://phunks.auction/auction/${auctionId.toString()}`;
 
     this.twSvc.tweet({ text, image });
 
@@ -97,7 +97,7 @@ export class AppService {
     const image = await this.imgSvc.createImage(this.pad(phunkId.toString()));
     const ens = await this.web3Svc.provider.lookupAddress(sender);
 
-    const text = `📢 Phunk #${phunkId.toString()} has a new bid of Ξ${this.web3Svc.weiToEth(value)}\n\nFrom: ${ens ?? this.shortenAddress(sender)}\n\nTime remaining:\n${timeLeft.days !== '00' ? timeLeft.days + ' days\n' : ''}${timeLeft.hours !== '00' ? timeLeft.hours + ' hours\n' : ''}${timeLeft.minutes !== '00' ? timeLeft.minutes + ' minutes\n' : ''}${timeLeft.seconds !== '00' ? timeLeft.seconds + ' seconds\n\n' : ''}https://testnet.phunks.auction/auction/${auctionId.toString()}`;
+    const text = `📢 Phunk #${phunkId.toString()} has a new bid of Ξ${this.web3Svc.weiToEth(value)}\n\nFrom: ${ens ?? this.shortenAddress(sender)}\n\nTime remaining:\n${timeLeft.days !== '00' ? timeLeft.days + ' days\n' : ''}${timeLeft.hours !== '00' ? timeLeft.hours + ' hours\n' : ''}${timeLeft.minutes !== '00' ? timeLeft.minutes + ' minutes\n' : ''}${timeLeft.seconds !== '00' ? timeLeft.seconds + ' seconds\n\n' : ''}https://phunks.auction/auction/${auctionId.toString()}`;
 
     this.twSvc.tweet({ text, image });
 
@@ -112,42 +112,42 @@ export class AppService {
 
     const image = await this.imgSvc.createImage(this.pad(phunkId.toString()));
 
-    const text = `📢 The auction for Phunk #${phunkId.toString()} is ending in soon!\n\nTime remaining:\n${timeLeft.days !== '00' ? timeLeft.days + ' days\n' : ''}${timeLeft.hours !== '00' ? timeLeft.hours + ' hours\n' : ''}${timeLeft.minutes !== '00' ? timeLeft.minutes + ' minutes\n' : ''}${timeLeft.seconds !== '00' ? timeLeft.seconds + ' seconds\n\n' : ''}https://testnet.phunks.auction/auction/${auctionId.toString()}`;
+    const text = `📢 The auction for Phunk #${phunkId.toString()} is ending in soon!\n\nTime remaining:\n${timeLeft.days !== '00' ? timeLeft.days + ' days\n' : ''}${timeLeft.hours !== '00' ? timeLeft.hours + ' hours\n' : ''}${timeLeft.minutes !== '00' ? timeLeft.minutes + ' minutes\n' : ''}${timeLeft.seconds !== '00' ? timeLeft.seconds + ' seconds\n\n' : ''}https://phunks.auction/auction/${auctionId.toString()}`;
 
     this.twSvc.tweet({ text, image });
   }
 
   setTimers(endTime: BigNumber) {
 
-    clearTimeout(this.timer24);
-    clearTimeout(this.timer6);
-    clearTimeout(this.timer1);
+    // clearTimeout(this.timer24);
+    // clearTimeout(this.timer6);
+    // clearTimeout(this.timer1);
 
-    const timestamp = Number(endTime) * 1000;
+    // const timestamp = Number(endTime) * 1000;
 
-    const now = Date.now();
-    const diff = timestamp - now;
+    // const now = Date.now();
+    // const diff = timestamp - now;
 
-    const time24 = 86400000;
-    const time6 = 21600000;
-    const time1 = 3600000;
+    // const time24 = 86400000;
+    // const time6 = 21600000;
+    // const time1 = 3600000;
 
-    if (diff > 0) {
-      if (diff > time24) {
-        console.log('Starting 24 hour timer');
-        this.timer24 = setTimeout(() => this.onTimer(), diff - time24);
-      }
+    // if (diff > 0) {
+    //   if (diff > time24) {
+    //     console.log('Starting 24 hour timer');
+    //     this.timer24 = setTimeout(() => this.onTimer(), diff - time24);
+    //   }
 
-      if (diff > time6) {
-        console.log('Starting 6 hour timer');
-        this.timer6 = setTimeout(() => this.onTimer(), diff - time6);
-      }
+    //   if (diff > time6) {
+    //     console.log('Starting 6 hour timer');
+    //     this.timer6 = setTimeout(() => this.onTimer(), diff - time6);
+    //   }
 
-      if (diff > time1) {
-        console.log('Starting 1 hour timer');
-        this.timer1 = setTimeout(() => this.onTimer(), diff - time1);
-      }
-    }
+    //   if (diff > time1) {
+    //     console.log('Starting 1 hour timer');
+    //     this.timer1 = setTimeout(() => this.onTimer(), diff - time1);
+    //   }
+    // }
   }
 
   ////////////////////////////////////////////////////////////////////////////////////////
