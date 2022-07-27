@@ -32,8 +32,6 @@ export class AppService {
     private readonly twSvc: TweetService
   ) {
 
-    this.setTimers();
-
     this.web3Svc.auctionHouseContract.on('AuctionCreated', (
       phunkId: BigNumber,
       auctionId: BigNumber,
@@ -112,8 +110,6 @@ export class AppService {
     const phunkId = auction.phunkId;
     const auctionId = auction.auctionId;
 
-    this.setTimers(auction.endTime);
-
     const image = await this.imgSvc.createImage(this.pad(phunkId.toString()));
 
     const text = `📢 The auction for Phunk #${phunkId.toString()} is ending in soon!\n\nTime remaining:\n${timeLeft.days !== '00' ? timeLeft.days + ' days\n' : ''}${timeLeft.hours !== '00' ? timeLeft.hours + ' hours\n' : ''}${timeLeft.minutes !== '00' ? timeLeft.minutes + ' minutes\n' : ''}${timeLeft.seconds !== '00' ? timeLeft.seconds + ' seconds\n\n' : ''}https://testnet.phunks.auction/auction/${auctionId.toString()}`;
@@ -121,7 +117,7 @@ export class AppService {
     this.twSvc.tweet({ text, image });
   }
 
-  setTimers(endTime?: BigNumber) {
+  setTimers(endTime: BigNumber) {
 
     clearTimeout(this.timer24);
     clearTimeout(this.timer6);
