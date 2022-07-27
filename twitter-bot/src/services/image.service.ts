@@ -8,6 +8,8 @@ import { createCanvas, Image, registerFont } from 'canvas';
 import { stringify } from 'svgson';
 import tinyColor from 'tinycolor2';
 
+import path from 'path';
+
 @Injectable()
 export class ImageService {
 
@@ -49,7 +51,7 @@ export class ImageService {
     img.onerror = err => { throw err };
     img.src = Buffer.from(svg);
 
-    registerFont('./static/retro-computer.woff', { family: 'RetroComputer' });
+    registerFont(path.join(__dirname, '../static/retro-computer.woff'), { family: 'RetroComputer' });
 
     // Line 1 (left side)
     const line1 = 'CryptoPhunk';
@@ -167,7 +169,7 @@ export class ImageService {
       traitsPos = traitsPos + 30;
     }
 
-    const phreePhunky = await readFile('./static/phree-phunky.svg', { encoding: 'utf8' });
+    const phreePhunky = await readFile(path.join(__dirname, '../static/phree-phunky.svg'), { encoding: 'utf8' });
     const phreePhunkyImg = new Image();
     phreePhunkyImg.onload = () => ctx.drawImage(
       phreePhunkyImg,
