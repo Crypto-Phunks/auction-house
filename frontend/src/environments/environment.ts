@@ -15,14 +15,14 @@ export const environment = {
   },
   addresses: {
     // Auction house contract    
-    auctionHouseAddress: '0x4D9Ec67490e933BFaaFce70819835d838b3c03e3',
+    auctionHouseAddress: '0x0E7f7d8007C0FCcAc2a813a25f205b9030697856',
     // Punk Data Contract
     punkDataAddress: '0x16F5A35647D6F03D5D3da7b35409D65ba03aF3B2',
     // Treasurey Address (Where the phunks live)
     treasuryWalletAddress: '0x61f874551c69f0E40c9f55219107B408C989aDEc',
   },
   network: 'mainnet',
-  auctionStartBlock: 15183810
+  auctionStartBlock: 15225534
 };
 
 /*

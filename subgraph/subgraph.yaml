@@ -6,7 +6,7 @@ dataSources:
     name: PhunksAuctionHouse
     network: mainnet
     source:
-      address: "0x4d9ec67490e933bfaafce70819835d838b3c03e3"
+      address: "0x0E7f7d8007C0FCcAc2a813a25f205b9030697856"
       abi: PhunksAuctionHouse
       startBlock: 15183810
     mapping:
