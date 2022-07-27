@@ -5,7 +5,7 @@ import { BigNumber, ethers } from 'ethers';
 import auctionABI from '../../abi/AuctionHouseABI.json';
 import punkDataABI from '../../abi/PunkData.json';
 
-const alchemyURL = 'https://eth-rinkeby.alchemyapi.io/v2';
+const alchemyURL = 'https://eth-mainnet.g.alchemy.com/v2';
 
 @Injectable()
 export class Web3Service {
