@@ -3,7 +3,7 @@ import { ApolloModule, APOLLO_OPTIONS } from 'apollo-angular';
 import { ApolloClientOptions, InMemoryCache } from '@apollo/client/core';
 import { HttpLink } from 'apollo-angular/http';
 
-const uri = 'https://api.studio.thegraph.com/query/4302/crypto-phunks-auction-house/v0.0.1';
+const uri = 'https://gateway.thegraph.com/api/7209a22e64c7ef1706183bd515b9d15c/subgraphs/id/B58L1YUzPKRZ8GSkizgGDtH1vdtvem76jDVK4LipFTbi';
 
 export function createApollo(httpLink: HttpLink): ApolloClientOptions<any> {
   return {
