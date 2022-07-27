@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
 
 import { AppService } from './app.service';
-import { ImageService } from './image.service';
-import { TweetService } from './tweet.service';
-import { Web3Service } from './web3.service';
+import { ImageService } from './services/image.service';
+import { TweetService } from './services/tweet.service';
+import { Web3Service } from './services/web3.service';
 
 @Module({
   imports: [],

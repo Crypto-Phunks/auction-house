@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
-import { TweetRequest } from './tweet.interface';
+import { TweetRequest } from '../interfaces/tweet.interface';
 
 import twit from 'twit';
 
