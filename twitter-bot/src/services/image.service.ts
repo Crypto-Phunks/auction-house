@@ -19,6 +19,8 @@ export class ImageService {
 
   async createImage(phunkId: string): Promise<string> {
 
+    registerFont(path.join(__dirname, '../static/retro-computer.woff'), { family: 'RetroComputer' });
+
     const canvasWidth = 1200;
     const canvasHeight = 1200;
 
@@ -50,8 +52,6 @@ export class ImageService {
     );
     img.onerror = err => { throw err };
     img.src = Buffer.from(svg);
-
-    registerFont(path.join(__dirname, '../static/retro-computer.woff'), { family: 'RetroComputer' });
 
     // Line 1 (left side)
     const line1 = 'CryptoPhunk';
