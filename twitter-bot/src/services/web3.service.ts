@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 
 import { BigNumber, ethers } from 'ethers';
 
-import auctionABI from '../../abi/AuctionHouseABI.json';
-import punkDataABI from '../../abi/PunkData.json';
+import auctionABI from '../abi/AuctionHouseABI.json';
+import punkDataABI from '../abi/PunkData.json';
 
 const alchemyURL = 'https://eth-mainnet.g.alchemy.com/v2';
 
