@@ -262,6 +262,7 @@ contract PhunksAuctionHouse is IPhunksAuctionHouse, Pausable, ReentrancyGuard, O
      */
     function createSpecialAuction(uint _phunkId, uint256 _endTime) public onlyOwner {
         require(phunks.balanceOf(treasuryWallet) > 0, "No Phunks available for auction.");
+        require(phunks.ownerOf(_phunkId) == treasuryWallet, "Phunk does not exist in treasury wallet");
         uint phunkId = _phunkId;
         uint256 startTime = block.timestamp;
         uint256 endTime = _endTime;
