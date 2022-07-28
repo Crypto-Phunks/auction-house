@@ -19,7 +19,7 @@ export class ImageService {
 
   async createImage(phunkId: string): Promise<string> {
 
-    registerFont(path.join(__dirname, '../static/retro-computer.woff'), { family: 'RetroComputer' });
+    registerFont(path.join(__dirname, '../static/retro-computer.ttf'), { family: 'RetroComputer' });
 
     const canvasWidth = 1200;
     const canvasHeight = 1200;

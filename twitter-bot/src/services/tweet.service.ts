@@ -7,11 +7,16 @@ import twit from 'twit';
 import dotenv from 'dotenv';
 dotenv.config();
 
-const twitterConfig = {
+const twitterConfig = process.env.NODE_ENV === 'prod' ? {
   consumer_key: process.env.TW_CONSUMER_KEY,
   consumer_secret: process.env.TW_CONSUMER_SECRET,
   access_token: process.env.TW_ACCESS_TOKEN_KEY,
   access_token_secret: process.env.TW_ACCESS_TOKEN_SECRET,
+} : {
+  consumer_key: process.env.DEV_TW_CONSUMER_KEY,
+  consumer_secret: process.env.DEV_TW_CONSUMER_SECRET,
+  access_token: process.env.DEV_TW_ACCESS_TOKEN_KEY,
+  access_token_secret: process.env.DEV_TW_ACCESS_TOKEN_SECRET,
 };
 
 const twitterClient = new twit(twitterConfig);
@@ -41,6 +46,8 @@ export class TweetService {
       if (!error) console.log(`Successfully tweeted: ${data.text}`);
       else console.error(error);
     });
+
+    // console.log(data.text);
   }
 
 }
