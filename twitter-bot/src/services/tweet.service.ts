@@ -47,7 +47,7 @@ export class TweetService {
       else console.error(error);
     });
 
-    // console.log(data.text);
+    console.log(data.text);
   }
 
 }
