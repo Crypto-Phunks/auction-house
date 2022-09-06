@@ -50,7 +50,12 @@ export class Web3Service {
   // Initialize auction contract
   punkDataContract = new ethers.Contract(environment.addresses.punkDataAddress, environment.abis.punkDataABI as ContractInterface, this.provider);
 
+  // Initialize auction contract
+  // phunkTokenContract = new ethers.Contract(environment.addresses.phunkTokenAddress, environment.abis.phunkTokenABI as ContractInterface, this.provider);
+
   minBidIncrementPercentage: number = 5;
+
+  // treasuryValueEth!: BigNumber;
 
   constructor(
     private stateSvc: StateService
@@ -58,7 +63,7 @@ export class Web3Service {
 
     // Web3 connect
     web3Modal.on('connect', (instance) => {
-      
+
       this.setWeb3Connected(true);
       this.setWalletAddress(instance?.selectedAddress);
       this.provider = new providers.Web3Provider(instance);
@@ -107,7 +112,17 @@ export class Web3Service {
       extended: boolean,
       event: Event
     ) => this.stateSvc.updateAuctionBid(phunkId, id, sender, value, extended, event));
+
+    // this.treasuryValueEth =
+    // this.getTreasuryValues();
   }
+
+  // async getTreasuryValues(): Promise<void> {
+  //   const balance = await this.phunkTokenContract['balanceOf'](environment.addresses.treasuryWalletAddress);
+  //   console.log(Number(balance));
+  //   // const etherPrice = await this.provider.getBalance(environment.addresses.treasuryWalletAddress);
+  //   // console.log(Number(etherPrice));
+  // }
 
   // Connection toggle (for UI)
   async connectDisconnect(): Promise<void> {
