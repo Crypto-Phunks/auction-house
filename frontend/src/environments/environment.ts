@@ -10,7 +10,7 @@ export const environment = {
   production: false,
   httpRpc: 'https://eth-mainnet.g.alchemy.com/v2/tBFG98iJPUBA1DUzkXDLlgaW8ms5qoqR',
   wssRpc: 'wss://eth-mainnet.g.alchemy.com/v2/tBFG98iJPUBA1DUzkXDLlgaW8ms5qoqR',
-  graphURI: 'https://api.studio.thegraph.com/query/4302/crypto-phunks-auction-house/v0.0.2',
+  graphURI: 'https://api.studio.thegraph.com/query/4302/crypto-phunks-auction-house/v0.0.3-2',
   abis: {
     auctionHouseABI,
     punkDataABI,
