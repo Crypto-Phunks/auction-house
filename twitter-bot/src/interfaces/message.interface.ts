@@ -4,4 +4,5 @@ export interface Message {
   image: { base64: string, color: string },
   phunkId: string,
   channels?: string[],
+  reply?: any,
 }

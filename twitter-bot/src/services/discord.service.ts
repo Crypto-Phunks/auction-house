@@ -21,11 +21,11 @@ export class DiscordService {
     private readonly supaSvc: SupabaseService,
     private imgSvc: ImageService
   ) {
-
+ 
     if (!process.env.DISABLED) {
       this.client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
       this.initializeBot();
-      this.registerSlashCommands();
+      // this.registerSlashCommands();
     }
   }
   
@@ -80,7 +80,6 @@ export class DiscordService {
   }
 
   async testMessage(interaction: CommandInteraction<any>) {
-
     if (!interaction.member) return;
 
     const member = interaction.member;
@@ -95,21 +94,34 @@ export class DiscordService {
       return;
     }
   
-    const channelId = interaction.channelId;
+    const channelId = await this.supaSvc.getChannelFromServerId(interaction.guildId);
 
     const randomPhunkId = Math.floor(Math.random() * 10000).toString();
 
     const image = await this.imgSvc.createImage(randomPhunkId);
     const title = `📢 Phunk #${randomPhunkId} has been put up for auction!`;
-    const text = `Started by: chopperdad.eth\nAuction Ends: ${new Date().toUTCString()}\n\nTime remaining:\n4 days\n2 hours\n0 minutes\n69 seconds`;
+    const text = `Started by: ${interaction.user.username}.eth\nAuction Ends: ${new Date().toUTCString()}\n\nTime remaining:\n4 days\n2 hours\n0 minutes\n69 seconds`;
 
-    this.postMessage({ text, title, image, phunkId: randomPhunkId, channels: [channelId] });
+    await this.postMessage({
+      text,
+      title,
+      image,
+      phunkId: randomPhunkId,
+      channels: [channelId],
+      reply: {
+        interaction,
+      }
+    });
+  
+    await interaction.reply({
+      content: 'Test auction notification sent successfully!',
+      ephemeral: true,
+    });
   }
 
 
   async postMessage(data: Message) {
-
-    if (!process.env.DISABLED) return;
+    if (process.env.DISABLED) return;
 
     const channels = data.channels ?? await this.supaSvc.getAllChannels();
 
@@ -126,6 +138,8 @@ export class DiscordService {
         value: `\`\`\`${data.text}\`\`\``,
         inline: true
       });
+
+    if (data.reply) embed.footer = { text: `This is a test created by ${data.reply.interaction.user.username}` };
 
     // Loop through all channels and send the message
     for (const channelId of channels) {
