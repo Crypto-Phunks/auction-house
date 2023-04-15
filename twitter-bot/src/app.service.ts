@@ -1,18 +1,17 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 
 import { Web3Service } from './services/web3.service';
 import { TweetService } from './services/tweet.service';
 import { ImageService } from './services/image.service';
-
-// import { writeFile } from 'fs/promises';
+import { DiscordService } from './services/discord.service';
 
 import { format, fromUnixTime } from 'date-fns'
 import { BigNumber, Event } from 'ethers';
 
+import { Message } from './interfaces/message.interface';
+
 import dotenv from 'dotenv';
 dotenv.config();
-
-const auctionURL = process.env.NODE_ENV === 'prod' ? 'https://phunks.auction' : 'https://testnet.phunks.auction';
 
 interface Time {
   days: string,
@@ -31,7 +30,8 @@ export class AppService {
   constructor(
     private readonly web3Svc: Web3Service,
     private readonly imgSvc: ImageService,
-    private readonly twSvc: TweetService
+    private readonly twSvc: TweetService,
+    private readonly discordSvc: DiscordService
   ) {
 
     this.web3Svc.auctionHouseContract.on('AuctionCreated', (
@@ -57,10 +57,14 @@ export class AppService {
       // console.log({ phunkId, id: Number(auctionId), sender, value, extended, event });
     });
 
-
     this.web3Svc.auctionHouseContract['auction']().then(({ endTime }) => {
       this.setTimers(endTime);
     });
+  }
+
+  sendNotification(data: Message): void {
+    // this.twSvc.tweet({ text: data.text, image: data.image });
+    this.discordSvc.postMessage(data);
   }
 
   async onAuctionCreated(
@@ -77,12 +81,14 @@ export class AppService {
     const timeLeft = this.convertTimeLeft(endTime);
 
     const image = await this.imgSvc.createImage(this.pad(phunkId.toString()));
+
     const receipt = await event.getTransactionReceipt();
     const ens = await this.web3Svc.provider.lookupAddress(receipt?.from);
 
-    const text = `📢 Phunk #${phunkId.toString()} has been put up for auction\n\nStarted by: ${ens ?? this.shortenAddress(receipt?.from)}\nAuction Ends: ${format(date, 'PPpp')} GMT\n\nTime remaining:\n${timeLeft.days !== '00' ? timeLeft.days + ' days\n' : ''}${timeLeft.hours !== '00' ? timeLeft.hours + ' hours\n' : ''}${timeLeft.minutes !== '00' ? timeLeft.minutes + ' minutes\n' : ''}${timeLeft.seconds !== '00' ? timeLeft.seconds + ' seconds\n\n' : ''}${auctionURL}`;
+    const title = `📢 Phunk #${phunkId.toString()} has been put up for auction!`;
+    const text = `Started by: ${ens ?? this.shortenAddress(receipt?.from)}\nAuction Ends: ${format(date, 'PPpp')} GMT\n\nTime remaining:\n${timeLeft.days !== '00' ? timeLeft.days + ' days\n' : ''}${timeLeft.hours !== '00' ? timeLeft.hours + ' hours\n' : ''}${timeLeft.minutes !== '00' ? timeLeft.minutes + ' minutes\n' : ''}${timeLeft.seconds !== '00' ? timeLeft.seconds + ' seconds\n\n' : ''}`;
 
-    this.twSvc.tweet({ text, image });
+    this.sendNotification({ text, title, image, phunkId: phunkId.toString() });
 
     // await writeFile(`./phunk${this.pad(phunkId.toString())}.png`, image, 'base64');
   }
@@ -104,9 +110,10 @@ export class AppService {
     const image = await this.imgSvc.createImage(this.pad(phunkId.toString()));
     const ens = await this.web3Svc.provider.lookupAddress(sender);
 
-    const text = `📢 Phunk #${phunkId.toString()} has a new bid of Ξ${this.web3Svc.weiToEth(value)}\n\nFrom: ${ens ?? this.shortenAddress(sender)}\n\nTime remaining:\n${timeLeft.days !== '00' ? timeLeft.days + ' days\n' : ''}${timeLeft.hours !== '00' ? timeLeft.hours + ' hours\n' : ''}${timeLeft.minutes !== '00' ? timeLeft.minutes + ' minutes\n' : ''}${timeLeft.seconds !== '00' ? timeLeft.seconds + ' seconds\n\n' : ''}${auctionURL}`;
+    const title = `📢 Phunk #${phunkId.toString()} has a new bid of Ξ${this.web3Svc.weiToEth(value)}!`;
+    const text = `From: ${ens ?? this.shortenAddress(sender)}\n\nTime remaining:\n${timeLeft.days !== '00' ? timeLeft.days + ' days\n' : ''}${timeLeft.hours !== '00' ? timeLeft.hours + ' hours\n' : ''}${timeLeft.minutes !== '00' ? timeLeft.minutes + ' minutes\n' : ''}${timeLeft.seconds !== '00' ? timeLeft.seconds + ' seconds\n\n' : ''}`;
 
-    this.twSvc.tweet({ text, image });
+    this.sendNotification({ text, title, image, phunkId: phunkId.toString() });
 
     // await writeFile(`./phunk${this.pad(phunkId.toString())}.png`, image, 'base64');
   }
@@ -118,9 +125,10 @@ export class AppService {
 
     const image = await this.imgSvc.createImage(this.pad(phunkId.toString()));
 
-    const text = `📢 The auction for Phunk #${phunkId.toString()} is ending soon!\n\nTime remaining:\n${timeLeft.days !== '00' ? timeLeft.days + ' days\n' : ''}${timeLeft.hours !== '00' ? timeLeft.hours + ' hours\n' : ''}${timeLeft.minutes !== '00' ? timeLeft.minutes + ' minutes\n' : ''}${timeLeft.seconds !== '00' ? timeLeft.seconds + ' seconds\n\n' : ''}${auctionURL}`;
+    const title = `📢 The auction for Phunk #${phunkId.toString()} is ending soon!`;
+    const text = `Time remaining:\n${timeLeft.days !== '00' ? timeLeft.days + ' days\n' : ''}${timeLeft.hours !== '00' ? timeLeft.hours + ' hours\n' : ''}${timeLeft.minutes !== '00' ? timeLeft.minutes + ' minutes\n' : ''}${timeLeft.seconds !== '00' ? timeLeft.seconds + ' seconds\n\n' : ''}`;
 
-    this.twSvc.tweet({ text, image });
+    this.sendNotification({ text, title, image, phunkId: phunkId.toString() });
   }
 
   setTimers(endTime: BigNumber) {
@@ -140,17 +148,17 @@ export class AppService {
 
     if (diff > 0) {
       if (diff > time24) {
-        console.log('Starting 24 hour timer');
+        Logger.debug('Starting 24 hour timer');
         this.timer24 = setTimeout(() => this.onTimer(), diff - time24);
       }
 
       if (diff > time6) {
-        console.log('Starting 6 hour timer');
+        Logger.debug('Starting 6 hour timer');
         this.timer6 = setTimeout(() => this.onTimer(), diff - time6);
       }
 
       if (diff > time1) {
-        console.log('Starting 1 hour timer');
+        Logger.debug('Starting 1 hour timer');
         this.timer1 = setTimeout(() => this.onTimer(), diff - time1);
       }
     }

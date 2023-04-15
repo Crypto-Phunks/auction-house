@@ -17,7 +17,7 @@ export class ImageService {
     private readonly web3Svc: Web3Service
   ) {}
 
-  async createImage(phunkId: string): Promise<string> {
+  async createImage(phunkId: string): Promise<{ base64: string, color: string }> {
 
     registerFont(path.join(__dirname, '../static/retro-computer.ttf'), { family: 'RetroComputer' });
 
@@ -181,25 +181,28 @@ export class ImageService {
 
     const buffer = canvas.toBuffer('image/png');
 
-    return buffer.toString('base64');
+    return { base64: buffer.toString('base64'), color: tinyColor(color).toHex() };
   }
 
   // Get the "brightest" color from the punk data
   getColor(punkData: string): string {
-
     const colorGroups: any = {};
     const phunkArr = punkData?.replace('0x', '').match(/.{1,8}/g) as string[];
-
+  
     phunkArr.map((color: any) => {
       if (!colorGroups[color]) colorGroups[color] = 1;
       colorGroups[color]++;
     });
-
+  
     const hslColors = Object.keys(colorGroups).map((key: any) => tinyColor(key).toHsl());
-    const brightest = hslColors.sort((a: any, b: any) => (`${b.s}`.localeCompare(`${a.s}`) || b.l - a.l))[2];
+    const brightest = hslColors.sort((a: any, b: any) => {
+      if (b.s !== a.s) return b.s - a.s;
+      return b.l - a.l;
+    })[0];
+  
     return tinyColor(brightest).setAlpha(.15).toRgbString();
   }
-
+  
   // Create SVG from punk data
   async createPhunkSvg(punkData: string, width: number, height: number): Promise<any> {
     

@@ -8,8 +8,8 @@
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "nest build && cp -R src/static dist",
-    "start": "nest start",
-    "start:dev": "nest start --watch",
+    "start": "cp -R src/static dist && nest start",
+    "start:dev": "cp -R src/static dist && nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
@@ -20,11 +20,14 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
+    "@nestjs/axios": "^2.0.0",
     "@nestjs/common": "^8.0.0",
     "@nestjs/core": "^8.0.0",
     "@nestjs/platform-express": "^8.0.0",
+    "@supabase/supabase-js": "^2.20.0",
     "canvas": "^2.9.3",
     "date-fns": "^2.29.1",
+    "discord.js": "13.3.0",
     "dotenv": "^10.0.0",
     "ethers": "^5.6.9",
     "reflect-metadata": "^0.1.13",
