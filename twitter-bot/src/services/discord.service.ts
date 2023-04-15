@@ -21,9 +21,12 @@ export class DiscordService {
     private readonly supaSvc: SupabaseService,
     private imgSvc: ImageService
   ) {
-    this.client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
-    this.initializeBot();
-    this.registerSlashCommands();
+
+    if (!process.env.DISABLED) {
+      this.client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
+      this.initializeBot();
+      this.registerSlashCommands();
+    }
   }
   
   // Initialize the bot
@@ -40,14 +43,15 @@ export class DiscordService {
       if (interaction.commandName === 'setchannel') {
         await this.setDesignatedChannel(interaction);
       }
-    });
 
-    // this.testMessage();
+      if (interaction.commandName === 'test') {
+        await this.testMessage(interaction);
+      }
+    });
   }
 
   // Set the designated channel for the bot to post in
-  async setDesignatedChannel(interaction: CommandInteraction<any>) {
-    
+  async setDesignatedChannel(interaction: CommandInteraction<any>) {  
     if (!interaction.member) return;
 
     const member = interaction.member;
@@ -75,9 +79,39 @@ export class DiscordService {
     });
   }
 
+  async testMessage(interaction: CommandInteraction<any>) {
+
+    if (!interaction.member) return;
+
+    const member = interaction.member;
+    if (!('permissions' in member)) return;
+
+    const memberPermissions = member.permissions instanceof Permissions ? member.permissions : new Permissions();
+    if (!memberPermissions.has(Permissions.FLAGS.MANAGE_CHANNELS)) {
+      await interaction.reply({
+        content: 'You do not have the required permissions to set the designated channel.',
+        ephemeral: true,
+      });
+      return;
+    }
+  
+    const channelId = interaction.channelId;
+
+    const randomPhunkId = Math.floor(Math.random() * 10000).toString();
+
+    const image = await this.imgSvc.createImage(randomPhunkId);
+    const title = `📢 Phunk #${randomPhunkId} has been put up for auction!`;
+    const text = `Started by: chopperdad.eth\nAuction Ends: ${new Date().toUTCString()}\n\nTime remaining:\n4 days\n2 hours\n0 minutes\n69 seconds`;
+
+    this.postMessage({ text, title, image, phunkId: randomPhunkId, channels: [channelId] });
+  }
+
+
   async postMessage(data: Message) {
 
-    const channels = await this.supaSvc.getAllChannels();
+    if (!process.env.DISABLED) return;
+
+    const channels = data.channels ?? await this.supaSvc.getAllChannels();
 
     // Create the attachment
     const imageBuffer = Buffer.from(data.image.base64, 'base64');
@@ -115,6 +149,10 @@ export class DiscordService {
         name: 'setchannel',
         description: 'Set the designated channel for the bot to post in',
       },
+      {
+        name: 'test',
+        description: 'Test the bot',
+      }
     ];
   
     try {
@@ -130,13 +168,5 @@ export class DiscordService {
       console.error(error);
     }
   }
-
-  // async testMessage() {
-  //   const image = await this.imgSvc.createImage('1060');
-  //   const title = `📢 Phunk #1060 has been put up for auction!`;
-  //   const text = `Started by: chopperdad.eth\nAuction Ends: ${new Date().toUTCString()}\n\nTime remaining:\n0 days\n0 hours\n0 minutes\n0 seconds`;
-
-  //   this.postMessage({ text, title, image, phunkId: '1060' });
-  // }
   
 }
