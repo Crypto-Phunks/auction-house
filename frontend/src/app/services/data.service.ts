@@ -5,6 +5,34 @@ import { BehaviorSubject, map, Subscription, tap } from 'rxjs';
 
 import { Auction, Bid } from '../interfaces/auction';
 
+const GET_AUCTIONS = gql`
+  {
+    auctions(
+      orderBy: startTime
+      orderDirection: desc
+      first: 500
+    ) {
+      phunk { id }
+      id
+      startTime
+      endTime
+      settled
+      amount
+      # attributes
+      # image
+      bidder {
+        id
+      }
+      bids {
+        id
+        bidder { id }
+        amount,
+        blockTimestamp
+      }
+    }
+  }
+`;
+
 @Injectable({
   providedIn: 'root'
 })
@@ -26,40 +54,12 @@ export class DataService {
   }
 
   getAuctionData(): void {
-
-    const GET_AUCTIONS = gql`
-      {
-        auctions(
-          orderBy: startTime,
-          orderDirection: desc
-        ) {
-          phunk { id }
-          id
-          startTime
-          endTime
-          settled
-          amount
-          # attributes
-          # image
-          bidder {
-            id
-          }
-          bids {
-            id
-            bidder { id }
-            amount,
-            blockTimestamp
-          }
-        }
-      }
-    `;
-
     this.subscription = this.apollo.query({ query: GET_AUCTIONS }).pipe(
       map((res: any) => res.data?.auctions || []),
       // tap(console.log),
       map((res: any[]) => {
         const auctions: Auction[] = res.map((auction: any) => {
-          const bids: Bid[] = [...auction?.bids].sort((a: Bid, b: Bid) => Number(b?.amount) - Number(a?.amount));
+          const bids: Bid[] = [ ...auction?.bids ].sort((a: Bid, b: Bid) => Number(b?.amount) - Number(a?.amount));
           return {
             id: auction.id,
             phunkId: auction?.phunk.id,
