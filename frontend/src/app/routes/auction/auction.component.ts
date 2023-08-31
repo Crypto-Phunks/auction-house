@@ -1,16 +1,32 @@
 import { AfterViewInit, Component, OnDestroy, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 
-import { DataService } from 'src/app/services/data.service';
+import { DataService } from '@/services/data.service';
+import { Auction } from '@/interfaces/auction';
 
-import { Auction } from 'src/app/interfaces/auction';
+import { BidComponent } from '@/components/bid/bid.component';
+import { PhunkInfoComponent } from '@/components/phunk-info/phunk-info.component';
+import { AuctionSliderComponent } from '@/components/auction-slider/auction-slider.component';
+
+import { PhunkImageDirective } from '@/directives/phunk-image.directive';
 
 import { environment } from 'src/environments/environment';
 
-import tinyColor from 'tinycolor2';
-
 import { combineLatest, map, Subscription } from 'rxjs';
 
+import tinyColor from 'tinycolor2';
+
 @Component({
+  standalone: true,
+  imports: [
+    CommonModule,
+
+    BidComponent,
+    PhunkInfoComponent,
+    AuctionSliderComponent,
+
+    PhunkImageDirective
+  ],
   selector: 'app-auction',
   templateUrl: './auction.component.html',
   styleUrls: ['./auction.component.scss']
@@ -25,6 +41,7 @@ export class AuctionComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // Visuals
   backgroundColor: string = '0, 0, 0';
+  expanded: boolean = false;
 
   constructor(
     public dataSvc: DataService

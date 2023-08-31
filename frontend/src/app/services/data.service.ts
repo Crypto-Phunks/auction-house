@@ -4,28 +4,32 @@ import { Apollo, gql } from 'apollo-angular';
 import { BehaviorSubject, map, Subscription, tap } from 'rxjs';
 
 import { Auction, Bid } from '../interfaces/auction';
+import { WatchQueryOptions } from '@apollo/client';
 
 const GET_AUCTIONS = gql`
-  {
+  query GetAuctions($first: Int, $skip: Int) {
     auctions(
       orderBy: startTime
       orderDirection: desc
-      first: 500
+      first: $first
+      skip: $skip
     ) {
-      phunk { id }
       id
       startTime
       endTime
       settled
       amount
-      # attributes
-      # image
+      phunk {
+        id
+      }
       bidder {
         id
       }
       bids {
         id
-        bidder { id }
+        bidder {
+          id
+        }
         amount,
         blockTimestamp
       }
@@ -38,8 +42,6 @@ const GET_AUCTIONS = gql`
 })
 
 export class DataService {
-
-  subscription!: Subscription;
 
   private auctionData = new BehaviorSubject<Auction[]>([]);
   public auctionData$ = this.auctionData.asObservable();
@@ -54,30 +56,44 @@ export class DataService {
   }
 
   getAuctionData(): void {
-    this.subscription = this.apollo.query({ query: GET_AUCTIONS }).pipe(
+
+    // this.apollo.watchQuery({ query: GET_AUCTIONS }).valueChanges.
+
+    const query: WatchQueryOptions = {
+      query: GET_AUCTIONS,
+      variables: {
+        first: 300,
+        skip: 0
+      },
+      pollInterval: 10000
+    };
+
+    this.apollo.watchQuery(query).valueChanges.pipe(
       map((res: any) => res.data?.auctions || []),
-      // tap(console.log),
-      map((res: any[]) => {
-        const auctions: Auction[] = res.map((auction: any) => {
-          const bids: Bid[] = [ ...auction?.bids ].sort((a: Bid, b: Bid) => Number(b?.amount) - Number(a?.amount));
-          return {
-            id: auction.id,
-            phunkId: auction?.phunk.id,
-            amount: auction?.amount,
-            // attributes: this.transformAttributes(auction?.attributes),
-            // image: auction?.image,
-            startTime: Number(auction?.startTime) * 1000,
-            endTime: Number(auction?.endTime) * 1000,
-            bidder: auction?.bidder?.id,
-            settled: auction?.settled,
-            bids
-          };
-        });
-        return auctions;
-      }),
+      tap((res) => console.log(`getAuctionData`, {res})),
+      map((res: any) => transformData(res)),
       // tap(console.log),
       tap((res: Auction[]) => this.setAuctionData(res))
-    ).subscribe(() => this.subscription.unsubscribe());
+    ).subscribe();
+
+    function transformData(data: any) {
+      const auctions: Auction[] = data.map((auction: any) => {
+        const bids: Bid[] = [ ...auction?.bids ].sort((a: Bid, b: Bid) => Number(b?.amount) - Number(a?.amount));
+        return {
+          id: auction.id,
+          phunkId: auction?.phunk.id,
+          amount: auction?.amount,
+          // attributes: this.transformAttributes(auction?.attributes),
+          // image: auction?.image,
+          startTime: Number(auction?.startTime) * 1000,
+          endTime: Number(auction?.endTime) * 1000,
+          bidder: auction?.bidder?.id,
+          settled: auction?.settled,
+          bids
+        };
+      });
+      return auctions;
+    }
   }
 
   public setAuctionData(auctionData: Auction[]) {

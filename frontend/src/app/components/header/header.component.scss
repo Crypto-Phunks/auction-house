@@ -14,7 +14,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  
+
   @media (max-width: $small) {
     height: calc(9rem + env(safe-area-inset-top));
     padding-top: env(safe-area-inset-top);
@@ -22,7 +22,6 @@
 }
 
 .inner {
-
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -31,49 +30,40 @@
   max-width: var(--max-width);
   padding: 0 5rem;
 
-  @media (max-width: $small) {
-    padding: 2rem;
-  }
-}
+  .left {
+    display: flex;
+    align-items: center;
 
-.logo {
-
-  svg {
-    display: block;
-  }
-
-  @media (max-width: $small) {
-
-    width: 30rem;
-    overflow: hidden;
-
-    svg {
-      path {
-        &#wordmark {
-          display: none;
-        }
+    .logo {
+      svg {
+        display: block;
       }
     }
+
+    app-treasury-info {
+      padding-left: 2rem;
+      margin-left: 2rem;
+      border-left: .2rem solid rgba(var(--text-color), .1);
+    }
   }
-}
 
-nav {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
+  nav {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
 
-  button {
-    color: rgba(var(--text-color), 1);
-    background-color: rgba(var(--background), 1);
-    padding: 1rem 2rem;
+    .connect {
+      color: rgba(var(--text-color), 1);
+      background-color: rgba(var(--background), 1);
+      padding: 1rem 2rem;
+    }
 
-    &.mode {
-
+    .mode {
       display: flex;
       align-items: center;
       justify-content: center;
 
-      background: none;
+      padding: 1rem 2rem;
 
       svg {
         width: 2rem;
@@ -97,6 +87,38 @@ nav {
             display: block;
           }
         }
+      }
+    }
+  }
+
+  @media (max-width: $small) {
+    padding: 2rem;
+
+    .left {
+      .logo {
+        width: 5rem;
+        overflow: hidden;
+
+        svg {
+          width: 16rem;
+          path {
+            &#wordmark {
+              display: none;
+            }
+          }
+        }
+      }
+
+      app-treasury-info {
+        padding-left: 1rem;
+        margin-left: 1rem;
+      }
+    }
+
+    nav {
+      .connect {
+        font-size: 1.4rem;
+        padding: .5rem 1rem;
       }
     }
   }

@@ -1,13 +1,21 @@
 import { Component } from '@angular/core';
-import { NavigationEnd, Router } from '@angular/router';
+import { NavigationEnd, Router, RouterModule } from '@angular/router';
+import { CommonModule } from '@angular/common';
 
-import { DataService } from './services/data.service';
+import { HeaderComponent } from '@/components/header/header.component';
+import { DataService } from '@/services/data.service';
+import { Auction } from '@/interfaces/auction';
 
-import { filter, map, switchMap, tap } from 'rxjs';
-
-import { Auction } from './interfaces/auction';
+import { filter, switchMap, tap } from 'rxjs';
 
 @Component({
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule,
+
+    HeaderComponent
+  ],
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
@@ -36,5 +44,5 @@ export class AppComponent {
       })
     ).subscribe();
   }
-  
+
 }

@@ -10,6 +10,7 @@ import { Web3Service } from '../services/web3.service';
 import { placeholderPunkData } from './placeholderPunkData';
 
 @Directive({
+  standalone: true,
   selector: 'phunk-image'
 })
 
@@ -100,7 +101,7 @@ export class PhunkImageDirective implements OnChanges {
 
     this.svg.selectAll('text')
       .remove()
-    
+
     this.buildPhunk();
   }
 
@@ -123,7 +124,7 @@ export class PhunkImageDirective implements OnChanges {
           .transition()
             .style('fill', (d) => `#${d.value}`)
             .delay((d, i) => Math.floor(Math.random() * this.dataArr.length));
-    
+
     const colorGroups: any = {};
     this.dataArr.map((res: any) => {
       if (!colorGroups[res.value]) colorGroups[res.value] = 1;

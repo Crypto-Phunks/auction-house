@@ -1,11 +1,35 @@
 import { AfterViewInit, Component, Input, OnInit } from '@angular/core';
-import { FormControl } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 
-import { DataService } from 'src/app/services/data.service';
-import { ThemeService } from 'src/app/services/theme.service';
-import { Web3Service } from 'src/app/services/web3.service';
+import { DataService } from '@/services/data.service';
+import { ThemeService } from '@/services/theme.service';
+import { Web3Service } from '@/services/web3.service';
+import { StateService } from '@/services/state.service';
+
+import { TimerComponent } from '@/components/timer/timer.component';
+import { BidHistoryComponent } from '@/components/bid-history/bid-history.component';
+
+import { WeiPipe } from '@/pipes/wei.pipe';
+import { MinBidPipe } from '@/pipes/min-bid.pipe';
+import { TippyDirective } from '@/directives/tippy.directive';
 
 @Component({
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule,
+    ReactiveFormsModule,
+
+    TimerComponent,
+    BidHistoryComponent,
+
+    TippyDirective,
+
+    WeiPipe,
+    MinBidPipe
+  ],
   selector: 'app-bid',
   templateUrl: './bid.component.html',
   styleUrls: ['./bid.component.scss']
@@ -16,18 +40,19 @@ export class BidComponent implements OnInit, AfterViewInit {
   @Input() currentAuction!: any;
   @Input() backgroundColor!: string;
 
-  bidValue = new FormControl('');
+  bidValue = new FormControl<number | null>(null);
 
   auctionComplete: boolean = false;
   auctionClosed!: boolean;
 
   inputError!: boolean;
   errorMessage!: string | null;
-  txHash!: string | null;
+  txHash!: `0x${string}` | string | null | undefined;
 
   constructor(
     public dataSvc: DataService,
     public web3Svc: Web3Service,
+    public stateSvc: StateService,
     public themeSvc: ThemeService
   ) {}
 
@@ -63,18 +88,21 @@ export class BidComponent implements OnInit, AfterViewInit {
     try {
       await this.web3Svc.checkNetwork();
       // Bid value
-      const bidValue: number = this.bidValue.value;
+      const bidValue: number | null = this.bidValue.value;
       if (!bidValue) throw new Error('You must enter a bid value');
-      
+
       // Get the current active auction
       const currentAuction = await this.web3Svc.getCurrentAuction();
+      const tokenId = (currentAuction as any)[0] as bigint;
 
       // Send the tx
-      const transaction = await this.web3Svc.setBid(currentAuction.phunkId, bidValue);
-      this.txHash = transaction.hash;
+      this.txHash = await this.web3Svc.setBid(tokenId, bidValue);
       this.resetBid();
 
-      await transaction.wait();
+      // Wait for the tx to be mined
+      if (!this.txHash) throw new Error('Transaction failed');
+      await this.web3Svc.waitForTransaction(this.txHash);
+
       this.closeTransaction();
       this.closeError();
 
