@@ -2,7 +2,6 @@ import { Pipe, PipeTransform } from '@angular/core';
 import { Web3Service } from '../services/web3.service';
 
 @Pipe({
-  standalone: true,
   name: 'wei'
 })
 export class WeiPipe implements PipeTransform {
@@ -11,10 +10,12 @@ export class WeiPipe implements PipeTransform {
     private web3Svc: Web3Service
   ) {}
 
-  transform(value: string): string {
-    if (!value) return '0';
-    const bigIntVal = BigInt(value);
-    const eth = this.web3Svc.weiToEth(bigIntVal);
-    return Number(eth).toFixed(3);
+  transform(value: string): number {
+    const eth = value ? this.web3Svc.weiToEth(`${value}`) : '0';
+    if (parseFloat(eth) > .99) {
+      return eth.includes('.') ? Number(parseFloat(eth).toFixed(2)) : parseFloat(eth);
+    }
+    return eth.includes('.') ? Number(parseFloat(eth).toFixed(3)) : parseFloat(eth);
   }
+
 }

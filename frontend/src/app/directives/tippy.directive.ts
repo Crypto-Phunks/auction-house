@@ -3,7 +3,6 @@ import { Directive, Input, OnInit, ElementRef, SimpleChanges, OnChanges } from '
 import tippy, { Placement, Instance, Props } from 'tippy.js';
 
 @Directive({
-  standalone: true,
   selector: '[tippy]'
 })
 
@@ -21,13 +20,11 @@ export class TippyDirective implements OnInit, OnChanges {
 
     const el = this.el.nativeElement as HTMLElement;
 
-    console.log(el);
-
     if (this.el.nativeElement._tippy) {
       const tippy = this.el.nativeElement._tippy as Instance;
       tippy.destroy();
     }
-
+    
     el.style.cursor = 'default';
     const position = el.dataset.tippyPosition as Placement;
     const hide = el.dataset.tippyKeep;

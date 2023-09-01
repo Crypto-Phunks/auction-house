@@ -22,6 +22,6 @@ export const environment = {
     // CryptoPhunks Token Contract
     phunkTokenAddress: '0xf07468ead8cf26c752c676e43c814fee9c8cf402'
   },
-  chainId: 1,
+  network: 'mainnet',
   auctionStartBlock: 15225534
 };

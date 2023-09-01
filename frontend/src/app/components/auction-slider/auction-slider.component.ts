@@ -1,28 +1,18 @@
 import { AfterViewInit, Component, ElementRef, Input, OnChanges, OnInit, SimpleChanges, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
-import { CommonModule } from '@angular/common';
+
+import { DataService } from 'src/app/services/data.service';
+import { StateService } from 'src/app/services/state.service';
+
+import { Auction } from 'src/app/interfaces/auction';
+
+import { BigNumber } from 'ethers';
 
 import SwiperCore, { Virtual, Navigation, SwiperOptions } from 'swiper';
-import { SwiperComponent, SwiperModule } from 'swiper/angular';
-import { TimeagoModule } from 'ngx-timeago';
-
-import { DataService } from '@/services/data.service';
-import { StateService } from '@/services/state.service';
-
-import { PhunkImageDirective } from '@/directives/phunk-image.directive';
-
-import { Auction } from '@/interfaces/auction';
-
+import { SwiperComponent } from 'swiper/angular';
 SwiperCore.use([Virtual, Navigation]);
-@Component({
-  standalone: true,
-  imports: [
-    CommonModule,
-    SwiperModule,
-    TimeagoModule,
 
-    PhunkImageDirective
-  ],
+@Component({
   selector: 'app-auction-slider',
   templateUrl: './auction-slider.component.html',
   styleUrls: ['./auction-slider.component.scss']
@@ -67,7 +57,7 @@ export class AuctionSliderComponent implements OnInit, AfterViewInit, OnChanges 
   }
 
   async goToAuction(auctionId: string): Promise<void> {
-    const auctionIdBN = BigInt(auctionId);
+    const auctionIdBN = BigNumber.from(auctionId);
     const { auctionIndex } = await this.stateSvc.getAuctionIndexAndData(auctionIdBN);
     if (auctionIndex === 0) this.router.navigate(['/']);
     else if (auctionIndex > -1) this.router.navigate(['/auction', auctionId]);
