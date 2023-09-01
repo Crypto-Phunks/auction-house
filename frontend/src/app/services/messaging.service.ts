@@ -4,10 +4,14 @@ import { getMessaging, getToken, onMessage } from 'firebase/messaging';
 import { BehaviorSubject } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
-
 import { app } from 'src/firebase.config';
 
 const messaging = getMessaging(app);
+
+const isSupported = () =>
+  'Notification' in window &&
+  'serviceWorker' in navigator &&
+  'PushManager' in window;
 
 @Injectable({
   providedIn: 'root',
@@ -22,12 +26,25 @@ export class MessagingService {
     //   console.log('Message received. ', { payload });
     //   // ...
     // });
+  }
+
+  setPermission(): void {
+
+    if (!isSupported()) {
+      this.hasPermission.next(false);
+      return;
+    }
 
     const permission = Notification.permission;
     this.hasPermission.next(permission === 'granted');
   }
 
   async requestPermission(): Promise<void> {
+
+    if (!isSupported()) {
+      this.hasPermission.next(false);
+      return;
+    }
 
     // Check permissions if they exist
     const permission = Notification.permission;
