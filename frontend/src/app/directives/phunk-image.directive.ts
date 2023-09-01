@@ -1,8 +1,7 @@
 import { Directive, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 
-import * as d3 from 'd3';
-
 import tinyColor from 'tinycolor2';
+import { axisBottom, axisLeft, scaleBand, select } from 'd3';
 
 import { Auction } from '../interfaces/auction';
 import { Web3Service } from '../services/web3.service';
@@ -10,6 +9,7 @@ import { Web3Service } from '../services/web3.service';
 import { placeholderPunkData } from './placeholderPunkData';
 
 @Directive({
+  standalone: true,
   selector: 'phunk-image'
 })
 
@@ -64,7 +64,7 @@ export class PhunkImageDirective implements OnChanges {
     element.style.height = this.phunkHeight + 'px';
 
     // Create the SVG
-    this.svg = d3.select(this.el.nativeElement)
+    this.svg = select(this.el.nativeElement)
       .append('svg')
         .style('display', 'block')
         .attr('preserveAspectRatio', 'xMinYMin meet')
@@ -78,29 +78,29 @@ export class PhunkImageDirective implements OnChanges {
     const y = [...Array(24).keys()].map((i) => `${i}`).reverse();
 
     // Build X scales and axis:
-    this.xScale = d3.scaleBand()
+    this.xScale = scaleBand()
       .range([ 0, this.phunkWidth ])
       .domain(x)
       .padding(0);
 
     this.svg.append('g')
       .attr('transform', `translate(0, ${this.phunkHeight})`)
-      .call(d3.axisBottom(this.xScale))
+      .call(axisBottom(this.xScale))
       .call((g: any) => g.select('.domain').remove());
 
     // Build Y scales and axis:
-    this.yScale = d3.scaleBand()
+    this.yScale = scaleBand()
       .range([ this.phunkHeight, 0 ])
       .domain(y)
       .padding(0);
 
     this.svg.append('g')
-      .call(d3.axisLeft(this.yScale))
+      .call(axisLeft(this.yScale))
       .call((g: any) => g.select('.domain').remove());
 
     this.svg.selectAll('text')
       .remove()
-    
+
     this.buildPhunk();
   }
 
@@ -123,7 +123,7 @@ export class PhunkImageDirective implements OnChanges {
           .transition()
             .style('fill', (d) => `#${d.value}`)
             .delay((d, i) => Math.floor(Math.random() * this.dataArr.length));
-    
+
     const colorGroups: any = {};
     this.dataArr.map((res: any) => {
       if (!colorGroups[res.value]) colorGroups[res.value] = 1;

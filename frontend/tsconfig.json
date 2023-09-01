@@ -2,13 +2,10 @@
   "compileOnSave": false,
   "compilerOptions": {
     "resolveJsonModule": true,
-    "esModuleInterop": true,
     "baseUrl": "./",
     "outDir": "./dist/out-tsc",
     "forceConsistentCasingInFileNames": true,
     "strict": true,
-    "noImplicitOverride": true,
-    "noPropertyAccessFromIndexSignature": false,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "sourceMap": true,
@@ -17,34 +14,40 @@
     "experimentalDecorators": true,
     "moduleResolution": "node",
     "importHelpers": true,
-    "target": "es2017",
+    "target": "ES2022",
     "module": "es2020",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
     "paths": {
-      "stream": [
-        "./node_modules/readable-stream"
+      "@/*": [
+        "src/app/*"
       ],
-      "crypto": [
-        "./node_modules/crypto-browserify"
-      ],
-      "assert": [
-        "./node_modules/assert"
-      ],
-      "http": [
-        "./node_modules/stream-http"
-      ],
-      "https": [
-        "./node_modules/https-browserify"
-      ],
-      "os": [
-        "./node_modules/os-browserify"
-      ]
+      // "stream": [
+      //   "./node_modules/readable-stream"
+      // ],
+      // "crypto": [
+      //   "./node_modules/crypto-browserify"
+      // ],
+      // "assert": [
+      //   "./node_modules/assert"
+      // ],
+      // "http": [
+      //   "./node_modules/stream-http"
+      // ],
+      // "https": [
+      //   "./node_modules/https-browserify"
+      // ],
+      // "os": [
+      //   "./node_modules/os-browserify"
+      // ]
     },
     "lib": [
-      "es2020",
+      "es2018",
       "dom",
       "esnext.asynciterable"
     ],
-    "allowSyntheticDefaultImports": true
+    "useDefineForClassFields": false
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,

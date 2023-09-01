@@ -1,4 +1,5 @@
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 
 import { DataService } from 'src/app/services/data.service';
@@ -7,6 +8,10 @@ import { Web3Service } from 'src/app/services/web3.service';
 import { firstValueFrom } from 'rxjs';
 
 @Component({
+  standalone: true,
+  imports: [
+    CommonModule,
+  ],
   selector: 'app-phunk-info',
   templateUrl: './phunk-info.component.html',
   styleUrls: ['./phunk-info.component.scss']

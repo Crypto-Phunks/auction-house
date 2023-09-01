@@ -1,0 +1,21 @@
+<div *ngIf="(stateSvc.treasury$ | async) as treasury">
+  <h4>Treasury</h4>
+  <div class="values">
+    <div class="usdc">
+      <ng-template [ngTemplateOutlet]="usdcIcon"></ng-template>
+      <div class="value">{{ +treasury.usdc | formatCash }} USDC</div>
+    </div>
+    <div class="eth">
+      <ng-template [ngTemplateOutlet]="ethIcon"></ng-template>
+      <div class="value">{{ treasury.eth | number }} ETH</div>
+    </div>
+  </div>
+</div>
+
+<ng-template #ethIcon>
+  <svg height="26" viewBox="0 0 26 26" width="26" xmlns="http://www.w3.org/2000/svg"><path d="m16 24v2h-6v-2zm4-2v2h-4v-2zm-10 0v2h-4v-2zm12-2v2h-2v-2zm-16 0v2h-2v-2zm8-15v2h2v4h-2v2h-2v-2h-2v2h2v2h2v-2h2v-2h2v4h-2v4h-2v2h-2v-2h-2v-4h-2v-4h2v-4h2v-2zm10 11v4h-2v-4zm-20 0v4h-2v-4zm22-6v6h-2v-6zm-24 0v6h-2v-6zm22-4v4h-2v-4zm-20 0v4h-2v-4zm18-2v2h-2v-2zm-16 0v2h-2v-2zm14-2v2h-4v-2zm-10 0v2h-4v-2zm6-2v2h-6v-2z" fill="#627eea" fill-rule="evenodd"/></svg>
+</ng-template>
+
+<ng-template #usdcIcon>
+  <svg height="26" viewBox="0 0 26 26" width="26" xmlns="http://www.w3.org/2000/svg"><path d="m16 24v2h-6v-2zm4-2v2h-4v-2zm-10 0v2h-4v-2zm12-2v2h-2v-2zm-16 0v2h-2v-2zm18-4v4h-2v-4zm-20 0v4h-2v-4zm11.7929688.1210938v1.8789062h-1.8535157v1.8535156h-1.8789062v-1.8535156h-3.75781252v-1.8789062zm1.8789062-1.8789063v1.8789063h-1.8789062v-1.8789063zm8.328125-4.2421875v6h-2v-6zm-24 0v6h-2v-6zm13.7929688 2.3632812v1.8789063h-5.6113282v-1.8789063zm-5.6113282-1.8789062v1.8789062h-1.87890622v-1.8789062zm3.7578125-3.7578125v1.87890625h3.7324219v1.87890625h-7.4902344v-1.87890625h1.8789063v-1.87890625zm10.0605469-.7265625v4h-2v-4zm-20 0v4h-2v-4zm18-2v2h-2v-2zm-16 0v2h-2v-2zm14-2v2h-4v-2zm-10 0v2h-4v-2zm6-2v2h-6v-2z" fill="#2775ca" fill-rule="evenodd"/></svg>
+</ng-template>

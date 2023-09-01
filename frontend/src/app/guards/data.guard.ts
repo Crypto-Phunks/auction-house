@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { ActivatedRouteSnapshot, CanActivate, RouterStateSnapshot, UrlTree } from '@angular/router';
+import { ActivatedRouteSnapshot, RouterStateSnapshot, UrlTree } from '@angular/router';
 
 import { map, Observable, tap } from 'rxjs';
 
@@ -9,7 +9,7 @@ import { DataService } from '../services/data.service';
   providedIn: 'root'
 })
 
-export class DataGuard implements CanActivate {
+export class DataGuard  {
 
   constructor(
     private dataSvc: DataService

@@ -3,30 +3,18 @@ import { Injectable } from '@angular/core';
 import { environment } from 'src/environments/environment';
 import { StateService } from './state.service';
 
-import { BehaviorSubject, firstValueFrom } from 'rxjs';
+import { catchError, filter, Observable, of, tap } from 'rxjs';
 
-import { BigNumber, ContractInterface, ethers, Event, providers } from 'ethers';
+import { FallbackTransport, TransactionReceipt, formatEther, formatUnits, parseEther } from 'viem';
+import { mainnet, goerli } from 'viem/chains';
 
-import Web3Modal from 'web3modal';
-import WalletConnectProvider from '@walletconnect/web3-provider';
+import { Chain, Config, PublicClient, WebSocketPublicClient, configureChains, createConfig, disconnect, getAccount, getNetwork, getPublicClient, getWalletClient, switchNetwork, watchAccount } from '@wagmi/core';
 
-const providerOptions = {
-  walletconnect: {
-    package: WalletConnectProvider,
-    options: {
-      network: 'mainnet',
-      rpc: {
-        1: environment.httpRpc
-      },
-    }
-  }
-};
+import { jsonRpcProvider } from '@wagmi/core/providers/jsonRpc';
+import { EthereumClient, w3mConnectors } from '@web3modal/ethereum';
+import { Web3Modal } from '@web3modal/html';
 
-const web3Modal = new Web3Modal({
-  network: 'mainnet',
-  cacheProvider: true,
-  providerOptions
-});
+const projectId = '260e2bfb25e604e64f4ebd6eec1bb3d8';
 
 @Injectable({
   providedIn: 'root'
@@ -34,148 +22,198 @@ const web3Modal = new Web3Modal({
 
 export class Web3Service {
 
-  private web3Connected = new BehaviorSubject<boolean>(false);
-  web3Connected$ = this.web3Connected.asObservable();
-
-  private activeWallet = new BehaviorSubject<string | undefined>(undefined);
-  activeWallet$ = this.activeWallet.asObservable();
-
-  // Set ethers provider (Alchemy)
-  provider: ethers.providers.JsonRpcProvider = new ethers.providers.JsonRpcProvider(environment.httpRpc);
-  signer = this.provider.getSigner();
-
-  // Initialize auction contract
-  auctionHouseContract = new ethers.Contract(environment.addresses.auctionHouseAddress, environment.abis.auctionHouseABI as ContractInterface, this.signer);
-
-  // Initialize auction contract
-  punkDataContract = new ethers.Contract(environment.addresses.punkDataAddress, environment.abis.punkDataABI as ContractInterface, this.provider);
-
-  // Initialize auction contract
-  // phunkTokenContract = new ethers.Contract(environment.addresses.phunkTokenAddress, environment.abis.phunkTokenABI as ContractInterface, this.provider);
+  config!: Config<PublicClient<FallbackTransport, Chain>, WebSocketPublicClient<FallbackTransport, Chain>>;
+  connectors: any[] = [];
+  web3modal!: Web3Modal;
+  connectedState!: Observable<any>;
 
   minBidIncrementPercentage: number = 5;
-
-  // treasuryValueEth!: BigNumber;
 
   constructor(
     private stateSvc: StateService
   ) {
 
-    // Web3 connect
-    web3Modal.on('connect', (instance) => {
+    const { chains, publicClient, webSocketPublicClient } = configureChains(
+      [mainnet, goerli],
+      [
+        jsonRpcProvider({
+          rpc: (chain) => ({ http: environment.httpRpc }),
+        }),
+      ],
+    );
 
-      this.setWeb3Connected(true);
-      this.setWalletAddress(instance?.selectedAddress);
-      this.provider = new providers.Web3Provider(instance);
-      this.signer = this.provider.getSigner();
-      this.setContractInstances();
-      this.getAuctionDetails();
+    this.connectors = [ ...w3mConnectors({ projectId, chains }) ];
 
-      this.checkNetwork();
+    this.config = createConfig({
+      autoConnect: true,
+      publicClient,
+      webSocketPublicClient,
+      connectors: this.connectors
     });
 
-    // Web3 disconnect
-    web3Modal.on('disconnect', (instance) => {
-      this.disconnect();
-    });
+    const ethereumClient = new EthereumClient(this.config, chains);
+    this.web3modal = new Web3Modal(
+      {
+        projectId,
+        themeVariables: {
+          '--w3m-font-family': 'Montserrat, sans-serif',
+          '--w3m-accent-color': 'rgba(var(--pink), 1)',
+          '--w3m-accent-fill-color': 'rgba(var(--text-color), 1)',
+          '--w3m-background-color': 'rgba(var(--background), 1)',
+          '--w3m-overlay-background-color': 'rgba(var(--background), .5)',
+          '--w3m-z-index': '2000',
+          '--w3m-wallet-icon-border-radius': '0',
+          '--w3m-background-border-radius': '0',
+          '--w3m-button-border-radius': '0',
+          '--w3m-button-hover-highlight-border-radius': '0',
+          '--w3m-container-border-radius': '0',
+          '--w3m-icon-button-border-radius': '0',
+          '--w3m-secondary-button-border-radius': '0',
+        }
+      },
+      ethereumClient
+    );
 
-    // The user has connected before
-    if (web3Modal.cachedProvider) this.connect();
-
-    this.auctionHouseContract.on('AuctionCreated', (
-      phunkId: BigNumber,
-      id: BigNumber,
-      startTime: BigNumber,
-      endTime: BigNumber,
-      attributes: string,
-      image: string
-    ) => this.stateSvc.updateAuctionCreated(phunkId, id, startTime, endTime, attributes, image));
-
-    this.auctionHouseContract.on('AuctionSettled', (
-      phunkId: BigNumber,
-      id: BigNumber,
-      winner: string,
-      amount: BigNumber
-    ) => this.stateSvc.updateAuctionSettled(phunkId, id, winner, amount));
-
-    this.auctionHouseContract.on('AuctionExtended', (
-      phunkId: BigNumber,
-      id: BigNumber,
-      endTime: BigNumber
-    ) => this.stateSvc.updateAuctionExtended(phunkId, id, endTime));
-
-    this.auctionHouseContract.on('AuctionBid', (
-      phunkId: BigNumber,
-      id: BigNumber,
-      sender: string,
-      value: BigNumber,
-      extended: boolean,
-      event: Event
-    ) => this.stateSvc.updateAuctionBid(phunkId, id, sender, value, extended, event));
-
-    // this.treasuryValueEth =
-    // this.getTreasuryValues();
+    this.createListeners();
+    this.getTreasuryValues();
+    this.getAuctionDetails();
   }
 
-  // async getTreasuryValues(): Promise<void> {
-  //   const balance = await this.phunkTokenContract['balanceOf'](environment.addresses.treasuryWalletAddress);
-  //   console.log(Number(balance));
-  //   // const etherPrice = await this.provider.getBalance(environment.addresses.treasuryWalletAddress);
-  //   // console.log(Number(etherPrice));
-  // }
+  createListeners(): void {
+    this.connectedState = new Observable((observer) => watchAccount((account) => observer.next(account)));
+    this.connectedState.pipe(
+      tap((account) => { if (account.isDisconnected) this.disconnectWeb3(); }),
+      filter((account) => account.isConnected),
+      tap((account) => {
+        this.connectWeb3(account.address as string);
+      }),
+      catchError((err) => {
+        this.disconnectWeb3();
+        return of(err);
+      }),
+    ).subscribe();
 
-  // Connection toggle (for UI)
-  async connectDisconnect(): Promise<void> {
-    const connected = await firstValueFrom(this.web3Connected$);
-    if (connected) this.disconnect();
-    else this.connect();
+    // const unwatchAuctionCreated = watchContractEvent({
+    //   address: environment.addresses.auctionHouseAddress as `0x${string}`,
+    //   abi: auctionHouseAbi,
+    //   eventName: 'AuctionCreated',
+    //   chainId: environment.chainId,
+    // }, (log) => {
+    //   log.map((res) => {
+    //     console.log(res.args);
+    //   })
+    // });
+
+    // const unwatchAuctionSettled = watchContractEvent({
+    //   address: environment.addresses.auctionHouseAddress as `0x${string}`,
+    //   abi: auctionHouseAbi,
+    //   eventName: 'AuctionSettled',
+    //   chainId: environment.chainId,
+    // }, (log) => {
+    //   log.map((res) => {
+    //     console.log(res.args);
+    //   })
+    // });
+
+    // const unwatchAuctionExtended = watchContractEvent({
+    //   address: environment.addresses.auctionHouseAddress as `0x${string}`,
+    //   abi: auctionHouseAbi,
+    //   eventName: 'AuctionExtended',
+    //   chainId: environment.chainId,
+    // }, (log) => {
+    //   log.map((res) => {
+    //     console.log(res.args);
+    //   })
+    // });
+
+    // const unwatchAuctionBid = watchContractEvent({
+    //   address: environment.addresses.auctionHouseAddress as `0x${string}`,
+    //   abi: auctionHouseAbi,
+    //   eventName: 'AuctionBid',
+    //   chainId: environment.chainId,
+    // }, (log) => {
+    //   log.map((res) => {
+    //     console.log(res.args);
+    //   })
+    // });
+
+    // // this.stateSvc.updateAuctionCreated(phunkId, id, startTime, endTime, attributes, image)
+    // // this.stateSvc.updateAuctionSettled(phunkId, id, winner, amount);
+    // // this.stateSvc.updateAuctionExtended(phunkId, id, endTime);
+    // // this.stateSvc.updateAuctionBid(phunkId, id, sender, value, extended, event);
   }
 
   async connect(): Promise<void> {
-    await web3Modal.connect();
-  }
-
-  async disconnect(): Promise<void> {
-    web3Modal.clearCachedProvider();
-    this.setWeb3Connected(false);
-    this.setWalletAddress(undefined);
-  }
-
-  async checkNetwork(): Promise<any> {
-    const activeNetwork = await this.provider.getNetwork();
-    if (activeNetwork.chainId !== 1) {
-      return await this.provider.send('wallet_switchEthereumChain', [{ chainId: '0x1' }]);
+    try {
+      await this.web3modal.openModal();
+    } catch (error) {
+      console.log(error);
+      this.disconnectWeb3();
     }
   }
 
-  async setContractInstances(): Promise<void> {
-    this.auctionHouseContract = new ethers.Contract(
-      environment.addresses.auctionHouseAddress,
-      environment.abis.auctionHouseABI as ContractInterface,
-      this.signer
-    );
+  async connectWeb3(address: string): Promise<void> {
+    if (!address) return;
+    address = address.toLowerCase();
 
-    this.punkDataContract = new ethers.Contract(
-      environment.addresses.punkDataAddress,
-      environment.abis.punkDataABI as ContractInterface,
-      this.provider
-    );
+    this.stateSvc.setWeb3Connected(true);
+    this.setWalletAddress(address);
+  }
+
+  async disconnectWeb3(): Promise<void> {
+    if (getAccount().isConnected) {
+      await disconnect();
+      this.stateSvc.setWeb3Connected(false);
+      this.stateSvc.setWalletAddress(null);
+    }
+  }
+
+  async checkNetwork(): Promise<void> {
+    const network = getNetwork();
+    if (network.chain?.id !== environment.chainId) {
+      await switchNetwork({ chainId: environment.chainId });
+    }
   }
 
   setWeb3Connected(val: boolean): void {
-    this.web3Connected.next(val);
+    this.stateSvc.setWeb3Connected(val);
   }
 
-  setWalletAddress(val: string | undefined): void {
-    this.activeWallet.next(val);
+  setWalletAddress(val: string | null): void {
+    this.stateSvc.setWalletAddress(val);
   }
 
-  async getAuctionDetails() {
-    try {
-      this.minBidIncrementPercentage = await this.auctionHouseContract['minBidIncrementPercentage']();
-    } catch (err) {
-      console.log(err);
-    }
+  async getTreasuryValues(): Promise<void> {
+
+    const usdcAbi: any = [{"inputs": [{ "internalType": "address", "name": "account", "type": "address" }],"name": "balanceOf","outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],"stateMutability": "view","type": "function"},{"inputs": [],"name": "decimals","outputs": [{ "internalType": "uint8", "name": "", "type": "uint8" }],"stateMutability": "view","type": "function"}];
+
+    const publicClient = getPublicClient();
+
+    const [balance, [usdcValue, decimals]] = await Promise.all([
+      publicClient.getBalance({
+        address: environment.addresses.treasuryWalletAddress as `0x${string}`,
+      }),
+      publicClient.multicall({
+        contracts: [{
+          address: `0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48` as `0x${string}`,
+          abi: usdcAbi,
+          functionName: 'balanceOf',
+          args: [environment.addresses.treasuryWalletAddress],
+        }, {
+          address: `0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48` as `0x${string}`,
+          abi: usdcAbi,
+          functionName: 'decimals',
+          args: [],
+        }],
+      })
+    ]);
+
+    const formattedUsdcValue = formatUnits(usdcValue.result as unknown as bigint, decimals.result as unknown as number);
+
+    this.stateSvc.updateTreasuryBalance({
+      usdc: formattedUsdcValue,
+      eth: formatEther(balance)
+    });
   }
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -183,69 +221,107 @@ export class Web3Service {
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
   async getPunkImage(tokenId: string): Promise<string | null> {
-    try {
-      return await this.punkDataContract['punkImage'](tokenId);
-    } catch (err) {
-      console.log(err);
-      return null;
-    }
+    const publicClient = getPublicClient();
+    const punkImage = await publicClient?.readContract({
+      address: environment.addresses.punkDataAddress as `0x${string}`,
+      abi: environment.abis.punkDataABI,
+      functionName: 'punkImage',
+      args: [tokenId],
+    });
+    return punkImage as string;
   }
 
   async getPunkAttributes(tokenId: string): Promise<string | null> {
-    try {
-      return await this.punkDataContract['punkAttributes'](tokenId);
-    } catch (err) {
-      console.log(err);
-      return null;
-    }
+    const publicClient = getPublicClient();
+    const punkAttributes = await publicClient?.readContract({
+      address: environment.addresses.punkDataAddress as `0x${string}`,
+      abi: environment.abis.punkDataABI,
+      functionName: 'punkAttributes',
+      args: [tokenId],
+    });
+    return punkAttributes as string;
   }
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   // Auction Interactions //////////////////////////////////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+  async getAuctionDetails() {
+    const publicClient = getPublicClient();
+    const res = await publicClient?.readContract({
+      address: environment.addresses.auctionHouseAddress as `0x${string}`,
+      abi: environment.abis.auctionHouseABI,
+      functionName: 'minBidIncrementPercentage',
+      args: [],
+    });
+    this.minBidIncrementPercentage = res as number;
+  }
+
   async getCurrentAuction(): Promise<any> {
-    return await this.auctionHouseContract['auction']();
+    const publicClient = getPublicClient();
+    return await publicClient?.readContract({
+      address: environment.addresses.auctionHouseAddress as `0x${string}`,
+      abi: environment.abis.auctionHouseABI,
+      functionName: 'auction',
+      args: [],
+    });
   }
 
-  async setBid(tokenId: BigNumber, bidAmount: number): Promise<any> {
+  async setBid(tokenId: bigint, bidAmount: number): Promise<`0x${string}` | undefined> {
 
-    const contract = this.auctionHouseContract.connect(this.signer);
-    const value: BigNumber = this.ethToWei(bidAmount.toString());
-    const estimateGas = await contract.estimateGas['createBid'](tokenId, { value });
-    const gasLimit = estimateGas.add(estimateGas);
+    const network = getNetwork();
+    const walletClient = await getWalletClient({ chainId: network.chain?.id });
 
-    return await contract['createBid'](tokenId, { value, gasLimit });
+    const tx: any = {
+      address: environment.addresses.auctionHouseAddress as `0x${string}`,
+      abi: environment.abis.auctionHouseABI,
+      functionName: 'createBid',
+      args: [tokenId]
+    };
+
+    if (bidAmount) tx.value = parseEther(bidAmount.toString(), 'wei');
+    return await walletClient?.writeContract(tx);
   }
 
-  async startNewAuction(): Promise<any> {
+  async startNewAuction(): Promise<`0x${string}` | undefined> {
+    const network = getNetwork();
+    const walletClient = await getWalletClient({ chainId: network.chain?.id });
 
-    const contract = this.auctionHouseContract.connect(this.signer);
-    const estimateGas = await contract.estimateGas['settleCurrentAndCreateNewAuction']();
-    const gasLimit = estimateGas.add(estimateGas);
-    // console.log(Number(estimateGas), Number(gasLimit));
+    const tx: any = {
+      address: environment.addresses.auctionHouseAddress as `0x${string}`,
+      abi: environment.abis.auctionHouseABI,
+      functionName: 'settleCurrentAndCreateNewAuction',
+      args: []
+    };
 
-    return await contract['settleCurrentAndCreateNewAuction']({ gasLimit });
+    return await walletClient?.writeContract(tx);
+  }
+
+  async waitForTransaction(hash: string): Promise<TransactionReceipt> {
+    const publicClient = getPublicClient();
+    const transaction = await publicClient.waitForTransactionReceipt({ hash: hash as `0x${string}` });
+    return transaction;
   }
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   // UTILS /////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-  weiToEth(wei: string): string {
-    return ethers.utils.formatUnits(wei, 'ether');
+  weiToEth(wei: bigint): string {
+    return formatEther(wei);
   }
 
-  ethToWei(eth: string) {
-    return ethers.utils.parseEther(eth);
+  async getEnsOwner(name: string) {
+    return await getPublicClient().getEnsAddress({ name });
   }
 
-  async getEns(address: string): Promise<string | null> {
-    return await this.provider.lookupAddress(address);
+  async getEnsFromAddress(address: string | null | undefined): Promise<string | null> {
+    if (!address) return null;
+    try {
+      const ens = await getPublicClient().getEnsName({ address: address as `0x${string}` });
+      return ens;
+    } catch (err) {
+      return null;
+    }
   }
-
-  async getCurrentBlock(): Promise<any> {
-    return await this.provider.getBlockNumber();
-  }
-
 }

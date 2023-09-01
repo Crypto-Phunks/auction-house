@@ -1,31 +1,34 @@
 import { Injectable } from '@angular/core';
-import { Apollo, gql } from 'apollo-angular';
 
-import { BehaviorSubject, map, Subscription, tap } from 'rxjs';
+import { Apollo, gql } from 'apollo-angular';
+import { BehaviorSubject, map, switchMap, tap } from 'rxjs';
 
 import { Auction, Bid } from '../interfaces/auction';
 
 const GET_AUCTIONS = gql`
-  {
+  query GetAuctions($first: Int, $skip: Int) {
     auctions(
       orderBy: startTime
       orderDirection: desc
-      first: 500
+      first: $first
+      skip: $skip
     ) {
-      phunk { id }
       id
       startTime
       endTime
       settled
       amount
-      # attributes
-      # image
+      phunk {
+        id
+      }
       bidder {
         id
       }
       bids {
         id
-        bidder { id }
+        bidder {
+          id
+        }
         amount,
         blockTimestamp
       }
@@ -38,8 +41,6 @@ const GET_AUCTIONS = gql`
 })
 
 export class DataService {
-
-  subscription!: Subscription;
 
   private auctionData = new BehaviorSubject<Auction[]>([]);
   public auctionData$ = this.auctionData.asObservable();
@@ -54,38 +55,57 @@ export class DataService {
   }
 
   getAuctionData(): void {
-    this.subscription = this.apollo.query({ query: GET_AUCTIONS }).pipe(
+
+    const watchQuery = (first: number, skip: number): any => ({
+      query: GET_AUCTIONS,
+      variables: { first, skip },
+      pollInterval: 2000
+    });
+
+    const query = (first: number, skip: number): any => ({
+      query: GET_AUCTIONS,
+      variables: { first, skip }
+    });
+
+    this.apollo.watchQuery(watchQuery(5, 0)).valueChanges.pipe(
       map((res: any) => res.data?.auctions || []),
-      // tap(console.log),
-      map((res: any[]) => {
-        const auctions: Auction[] = res.map((auction: any) => {
-          const bids: Bid[] = [ ...auction?.bids ].sort((a: Bid, b: Bid) => Number(b?.amount) - Number(a?.amount));
-          return {
-            id: auction.id,
-            phunkId: auction?.phunk.id,
-            amount: auction?.amount,
-            // attributes: this.transformAttributes(auction?.attributes),
-            // image: auction?.image,
-            startTime: Number(auction?.startTime) * 1000,
-            endTime: Number(auction?.endTime) * 1000,
-            bidder: auction?.bidder?.id,
-            settled: auction?.settled,
-            bids
-          };
-        });
-        return auctions;
+      map((res: any) => this.transformData(res)),
+      tap((res: Auction[]) => this.setAuctionData(res)),
+      switchMap(() => this.apollo.query(query(1000, 5))),
+      map((res: any) => res.data?.auctions || []),
+      map((res: any) => this.transformData(res)),
+      tap((res: Auction[]) => {
+        const currentAuctionData = this.auctionData.getValue();
+        const newAuctionData = [ ...currentAuctionData, ...res ];
+        this.setAuctionData(newAuctionData);
       }),
-      // tap(console.log),
-      tap((res: Auction[]) => this.setAuctionData(res))
-    ).subscribe(() => this.subscription.unsubscribe());
+    ).subscribe();
   }
 
-  public setAuctionData(auctionData: Auction[]) {
+  transformData(data: any): Auction[] {
+    const auctions: Auction[] = data.map((auction: any) => {
+      const bids: Bid[] = [ ...auction?.bids ].sort((a: Bid, b: Bid) => Number(b?.amount) - Number(a?.amount));
+      return {
+        id: auction.id,
+        phunkId: auction?.phunk.id,
+        amount: auction?.amount,
+        // attributes: this.transformAttributes(auction?.attributes),
+        // image: auction?.image,
+        startTime: Number(auction?.startTime) * 1000,
+        endTime: Number(auction?.endTime) * 1000,
+        bidder: auction?.bidder?.id,
+        settled: auction?.settled,
+        bids
+      };
+    });
+    return auctions;
+  }
+
+  setAuctionData(auctionData: Auction[]) {
     this.auctionData.next(auctionData);
-    // console.log(`setAuctionData`, auctionData);
   }
 
-  public setActiveIndex(index: number) {
+  setActiveIndex(index: number) {
     this.activeIndex.next(index);
     // console.log(`setActiveIndex`, index);
   }
@@ -94,7 +114,7 @@ export class DataService {
   // Util //////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-  public transformAttributes(attributes: string) {
+  transformAttributes(attributes: string) {
     return attributes.split(', ').map((res: any, i: number) => {
       if (!i) return res.match(/[a-zA-Z]+/g)[0];
       return res;

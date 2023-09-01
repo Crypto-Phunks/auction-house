@@ -15,16 +15,11 @@ button {
   display: inline-flex;
   align-items: center;
 
-  // background-color: rgba(var(--pink), 1);
-  // color: rgba(var(--background), 1);
-
   padding: .5rem 1rem;
 
   font-family: $primary-font-stack;
   font-weight: 600;
   font-size: 1.6rem;
-
-  // @include trans($duration: .2s);
 }
 
 ul {

@@ -6,5 +6,15 @@
     "CryptoPhunksV2": {
       "address": "0xf07468ead8cf26c752c676e43c814fee9c8cf402"
     }
+  },
+  "goerli": {
+    "PhunksAuctionHouse": {
+      "PhunksAuctionHouse": {
+        "address": "0x1CCf05242C20c82B0f8d7C2E80679dEc4f484325"
+      },
+      "CryptoPhunksV2": {
+        "address": "0x5B452c76D51e5ab02805477F3Aaf1b612f045dD6"
+      }
+    }
   }
 }

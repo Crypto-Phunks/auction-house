@@ -6,7 +6,7 @@ import {
   AuctionSettled,
 } from '../generated/PhunksAuctionHouse/PhunksAuctionHouse';
 
-import { Phunk, Auction, Bid, Account } from '../generated/schema';
+import { Phunk, Auction, Bid } from '../generated/schema';
 import { getOrCreateAccount } from './utils/helpers';
 
 export function handleAuctionCreated(event: AuctionCreated): void {

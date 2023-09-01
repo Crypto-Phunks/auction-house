@@ -1,0 +1,54 @@
+specVersion: 0.0.4
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum/contract
+    name: PhunksAuctionHouse
+    network: mainnet
+    source:
+      address: "0x0E7f7d8007C0FCcAc2a813a25f205b9030697856"
+      abi: PhunksAuctionHouse
+      startBlock: 15225534
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - Phunk
+        - Bid
+        - Auction
+        - Account
+      abis:
+        - name: PhunksAuctionHouse
+          file: ./abis/PhunksAuctionHouse.json
+      eventHandlers:
+        - event: AuctionCreated(indexed uint256,uint256,uint256,uint256)
+          handler: handleAuctionCreated
+        - event: AuctionBid(indexed uint256,uint256,address,uint256,bool)
+          handler: handleAuctionBid
+        - event: AuctionExtended(indexed uint256,uint256,uint256)
+          handler: handleAuctionExtended
+        - event: AuctionSettled(indexed uint256,uint256,address,uint256)
+          handler: handleAuctionSettled
+      file: ./src/phunks-auction-house.ts
+  - kind: ethereum/contract
+    name: CryptoPhunksV2
+    network: mainnet
+    source:
+      address: "0xf07468ead8cf26c752c676e43c814fee9c8cf402"
+      abi: CryptoPhunksV2
+      startBlock: 12674389
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - Phunk
+        - Account
+      abis:
+        - name: CryptoPhunksV2
+          file: ./abis/CryptoPhunksV2.json
+      eventHandlers:
+        - event: Transfer(indexed address,indexed address,indexed uint256)
+          handler: handleTransfer
+      file: ./src/phunks-token.ts

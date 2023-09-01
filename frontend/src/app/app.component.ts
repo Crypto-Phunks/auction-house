@@ -1,13 +1,24 @@
 import { Component } from '@angular/core';
-import { NavigationEnd, Router } from '@angular/router';
+import { NavigationEnd, Router, RouterModule } from '@angular/router';
+import { CommonModule } from '@angular/common';
 
-import { DataService } from './services/data.service';
+import { HeaderComponent } from '@/components/header/header.component';
 
-import { filter, map, switchMap, tap } from 'rxjs';
+import { DataService } from '@/services/data.service';
+import { MessagingService } from '@/services/messaging.service';
 
-import { Auction } from './interfaces/auction';
+import { Auction } from '@/interfaces/auction';
+
+import { filter, switchMap, tap } from 'rxjs';
 
 @Component({
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule,
+
+    HeaderComponent
+  ],
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
@@ -17,9 +28,9 @@ export class AppComponent {
 
   constructor(
     private readonly dataSvc: DataService,
-    private router: Router
+    private router: Router,
+    private msgSv: MessagingService
   ) {
-
     let activeRoute: string; // This is the phunkId
 
     this.router.events.pipe(
@@ -36,5 +47,5 @@ export class AppComponent {
       })
     ).subscribe();
   }
-  
+
 }

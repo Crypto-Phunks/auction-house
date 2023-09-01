@@ -2,7 +2,7 @@ import { log } from '@graphprotocol/graph-ts';
 import { Transfer } from '../generated/CryptoPhunksV2/CryptoPhunksV2';
 
 import { getOrCreateAccount } from '../src/utils/helpers';
-import { BIGINT_ONE, BIGINT_ZERO, ZERO_ADDRESS } from './utils/constants';
+import { BIGINT_ONE, BIGINT_ZERO } from './utils/constants';
 
 import { Phunk } from '../generated/schema';
 
@@ -14,7 +14,7 @@ export function handleTransfer(event: Transfer): void {
   transferredPhunkId = event.params.tokenId.toString();
 
   let fromHolderPreviousBalance = fromHolder.tokenBalanceRaw;
-  fromHolder.tokenBalanceRaw = fromHolder.tokenBalanceRaw - BIGINT_ONE;
+  fromHolder.tokenBalanceRaw = fromHolder.tokenBalanceRaw.minus(BIGINT_ONE);
   fromHolder.tokenBalance = fromHolder.tokenBalanceRaw;
   let fromHolderPhunks = fromHolder.phunks; // Re-assignment required to update array
   fromHolder.phunks = fromHolderPhunks.filter(n => n != transferredPhunkId);
@@ -29,9 +29,9 @@ export function handleTransfer(event: Transfer): void {
   fromHolder.save();
 
   let toHolderPreviousBalance = toHolder.tokenBalanceRaw;
-  toHolder.tokenBalanceRaw = toHolder.tokenBalanceRaw + BIGINT_ONE;
+  toHolder.tokenBalanceRaw = toHolder.tokenBalanceRaw.plus(BIGINT_ONE);
   toHolder.tokenBalance = toHolder.tokenBalanceRaw;
-  toHolder.totalTokensHeldRaw = toHolder.totalTokensHeldRaw + BIGINT_ONE;
+  toHolder.totalTokensHeldRaw = toHolder.totalTokensHeldRaw.plus(BIGINT_ONE);
   toHolder.totalTokensHeld = toHolder.totalTokensHeldRaw;
 
   let toHolderPhunks = toHolder.phunks; // Re-assignment required to update array
