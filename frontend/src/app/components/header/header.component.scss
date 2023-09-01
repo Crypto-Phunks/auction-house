@@ -52,21 +52,7 @@
     align-items: center;
     justify-content: flex-end;
 
-    .connect {
-      color: rgba(var(--text-color), 1);
-      background-color: rgba(var(--background), 1);
-      padding: 1rem 2rem;
-    }
-
-    .notifications {
-      color: rgba(var(--text-color), 1);
-    }
-
-    .mode {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-
+    button {
       padding: 1rem 2rem;
 
       svg {
@@ -77,18 +63,53 @@
         }
       }
 
-      &.dark {
-        svg {
-          path#sun {
-            display: block;
+      &.connect {
+        color: rgba(var(--text-color), 1);
+        background-color: rgba(var(--background), 1);
+        margin-left: 1rem;
+      }
+
+      &.notifications {
+        padding: 1rem;
+        color: rgba(var(--text-color), 1);
+
+        &.on {
+          svg {
+            path#on {
+              display: block;
+            }
+          }
+        }
+
+        &.off {
+          svg {
+            path#off {
+              display: block;
+            }
           }
         }
       }
 
-      &.light {
-        svg {
-          path#moon {
-            display: block;
+      &.mode {
+        padding: 1rem;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        &.dark {
+          svg {
+            path#sun {
+              display: block;
+            }
+          }
+        }
+
+        &.light {
+          svg {
+            path#moon {
+              display: block;
+            }
           }
         }
       }
@@ -120,9 +141,16 @@
     }
 
     nav {
-      .connect {
-        font-size: 1.4rem;
+      button {
         padding: .5rem 1rem;
+
+        svg {
+          width: 1.5rem;
+        }
+
+        &.connect {
+          font-size: 1.4rem;
+        }
       }
     }
   }

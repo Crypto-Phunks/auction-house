@@ -92,55 +92,6 @@ export class Web3Service {
         return of(err);
       }),
     ).subscribe();
-
-    // const unwatchAuctionCreated = watchContractEvent({
-    //   address: environment.addresses.auctionHouseAddress as `0x${string}`,
-    //   abi: auctionHouseAbi,
-    //   eventName: 'AuctionCreated',
-    //   chainId: environment.chainId,
-    // }, (log) => {
-    //   log.map((res) => {
-    //     console.log(res.args);
-    //   })
-    // });
-
-    // const unwatchAuctionSettled = watchContractEvent({
-    //   address: environment.addresses.auctionHouseAddress as `0x${string}`,
-    //   abi: auctionHouseAbi,
-    //   eventName: 'AuctionSettled',
-    //   chainId: environment.chainId,
-    // }, (log) => {
-    //   log.map((res) => {
-    //     console.log(res.args);
-    //   })
-    // });
-
-    // const unwatchAuctionExtended = watchContractEvent({
-    //   address: environment.addresses.auctionHouseAddress as `0x${string}`,
-    //   abi: auctionHouseAbi,
-    //   eventName: 'AuctionExtended',
-    //   chainId: environment.chainId,
-    // }, (log) => {
-    //   log.map((res) => {
-    //     console.log(res.args);
-    //   })
-    // });
-
-    // const unwatchAuctionBid = watchContractEvent({
-    //   address: environment.addresses.auctionHouseAddress as `0x${string}`,
-    //   abi: auctionHouseAbi,
-    //   eventName: 'AuctionBid',
-    //   chainId: environment.chainId,
-    // }, (log) => {
-    //   log.map((res) => {
-    //     console.log(res.args);
-    //   })
-    // });
-
-    // // this.stateSvc.updateAuctionCreated(phunkId, id, startTime, endTime, attributes, image)
-    // // this.stateSvc.updateAuctionSettled(phunkId, id, winner, amount);
-    // // this.stateSvc.updateAuctionExtended(phunkId, id, endTime);
-    // // this.stateSvc.updateAuctionBid(phunkId, id, sender, value, extended, event);
   }
 
   async connect(): Promise<void> {
@@ -184,36 +135,39 @@ export class Web3Service {
   }
 
   async getTreasuryValues(): Promise<void> {
-
     const usdcAbi: any = [{"inputs": [{ "internalType": "address", "name": "account", "type": "address" }],"name": "balanceOf","outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],"stateMutability": "view","type": "function"},{"inputs": [],"name": "decimals","outputs": [{ "internalType": "uint8", "name": "", "type": "uint8" }],"stateMutability": "view","type": "function"}];
 
-    const publicClient = getPublicClient();
+    try {
+      const publicClient = getPublicClient();
+      const [balance, [usdcValue, decimals]] = await Promise.all([
+        publicClient.getBalance({
+          address: environment.addresses.treasuryWalletAddress as `0x${string}`,
+        }),
+        publicClient.multicall({
+          contracts: [{
+            address: `0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48` as `0x${string}`,
+            abi: usdcAbi,
+            functionName: 'balanceOf',
+            args: [environment.addresses.treasuryWalletAddress],
+          }, {
+            address: `0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48` as `0x${string}`,
+            abi: usdcAbi,
+            functionName: 'decimals',
+            args: [],
+          }],
+        })
+      ]);
 
-    const [balance, [usdcValue, decimals]] = await Promise.all([
-      publicClient.getBalance({
-        address: environment.addresses.treasuryWalletAddress as `0x${string}`,
-      }),
-      publicClient.multicall({
-        contracts: [{
-          address: `0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48` as `0x${string}`,
-          abi: usdcAbi,
-          functionName: 'balanceOf',
-          args: [environment.addresses.treasuryWalletAddress],
-        }, {
-          address: `0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48` as `0x${string}`,
-          abi: usdcAbi,
-          functionName: 'decimals',
-          args: [],
-        }],
-      })
-    ]);
+      const formattedUsdcValue = formatUnits(
+        usdcValue.result as unknown as bigint,
+        decimals.result as unknown as number
+      );
 
-    const formattedUsdcValue = formatUnits(usdcValue.result as unknown as bigint, decimals.result as unknown as number);
-
-    this.stateSvc.updateTreasuryBalance({
-      usdc: formattedUsdcValue,
-      eth: formatEther(balance)
-    });
+      this.stateSvc.updateTreasuryBalance({ usdc: formattedUsdcValue, eth: formatEther(balance) });
+    } catch (error) {
+      console.log(error);
+      this.stateSvc.updateTreasuryBalance({ usdc: '0', eth: '0' });
+    }
   }
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

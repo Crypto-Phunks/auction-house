@@ -43,5 +43,8 @@ export const environment = {
     phunkTokenAddress: '0x5B452c76D51e5ab02805477F3Aaf1b612f045dD6'
   },
   chainId: 5,
-  auctionStartBlock: 9610116
+  auctionStartBlock: 9610116,
+  notifications: {
+    vapidKey: 'BGMg426N6tLVS6OsWuCxfewDOomVAcPLhi2KkUNGAZiiPQB8XlBZHad9lKsFfrhm5zyKx2sTBWiT5Uxs08Sd0pQ'
+  },
 };

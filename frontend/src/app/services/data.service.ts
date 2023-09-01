@@ -67,11 +67,11 @@ export class DataService {
       variables: { first, skip }
     });
 
-    this.apollo.watchQuery(watchQuery(5, 0)).valueChanges.pipe(
+    this.apollo.watchQuery(watchQuery(1, 0)).valueChanges.pipe(
       map((res: any) => res.data?.auctions || []),
       map((res: any) => this.transformData(res)),
       tap((res: Auction[]) => this.setAuctionData(res)),
-      switchMap(() => this.apollo.query(query(1000, 5))),
+      switchMap(() => this.apollo.query(query(1000, 1))),
       map((res: any) => res.data?.auctions || []),
       map((res: any) => this.transformData(res)),
       tap((res: Auction[]) => {
