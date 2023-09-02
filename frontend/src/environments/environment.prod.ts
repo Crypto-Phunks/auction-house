@@ -45,7 +45,7 @@ export const environment = {
   chainId: 5,
   auctionStartBlock: 9610116,
   notifications: {
-    apiUrl: 'http://localhost:3200',
+    apiUrl: 'https://goerli.phunks.auction/api',
     vapidKey: 'BGMg426N6tLVS6OsWuCxfewDOomVAcPLhi2KkUNGAZiiPQB8XlBZHad9lKsFfrhm5zyKx2sTBWiT5Uxs08Sd0pQ'
   },
 };
