@@ -8,11 +8,6 @@ import { app } from 'src/firebase.config';
 
 const messaging = getMessaging(app);
 
-const isSupported = () =>
-  'Notification' in window &&
-  'serviceWorker' in navigator &&
-  'PushManager' in window;
-
 @Injectable({
   providedIn: 'root',
 })
@@ -21,16 +16,19 @@ export class MessagingService {
   private hasPermission = new BehaviorSubject<boolean>(false);
   hasPermission$ = this.hasPermission.asObservable();
 
+  isSupported = 'Notification' in window && 'serviceWorker' in navigator && 'PushManager' in window;
+
   constructor() {
     // onMessage(messaging, (payload) => {
     //   console.log('Message received. ', { payload });
     //   // ...
     // });
+
+    this.setPermission();
   }
 
   setPermission(): void {
-
-    if (!isSupported()) {
+    if (!this.isSupported) {
       this.hasPermission.next(false);
       return;
     }
@@ -41,7 +39,7 @@ export class MessagingService {
 
   async requestPermission(): Promise<void> {
 
-    if (!isSupported()) {
+    if (!this.isSupported) {
       this.hasPermission.next(false);
       return;
     }
