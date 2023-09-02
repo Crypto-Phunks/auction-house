@@ -30,8 +30,7 @@
               "src/favicon.ico",
               "src/assets",
               "src/manifest.webmanifest",
-              "src/firebase-messaging-sw.js",
-              "src/ngsw-worker.js"
+              "src/firebase-messaging-sw.js"
             ],
             "styles": [
               "src/scss/main.scss"

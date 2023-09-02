@@ -102,7 +102,7 @@ export class DiscordService {
       .setImage(`attachment://${data.tokenId}.png`)
       .addFields({
         name: data.title,
-        value: `\`\`\`${data.text}\`\`\``,
+        value: `\`\`\`${data.discordText}\`\`\``,
         inline: true
       });
 
@@ -151,9 +151,15 @@ export class DiscordService {
 
     const image = await this.imgSvc.createImage(tokenId);
     const title = `📢 Phunk #${tokenId} has been put up for auction!`;
-    const text = `Started by: ${interaction.user.username}.eth\nAuction Ends: ${new Date().toUTCString()}\n\nTime remaining:\n4 days\n2 hours\n0 minutes\n69 seconds`;
+    const discordText = `Started by: ${interaction.user.username}.eth\nAuction Ends: ${new Date().toUTCString()}\n\nTime remaining:\n4 days\n2 hours\n0 minutes\n69 seconds`;
 
-    const channelsPosted = await this.postMessage({ title, text, image, tokenId }, type, channels);
+    const channelsPosted = await this.postMessage({
+      title,
+      discordText,
+      pushText: discordText,
+      image,
+      tokenId
+    }, type, channels);
   
     if (channelsPosted?.length) {
       await interaction.reply({

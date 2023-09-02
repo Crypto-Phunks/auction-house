@@ -83,9 +83,12 @@ export class AppService {
     const ens = await this.web3Svc.provider.lookupAddress(receipt?.from);
 
     const title = `📢 Phunk #${tokenId.toString()} has been put up for auction!`;
-    const text = `Started by: ${ens ?? this.shortenAddress(receipt?.from)}\nAuction Ends: ${format(date, 'PPpp')} GMT\n\nTime remaining:\n${timeLeft.days !== '00' ? timeLeft.days + ' days\n' : ''}${timeLeft.hours !== '00' ? timeLeft.hours + ' hours\n' : ''}${timeLeft.minutes !== '00' ? timeLeft.minutes + ' minutes\n' : ''}${timeLeft.seconds !== '00' ? timeLeft.seconds + ' seconds\n\n' : ''}`;
+    
+    const discordText = `Started by: ${ens ?? this.shortenAddress(receipt?.from)}\nAuction Ends: ${format(date, 'PPpp')} GMT\n\nTime remaining:\n${timeLeft.days !== '00' ? timeLeft.days + ' days\n' : ''}${timeLeft.hours !== '00' ? timeLeft.hours + ' hours\n' : ''}${timeLeft.minutes !== '00' ? timeLeft.minutes + ' minutes\n' : ''}${timeLeft.seconds !== '00' ? timeLeft.seconds + ' seconds\n\n' : ''}`;
+    
+    const pushText = `Started by: ${ens ?? this.shortenAddress(receipt?.from)}\nAuction Ends: ${format(date, 'PPpp')} GMT\n\nTime remaining:\n${timeLeft.days !== '00' ? timeLeft.days + ' days\n' : ''}${timeLeft.hours !== '00' ? timeLeft.hours + ' hours\n' : ''}${timeLeft.minutes !== '00' ? timeLeft.minutes + ' minutes\n' : ''}${timeLeft.seconds !== '00' ? timeLeft.seconds + ' seconds' : ''}`;
 
-    this.sendNotification({ text, title, image, tokenId: tokenId.toString() });
+    this.sendNotification({ discordText, pushText, title, image, tokenId: tokenId.toString() });
 
     // await writeFile(`./phunk${this.pad(phunkId.toString())}.png`, image, 'base64');
   }
@@ -108,9 +111,12 @@ export class AppService {
     const ens = await this.web3Svc.provider.lookupAddress(sender);
 
     const title = `📢 Phunk #${tokenId.toString()} has a new bid of Ξ${this.web3Svc.weiToEth(value)}!`;
-    const text = `From: ${ens ?? this.shortenAddress(sender)}\n\nTime remaining:\n${timeLeft.days !== '00' ? timeLeft.days + ' days\n' : ''}${timeLeft.hours !== '00' ? timeLeft.hours + ' hours\n' : ''}${timeLeft.minutes !== '00' ? timeLeft.minutes + ' minutes\n' : ''}${timeLeft.seconds !== '00' ? timeLeft.seconds + ' seconds\n\n' : ''}`;
 
-    this.sendNotification({ text, title, image, tokenId: tokenId.toString() });
+    const discordText = `From: ${ens ?? this.shortenAddress(sender)}\n\nTime remaining:\n${timeLeft.days !== '00' ? timeLeft.days + ' days\n' : ''}${timeLeft.hours !== '00' ? timeLeft.hours + ' hours\n' : ''}${timeLeft.minutes !== '00' ? timeLeft.minutes + ' minutes\n' : ''}${timeLeft.seconds !== '00' ? timeLeft.seconds + ' seconds\n\n' : ''}`;
+
+    const pushText = `From: ${ens ?? this.shortenAddress(sender)}\n\nTime remaining:\n${timeLeft.days !== '00' ? timeLeft.days + ' days\n' : ''}${timeLeft.hours !== '00' ? timeLeft.hours + ' hours\n' : ''}${timeLeft.minutes !== '00' ? timeLeft.minutes + ' minutes\n' : ''}${timeLeft.seconds !== '00' ? timeLeft.seconds + ' seconds' : ''}`;
+
+    this.sendNotification({ discordText, pushText, title, image, tokenId: tokenId.toString() });
 
     // await writeFile(`./phunk${this.pad(phunkId.toString())}.png`, image, 'base64');
   }
@@ -123,9 +129,12 @@ export class AppService {
     const image = await this.imgSvc.createImage(this.pad(tokenId.toString()));
 
     const title = `📢 The auction for Phunk #${tokenId.toString()} is ending soon!`;
-    const text = `Time remaining:\n${timeLeft.days !== '00' ? timeLeft.days + ' days\n' : ''}${timeLeft.hours !== '00' ? timeLeft.hours + ' hours\n' : ''}${timeLeft.minutes !== '00' ? timeLeft.minutes + ' minutes\n' : ''}${timeLeft.seconds !== '00' ? timeLeft.seconds + ' seconds\n\n' : ''}`;
+    
+    const discordText = `Time remaining:\n${timeLeft.days !== '00' ? timeLeft.days + ' days\n' : ''}${timeLeft.hours !== '00' ? timeLeft.hours + ' hours\n' : ''}${timeLeft.minutes !== '00' ? timeLeft.minutes + ' minutes\n' : ''}${timeLeft.seconds !== '00' ? timeLeft.seconds + ' seconds\n\n' : ''}`;
 
-    this.sendNotification({ text, title, image, tokenId: tokenId.toString() });
+    const pushText = `Time remaining:\n${timeLeft.days !== '00' ? timeLeft.days + ' days\n' : ''}${timeLeft.hours !== '00' ? timeLeft.hours + ' hours\n' : ''}${timeLeft.minutes !== '00' ? timeLeft.minutes + ' minutes\n' : ''}${timeLeft.seconds !== '00' ? timeLeft.seconds + ' seconds' : ''}`;
+
+    this.sendNotification({ discordText, pushText, title, image, tokenId: tokenId.toString() });
   }
 
   setTimers(endTime: BigNumber) {

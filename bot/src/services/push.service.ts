@@ -18,13 +18,13 @@ export class PushService {
 
   async sendPushNotification(message: Message, tokens: string[]): Promise<BatchResponse> {
 
-    const { title, text, image, tokenId } = message;
+    const { title, pushText, image, tokenId } = message;
 
     const payload = {
       tokens,
       notification: {
         title,
-        body: text,
+        body: pushText,
         imageUrl: `https://goerli.phunks.auction/assets/icons/icon.png`,
         // click_action: url,
       }
