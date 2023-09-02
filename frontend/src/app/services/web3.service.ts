@@ -159,8 +159,8 @@ export class Web3Service {
       ]);
 
       const formattedUsdcValue = formatUnits(
-        usdcValue.result as unknown as bigint,
-        decimals.result as unknown as number
+        usdcValue.result as unknown as bigint || BigInt(0),
+        decimals.result as unknown as number || 0
       );
 
       this.stateSvc.updateTreasuryBalance({ usdc: formattedUsdcValue, eth: formatEther(balance) });

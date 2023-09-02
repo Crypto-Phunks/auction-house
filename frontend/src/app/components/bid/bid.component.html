@@ -60,8 +60,10 @@
       <div
         class="info"
         tippy
-        [attr.data-tippy-content]="'Bids are in ETH and escrowed on smart-contract. If outbid, ETH is automatically returned'"
-        [attr.data-tippy-position]="'top'">
+        [options]="{
+          content: 'Bids are in ETH and escrowed on smart-contract. If outbid, ETH is automatically returned',
+          placement: 'top'
+        }">
 
         <ng-template [ngTemplateOutlet]="questionMarkIcon"></ng-template>
       </div>

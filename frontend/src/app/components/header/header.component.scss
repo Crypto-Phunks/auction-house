@@ -57,9 +57,16 @@
 
       svg {
         width: 2rem;
+        height: 2rem;
+
         path {
           display: none;
           fill: rgba(var(--text-color), 1);
+        }
+
+        &#loader {
+          // width: 1.4rem;
+          height: 1.4rem;
         }
       }
 
@@ -149,7 +156,8 @@
         }
 
         &.connect {
-          font-size: 1.4rem;
+          padding: 1rem 2rem;
+          font-size: 1.2rem;
         }
       }
     }

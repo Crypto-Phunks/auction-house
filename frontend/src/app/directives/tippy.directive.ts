@@ -9,7 +9,7 @@ import tippy, { Placement, Instance, Props } from 'tippy.js';
 
 export class TippyDirective implements OnInit, OnChanges {
 
-  @Input('tippyOptions') public tippyOptions!: Object;
+  @Input('options') public options!: Partial<Props> | undefined;
 
   private instance!: Instance<Props>;
 
@@ -19,14 +19,24 @@ export class TippyDirective implements OnInit, OnChanges {
 
   public ngOnInit() {
 
-    const el = this.el.nativeElement as HTMLElement;
 
-    console.log(el);
+  }
+
+  public ngOnDestroy() {
+    this.instance?.destroy();
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    console.log({changes})
+
+    const el = this.el.nativeElement as HTMLElement;
 
     if (this.el.nativeElement._tippy) {
       const tippy = this.el.nativeElement._tippy as Instance;
       tippy.destroy();
     }
+
+    if (!this.options?.content) return;
 
     el.style.cursor = 'default';
     const position = el.dataset.tippyPosition as Placement;
@@ -34,7 +44,8 @@ export class TippyDirective implements OnInit, OnChanges {
     const appendTo = el.dataset.appendTo as Element | "parent" | ((ref: Element) => Element);
 
     this.instance = tippy(el, {
-      content: el.dataset.tippyContent,
+      ...this.options,
+      // content: el.dataset.tippyContent,
       zIndex: 21474841,
       theme: 'phunks',
       hideOnClick: hide ? false : true,
@@ -44,15 +55,6 @@ export class TippyDirective implements OnInit, OnChanges {
 
     if (position) this.instance.props.placement = position;
     if (appendTo) this.instance.props.appendTo = appendTo;
-  }
-
-  public ngOnDestroy() {
-    this.instance?.destroy();
-  }
-
-  ngOnChanges(changes: SimpleChanges) {
-    // console.log(changes);
-    // this.updateProps(props);
   }
 
 }

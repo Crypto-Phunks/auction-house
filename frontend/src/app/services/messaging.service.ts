@@ -17,6 +17,8 @@ export class MessagingService {
   private hasPermission = new BehaviorSubject<boolean>(false);
   hasPermission$ = this.hasPermission.asObservable();
 
+  loadingPermission = false;
+
   isSupported = 'Notification' in window && 'serviceWorker' in navigator && 'PushManager' in window;
 
   constructor(
@@ -26,47 +28,51 @@ export class MessagingService {
     //   console.log('Message received. ', { payload });
     //   // ...
     // });
-    this.setPermission();
+    this.setInitialPermission();
   }
 
-  setPermission(): void {
+  setInitialPermission(): void {
     if (!this.isSupported) {
-      this.hasPermission.next(false);
+      this.setPermission(false);
       return;
     }
 
     const permission = Notification.permission;
-    this.hasPermission.next(permission === 'granted');
+    this.setPermission(permission === 'granted');
   }
 
   async requestPermission(): Promise<void> {
 
     if (!this.isSupported) {
-      this.hasPermission.next(false);
+      this.setPermission(false);
       return;
     }
+
+    this.loadingPermission = true;
 
     // Check permissions if they exist
     const permission = Notification.permission;
     if (permission === 'granted') {
-      this.hasPermission.next(true);
+      this.setPermission(true);
       return;
     } else if (permission === 'denied') {
-      this.hasPermission.next(false);
+      this.setPermission(false);
       return;
     }
 
     // If they dont exist (default) request them
     try {
       const token = await getToken(messaging, { vapidKey: environment.notifications.vapidKey });
-
-      console.log('token', {token});
       await firstValueFrom(this.http.post(`${environment.notifications.apiUrl}/subscribe`, { token }));
-
-      if (token) this.hasPermission.next(true);
+      if (token) this.setPermission(true);
     } catch (error) {
       console.error(error);
-      this.hasPermission.next(false);
+      this.setPermission(false);
     }
+  }
+
+  setPermission(value: boolean): void {
+    this.hasPermission.next(value);
+    this.loadingPermission = false;
   }
 }

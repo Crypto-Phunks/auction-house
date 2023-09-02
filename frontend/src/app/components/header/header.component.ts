@@ -3,13 +3,15 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
-import { TreasuryInfoComponent } from '../treasury-info/treasury-info.component';
-
+import { MessagingService } from '@/services/messaging.service';
 import { ThemeService } from '@/services/theme.service';
 import { Web3Service } from '@/services/web3.service';
 
+import { TreasuryInfoComponent } from '@/components/treasury-info/treasury-info.component';
+
+import { TippyDirective } from '@/directives/tippy.directive';
+
 import { firstValueFrom } from 'rxjs';
-import { MessagingService } from '@/services/messaging.service';
 
 @Component({
   standalone: true,
@@ -17,7 +19,9 @@ import { MessagingService } from '@/services/messaging.service';
     CommonModule,
     RouterModule,
 
-    TreasuryInfoComponent
+    TreasuryInfoComponent,
+
+    TippyDirective
   ],
   selector: 'app-header',
   templateUrl: './header.component.html',
