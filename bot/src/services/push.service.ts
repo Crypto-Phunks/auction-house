@@ -5,11 +5,11 @@ import { Message } from 'src/interfaces/message.interface';
 import * as admin from 'firebase-admin';
 import { BatchResponse } from 'firebase-admin/lib/messaging/messaging-api';
 
-import serviceAccount from '../service-account.json';
-admin.initializeApp({ credential: admin.credential.cert(serviceAccount as any) });
-
 import dotenv from 'dotenv';
 dotenv.config();
+
+const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT as string);
+admin.initializeApp({ credential: admin.credential.cert(serviceAccount as any) });
 
 @Injectable()
 export class PushService {
