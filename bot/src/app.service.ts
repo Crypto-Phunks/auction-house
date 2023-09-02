@@ -1,9 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 
 import { Web3Service } from './services/web3.service';
-import { TweetService } from './services/tweet.service';
 import { ImageService } from './services/image.service';
 import { DiscordService } from './services/discord.service';
+import { PushService } from './services/push.service';
+import { SupabaseService } from './services/supabase.service';
 
 import { format, fromUnixTime } from 'date-fns'
 import { BigNumber, Event } from 'ethers';
@@ -30,8 +31,9 @@ export class AppService {
   constructor(
     private readonly web3Svc: Web3Service,
     private readonly imgSvc: ImageService,
-    private readonly twSvc: TweetService,
-    private readonly discordSvc: DiscordService
+    private readonly discordSvc: DiscordService,
+    private readonly pushSvc: PushService,
+    private readonly spbSvc: SupabaseService
   ) {
 
     this.web3Svc.auctionHouseContract.on('AuctionCreated', (
@@ -62,13 +64,8 @@ export class AppService {
     });
   }
 
-  sendNotification(data: Message): void {
-    // this.twSvc.tweet({ text: data.text, image: data.image });
-    this.discordSvc.postMessage(data);
-  }
-
   async onAuctionCreated(
-    phunkId: BigNumber,
+    tokenId: BigNumber,
     auctionId: BigNumber,
     startTime: BigNumber,
     endTime: BigNumber,
@@ -80,21 +77,21 @@ export class AppService {
     const date = fromUnixTime(Number(endTime));
     const timeLeft = this.convertTimeLeft(endTime);
 
-    const image = await this.imgSvc.createImage(this.pad(phunkId.toString()));
+    const image = await this.imgSvc.createImage(this.pad(tokenId.toString()));
 
     const receipt = await event.getTransactionReceipt();
     const ens = await this.web3Svc.provider.lookupAddress(receipt?.from);
 
-    const title = `📢 Phunk #${phunkId.toString()} has been put up for auction!`;
+    const title = `📢 Phunk #${tokenId.toString()} has been put up for auction!`;
     const text = `Started by: ${ens ?? this.shortenAddress(receipt?.from)}\nAuction Ends: ${format(date, 'PPpp')} GMT\n\nTime remaining:\n${timeLeft.days !== '00' ? timeLeft.days + ' days\n' : ''}${timeLeft.hours !== '00' ? timeLeft.hours + ' hours\n' : ''}${timeLeft.minutes !== '00' ? timeLeft.minutes + ' minutes\n' : ''}${timeLeft.seconds !== '00' ? timeLeft.seconds + ' seconds\n\n' : ''}`;
 
-    this.sendNotification({ text, title, image, phunkId: phunkId.toString() });
+    this.sendNotification({ text, title, image, tokenId: tokenId.toString() });
 
     // await writeFile(`./phunk${this.pad(phunkId.toString())}.png`, image, 'base64');
   }
 
   async onAuctionBid(
-    phunkId: BigNumber,
+    tokenId: BigNumber,
     auctionId: BigNumber,
     sender: string,
     value: BigNumber,
@@ -107,13 +104,13 @@ export class AppService {
 
     this.setTimers(auction.endTime);
 
-    const image = await this.imgSvc.createImage(this.pad(phunkId.toString()));
+    const image = await this.imgSvc.createImage(this.pad(tokenId.toString()));
     const ens = await this.web3Svc.provider.lookupAddress(sender);
 
-    const title = `📢 Phunk #${phunkId.toString()} has a new bid of Ξ${this.web3Svc.weiToEth(value)}!`;
+    const title = `📢 Phunk #${tokenId.toString()} has a new bid of Ξ${this.web3Svc.weiToEth(value)}!`;
     const text = `From: ${ens ?? this.shortenAddress(sender)}\n\nTime remaining:\n${timeLeft.days !== '00' ? timeLeft.days + ' days\n' : ''}${timeLeft.hours !== '00' ? timeLeft.hours + ' hours\n' : ''}${timeLeft.minutes !== '00' ? timeLeft.minutes + ' minutes\n' : ''}${timeLeft.seconds !== '00' ? timeLeft.seconds + ' seconds\n\n' : ''}`;
 
-    this.sendNotification({ text, title, image, phunkId: phunkId.toString() });
+    this.sendNotification({ text, title, image, tokenId: tokenId.toString() });
 
     // await writeFile(`./phunk${this.pad(phunkId.toString())}.png`, image, 'base64');
   }
@@ -121,14 +118,14 @@ export class AppService {
   async onTimer(): Promise<void> {
     const auction = await this.web3Svc.auctionHouseContract['auction']();
     const timeLeft = this.convertTimeLeft(auction.endTime);
-    const phunkId = auction.phunkId;
+    const tokenId = auction.phunkId;
 
-    const image = await this.imgSvc.createImage(this.pad(phunkId.toString()));
+    const image = await this.imgSvc.createImage(this.pad(tokenId.toString()));
 
-    const title = `📢 The auction for Phunk #${phunkId.toString()} is ending soon!`;
+    const title = `📢 The auction for Phunk #${tokenId.toString()} is ending soon!`;
     const text = `Time remaining:\n${timeLeft.days !== '00' ? timeLeft.days + ' days\n' : ''}${timeLeft.hours !== '00' ? timeLeft.hours + ' hours\n' : ''}${timeLeft.minutes !== '00' ? timeLeft.minutes + ' minutes\n' : ''}${timeLeft.seconds !== '00' ? timeLeft.seconds + ' seconds\n\n' : ''}`;
 
-    this.sendNotification({ text, title, image, phunkId: phunkId.toString() });
+    this.sendNotification({ text, title, image, tokenId: tokenId.toString() });
   }
 
   setTimers(endTime: BigNumber) {
@@ -161,6 +158,20 @@ export class AppService {
         Logger.debug('Starting 1 hour timer');
         this.timer1 = setTimeout(() => this.onTimer(), diff - time1);
       }
+    }
+  }
+
+  async sendNotification(data: Message): Promise<void> {
+  
+    this.discordSvc.postMessage(data);
+
+    try {
+      if (!Number(process.env.PUSH_ENABLED)) throw new Error('Push notifications are disabled.');
+      const tokens = await this.spbSvc.getSubscriptionTokens('all');
+      const send = await this.pushSvc.sendPushNotification(data, tokens);
+      console.log(send);
+    } catch (error) {
+      console.log(error);
     }
   }
 

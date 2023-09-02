@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 
 import { getMessaging, getToken, onMessage } from 'firebase/messaging';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
 import { app } from 'src/firebase.config';
@@ -18,12 +19,13 @@ export class MessagingService {
 
   isSupported = 'Notification' in window && 'serviceWorker' in navigator && 'PushManager' in window;
 
-  constructor() {
+  constructor(
+    private http: HttpClient
+  ) {
     // onMessage(messaging, (payload) => {
     //   console.log('Message received. ', { payload });
     //   // ...
     // });
-
     this.setPermission();
   }
 
@@ -57,7 +59,10 @@ export class MessagingService {
     // If they dont exist (default) request them
     try {
       const token = await getToken(messaging, { vapidKey: environment.notifications.vapidKey });
-      console.log('token', token);
+
+      console.log('token', {token});
+      await firstValueFrom(this.http.post(`${environment.notifications.apiUrl}/subscribe`, { token }));
+
       if (token) this.hasPermission.next(true);
     } catch (error) {
       console.error(error);

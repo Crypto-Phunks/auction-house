@@ -8,8 +8,8 @@ import punkDataABI from '../abi/PunkData.json';
 import dotenv from 'dotenv';
 dotenv.config();
 
-const auctionContractAddress = process.env.NODE_ENV === 'prod' ? process.env.AUCTION_CONTRACT_ADDRESS : process.env.DEV_AUCTION_CONTRACT_ADDRESS;
-const punkDataAddress = process.env.NODE_ENV === 'prod' ? process.env.PUNK_DATA_ADDRESS : process.env.DEV_PUNK_DATA_ADDRESS;
+const auctionContractAddress = process.env.AUCTION_CONTRACT_ADDRESS;
+const punkDataAddress = process.env.PUNK_DATA_ADDRESS;
 
 @Injectable()
 export class Web3Service {

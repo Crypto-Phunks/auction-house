@@ -1,11 +1,11 @@
 module.exports = {
   parser: '@typescript-eslint/parser',
   parserOptions: {
-    project: './twitter-bot/tsconfig.json',
+    project: './bot/tsconfig.json',
     sourceType: 'module',
   },
-  plugins: ['@typescript-eslint/eslint-plugin'],
-  extends: ['plugin:@typescript-eslint/recommended'],
+  // plugins: ['@typescript-eslint/eslint-plugin'],
+  // extends: ['plugin:@typescript-eslint/recommended'],
   root: true,
   env: {
     node: true,

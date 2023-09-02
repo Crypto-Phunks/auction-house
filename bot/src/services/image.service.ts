@@ -260,5 +260,4 @@ export class ImageService {
       traitCount: traits.length - 1,
     };
   }
-
 }
