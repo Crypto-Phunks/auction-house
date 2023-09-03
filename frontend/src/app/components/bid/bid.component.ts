@@ -35,7 +35,7 @@ import { TippyDirective } from '@/directives/tippy.directive';
   styleUrls: ['./bid.component.scss']
 })
 
-export class BidComponent implements OnInit, AfterViewInit {
+export class BidComponent {
 
   @Input() currentAuction!: any;
   @Input() backgroundColor!: string;
@@ -55,10 +55,6 @@ export class BidComponent implements OnInit, AfterViewInit {
     public stateSvc: StateService,
     public themeSvc: ThemeService
   ) {}
-
-  ngOnInit(): void {}
-
-  ngAfterViewInit(): void {}
 
   async startNewAuction(): Promise<void> {
     this.closeTransaction();

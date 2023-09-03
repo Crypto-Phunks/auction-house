@@ -63,7 +63,7 @@ export class AuctionSliderComponent implements OnInit, AfterViewInit, OnChanges 
   ngOnChanges(changes: SimpleChanges): void {
     const current = changes['currentAuction']?.currentValue;
     const activeIndex = this.auctionData?.indexOf(current);
-    this.swiper?.swiperRef.slideTo((activeIndex ?? 0) + 1);
+    this.swiper?.swiperRef.slideTo((activeIndex ?? 0));
   }
 
   async goToAuction(auctionId: string): Promise<void> {

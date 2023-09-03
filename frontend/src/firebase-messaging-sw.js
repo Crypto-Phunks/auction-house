@@ -28,11 +28,10 @@ messaging.onBackgroundMessage((payload) => {
   const notificationOptions = {
     body: payload.notification.body,
     icon: payload.notification.icon,
-    vibrate: [200, 100, 200, 100, 200, 100, 200]
   };
 
   // Show the notification
-  return self.registration.showNotification(
+  self.registration.showNotification(
     notificationTitle,
     notificationOptions
   );

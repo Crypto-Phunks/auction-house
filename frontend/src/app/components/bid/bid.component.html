@@ -5,7 +5,10 @@
   </div>
 
   <div class="bid-info-item current-bid">
-    <div class="label">{{ auctionComplete ? 'Winning' : 'Current' }} bid</div>
+    <div class="label">
+      <ng-container *ngIf="auctionComplete; else winning">Current</ng-container>
+      <ng-template #winning>Winning</ng-template>
+    </div>
     <div class="value"><span class="eth-symbol">Ξ</span>{{ ((currentAuction?.amount | wei) || '0') | number }}</div>
   </div>
 
@@ -13,6 +16,7 @@
     <div class="label">Time remaining</div>
     <div class="value">
       <app-timer
+        *ngIf="currentAuction"
         [endTime]="currentAuction?.endTime"
         (event)="handleEvent($event)">
       </app-timer>
