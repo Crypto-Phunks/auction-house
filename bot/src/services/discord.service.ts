@@ -25,7 +25,7 @@ export class DiscordService {
  
     if (Number(process.env.DISCORD_ENABLED)) {
       this.initializeBot();
-      this.registerSlashCommands();
+      // this.registerSlashCommands();
     }
   }
   
@@ -81,8 +81,7 @@ export class DiscordService {
   }
 
   async postMessage(data: Message, type?: NotifType, channels?: Channel[]): Promise<Channel[]> {
-    if (!Number(process.env.DISCORD_ENABLED)) return;
-
+    
     channels = channels ?? await this.supaSvc.getAllChannels();
     if (!channels?.length) return;
 

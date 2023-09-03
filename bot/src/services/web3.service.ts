@@ -1,11 +1,15 @@
 import { Injectable } from '@nestjs/common';
 
-import { BigNumber, ethers } from 'ethers';
-
 import auctionABI from '../abi/AuctionHouseABI.json';
 import punkDataABI from '../abi/PunkData.json';
 
+import { createPublicClient, formatUnits, http } from 'viem'
+import { goerli, mainnet } from 'viem/chains'
+
+import { Auction, AuctionLog } from 'src/interfaces/auction.interface';
+
 import dotenv from 'dotenv';
+import { BehaviorSubject } from 'rxjs';
 dotenv.config();
 
 const auctionContractAddress = process.env.AUCTION_CONTRACT_ADDRESS;
@@ -14,13 +18,71 @@ const punkDataAddress = process.env.PUNK_DATA_ADDRESS;
 @Injectable()
 export class Web3Service {
 
-  // public provider = new ethers.providers.JsonRpcProvider(`http://geth.dappnode:8545`);
-  public provider = new ethers.providers.JsonRpcProvider(process.env.RPC_URL);
-  public auctionHouseContract = new ethers.Contract(auctionContractAddress, auctionABI, this.provider);
-  public punkDataContract = new ethers.Contract(punkDataAddress, punkDataABI, this.provider);
+  private auctionBid = new BehaviorSubject<AuctionLog | null>(null);
+  auctionBid$ = this.auctionBid.asObservable();
 
-  weiToEth(wei: BigNumber): string {
-    return ethers.utils.formatUnits(wei, 'ether');
+  private auctionCreated = new BehaviorSubject<AuctionLog | null>(null);
+  auctionCreated$ = this.auctionCreated.asObservable();
+
+  public client = createPublicClient({
+    chain: goerli,
+    transport: http(process.env.RPC_URL),
+  });
+
+  constructor() {
+
+    this.client.watchContractEvent({
+      address: auctionContractAddress as `0x${string}`,
+      abi: auctionABI,
+      eventName: 'AuctionCreated',
+      onLogs: (logs: any[] /* wtf viem */) => this.auctionCreated.next(logs[0] as AuctionLog)
+    });
+
+    this.client.watchContractEvent({
+      address: auctionContractAddress as `0x${string}`,
+      abi: auctionABI,
+      eventName: 'AuctionBid',
+      onLogs: (logs: any[] /* wtf viem */) => this.auctionBid.next(logs[0] as AuctionLog)
+    });
+  }
+
+  async getCurrentAuction(): Promise<Auction> {
+    return await this.client.readContract({
+      address: auctionContractAddress as `0x${string}`,
+      abi: auctionABI,
+      functionName: 'auction',
+      args: [],
+    }) as Auction;
+  }
+
+  async getPunkImage(phunkId: string): Promise<string> {
+    return await this.client.readContract({
+      address: punkDataAddress as `0x${string}`,
+      abi: punkDataABI,
+      functionName: 'punkImage',
+      args: [phunkId],
+    }) as string;
+  }
+
+  async getPunkAttributes(phunkId: string): Promise<string> {
+    return await this.client.readContract({
+      address: punkDataAddress as `0x${string}`,
+      abi: punkDataABI,
+      functionName: 'punkAttributes',
+      args: [phunkId],
+    }) as string;
+  }
+
+  async getTransactionReceipt(hash: `0x${string}`) {
+    return await this.client.getTransactionReceipt({ hash });
+  }
+
+  async getEnsFromAddress(address: `0x${string}`): Promise<string> {
+    return await this.client.getEnsName({ address });
+  }
+
+  weiToEth(wei: bigint): string {
+    return formatUnits(wei, 18);
   }
 
 }

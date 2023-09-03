@@ -37,7 +37,8 @@ export class ImageService {
     ctx.fillStyle = '#131415';
     ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
-    const punkData = await this.web3Svc.punkDataContract['punkImage'](parseInt(phunkId).toString());
+    // const punkData = await this.web3Svc.punkDataContract['punkImage'](parseInt(phunkId).toString());
+    const punkData = await this.web3Svc.getPunkImage(phunkId);
     const svg = await this.createPhunkSvg(punkData, phunkWidth, phunkHeight);
     const color = this.getColor(punkData);
 
@@ -76,7 +77,7 @@ export class ImageService {
     );
 
     // Line 3 (right side)
-    const punkTraits = await this.web3Svc.punkDataContract['punkAttributes'](parseInt(phunkId).toString());
+    const punkTraits = await this.web3Svc.getPunkAttributes(parseInt(phunkId).toString());
     const phunkData = this.getTraits(punkTraits);
     const sex = phunkData.traits.filter((tr) => tr.label === phunkData.sex)[0];
     

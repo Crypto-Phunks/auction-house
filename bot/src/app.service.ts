@@ -7,19 +7,14 @@ import { PushService } from './services/push.service';
 import { SupabaseService } from './services/supabase.service';
 
 import { format, fromUnixTime } from 'date-fns'
-import { BigNumber, Event } from 'ethers';
+import { interval, map, switchMap } from 'rxjs';
 
 import { Message } from './interfaces/message.interface';
+import { AuctionLog, BidEvent, NewAuctionEvent } from './interfaces/auction.interface';
+import { AuctionTimer } from './interfaces/timers.interface';
 
 import dotenv from 'dotenv';
 dotenv.config();
-
-interface Time {
-  days: string,
-  hours: string,
-  minutes: string,
-  seconds: string
-}
 
 @Injectable()
 export class AppService {
@@ -36,40 +31,34 @@ export class AppService {
     private readonly spbSvc: SupabaseService
   ) {
 
-    this.web3Svc.auctionHouseContract.on('AuctionCreated', (
-      phunkId: BigNumber,
-      auctionId: BigNumber,
-      startTime: BigNumber,
-      endTime: BigNumber,
-      event: Event
-    ) => {
-      this.onAuctionCreated(phunkId, auctionId, startTime, endTime, event);
-      // console.log({ phunkId, id: Number(auctionId), startTime, endTime, event });
+    this.web3Svc.auctionCreated$.subscribe((log) => {
+      if (!log) return;
+      const { phunkId, auctionId, startTime, endTime } = log.args as NewAuctionEvent;
+      this.onAuctionCreated(phunkId, auctionId, startTime, endTime, log);
     });
 
-    this.web3Svc.auctionHouseContract.on('AuctionBid', (
-      phunkId: BigNumber,
-      auctionId: BigNumber,
-      sender: string,
-      value: BigNumber,
-      extended: boolean,
-      event: Event
-    ) => {
-      this.onAuctionBid(phunkId, auctionId, sender, value, extended, event);
-      // console.log({ phunkId, id: Number(auctionId), sender, value, extended, event });
+    this.web3Svc.auctionBid$.subscribe((log) => {
+      if (!log) return;
+      const { phunkId, auctionId, sender, value, extended } = log.args as BidEvent;
+      this.onAuctionBid(phunkId, auctionId, sender, value, extended, log);
     });
+    
+    // interval(1000).pipe(
+    //   switchMap(() => this.web3Svc.getCurrentAuction()),
+    //   map((auction) => this.getTimeLeft(auction[3])),
+      
+    // ).subscribe((res) => {
+    //   Logger.debug('Time Left in Auction: ' + res, 'AppService')
+    // });
 
-    this.web3Svc.auctionHouseContract['auction']().then(({ endTime }) => {
-      this.setTimers(endTime);
-    });
   }
 
   async onAuctionCreated(
-    tokenId: BigNumber,
-    auctionId: BigNumber,
-    startTime: BigNumber,
-    endTime: BigNumber,
-    event: Event
+    tokenId: bigint,
+    auctionId: bigint,
+    startTime: bigint,
+    endTime: bigint,
+    log: AuctionLog
   ): Promise<void> {
 
     this.setTimers(endTime);
@@ -79,8 +68,8 @@ export class AppService {
 
     const image = await this.imgSvc.createImage(this.pad(tokenId.toString()));
 
-    const receipt = await event.getTransactionReceipt();
-    const ens = await this.web3Svc.provider.lookupAddress(receipt?.from);
+    const receipt = await this.web3Svc.getTransactionReceipt(log.transactionHash as `0x${string}`);
+    const ens = await this.web3Svc.getEnsFromAddress(receipt?.from);
 
     const title = `📢 Phunk #${tokenId.toString()} has been put up for auction!`;
     
@@ -90,25 +79,28 @@ export class AppService {
 
     this.sendNotification({ discordText, pushText, title, image, tokenId: tokenId.toString() });
 
-    // await writeFile(`./phunk${this.pad(phunkId.toString())}.png`, image, 'base64');
+    Logger.log(
+      `Auction created for Phunk #${tokenId.toString()}`,
+      'onAuctionCreated()'
+    );
   }
 
   async onAuctionBid(
-    tokenId: BigNumber,
-    auctionId: BigNumber,
-    sender: string,
-    value: BigNumber,
+    tokenId: bigint,
+    auctionId: bigint,
+    sender: `0x${string}`,
+    value: bigint,
     extended: boolean,
-    event: Event
+    log: AuctionLog
   ): Promise<void> {
 
-    const auction = await this.web3Svc.auctionHouseContract['auction']();
-    const timeLeft = this.convertTimeLeft(auction.endTime);
+    const auction = await this.web3Svc.getCurrentAuction();
+    const timeLeft = this.convertTimeLeft(auction[3]);
 
-    this.setTimers(auction.endTime);
+    this.setTimers(auction[3]);
 
     const image = await this.imgSvc.createImage(this.pad(tokenId.toString()));
-    const ens = await this.web3Svc.provider.lookupAddress(sender);
+    const ens = await this.web3Svc.getEnsFromAddress(sender);
 
     const title = `📢 Phunk #${tokenId.toString()} has a new bid of Ξ${this.web3Svc.weiToEth(value)}!`;
 
@@ -118,26 +110,33 @@ export class AppService {
 
     this.sendNotification({ discordText, pushText, title, image, tokenId: tokenId.toString() });
 
-    // await writeFile(`./phunk${this.pad(phunkId.toString())}.png`, image, 'base64');
+    Logger.log(
+      `New bid of Ξ${this.web3Svc.weiToEth(value)} for Phunk #${tokenId.toString()}`,
+      'onAuctionBid()'
+    );
   }
 
-  async onTimer(): Promise<void> {
-    const auction = await this.web3Svc.auctionHouseContract['auction']();
-    const timeLeft = this.convertTimeLeft(auction.endTime);
-    const tokenId = auction.phunkId;
+  async sendNotification(data: Message): Promise<void> {
+    if (Number(process.env.DISCORD_ENABLED)) this.discordSvc.postMessage(data);
+    try {
+      if (!Number(process.env.PUSH_ENABLED)) throw new Error('Push notifications are disabled.');
+      const tokens = await this.spbSvc.getSubscriptionTokens('all');
+      const send = await this.pushSvc.sendPushNotification(data, tokens);
 
-    const image = await this.imgSvc.createImage(this.pad(tokenId.toString()));
-
-    const title = `📢 The auction for Phunk #${tokenId.toString()} is ending soon!`;
-    
-    const discordText = `Time remaining:\n${timeLeft.days !== '00' ? timeLeft.days + ' days\n' : ''}${timeLeft.hours !== '00' ? timeLeft.hours + ' hours\n' : ''}${timeLeft.minutes !== '00' ? timeLeft.minutes + ' minutes\n' : ''}${timeLeft.seconds !== '00' ? timeLeft.seconds + ' seconds\n\n' : ''}`;
-
-    const pushText = `Time remaining:\n${timeLeft.days !== '00' ? timeLeft.days + ' days\n' : ''}${timeLeft.hours !== '00' ? timeLeft.hours + ' hours\n' : ''}${timeLeft.minutes !== '00' ? timeLeft.minutes + ' minutes\n' : ''}${timeLeft.seconds !== '00' ? timeLeft.seconds + ' seconds' : ''}`;
-
-    this.sendNotification({ discordText, pushText, title, image, tokenId: tokenId.toString() });
+      Logger.log(
+        `Push notification sent to ${send.successCount} devices and failed on ${send.failureCount} devices.`,
+        'sendNotification()'
+      );
+    } catch (error) {
+      console.log(error);
+    }
   }
 
-  setTimers(endTime: BigNumber) {
+  ////////////////////////////////////////////////////////////////////////////////////////
+  // TIMERS //////////////////////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////////////////////////////////
+
+  setTimers(endTime: bigint) {
 
     clearTimeout(this.timer24);
     clearTimeout(this.timer6);
@@ -170,37 +169,32 @@ export class AppService {
     }
   }
 
-  async sendNotification(data: Message): Promise<void> {
-  
-    this.discordSvc.postMessage(data);
+  async onTimer(): Promise<void> {
+    const auction = await this.web3Svc.getCurrentAuction();
+    const timeLeft = this.convertTimeLeft(auction[3]);
+    const tokenId = auction[0];
 
-    try {
-      if (!Number(process.env.PUSH_ENABLED)) throw new Error('Push notifications are disabled.');
-      const tokens = await this.spbSvc.getSubscriptionTokens('all');
-      const send = await this.pushSvc.sendPushNotification(data, tokens);
-      console.log(send);
-    } catch (error) {
-      console.log(error);
-    }
+    const image = await this.imgSvc.createImage(this.pad(tokenId.toString()));
+
+    const title = `📢 The auction for Phunk #${tokenId.toString()} is ending soon!`;
+    
+    const discordText = `Time remaining:\n${timeLeft.days !== '00' ? timeLeft.days + ' days\n' : ''}${timeLeft.hours !== '00' ? timeLeft.hours + ' hours\n' : ''}${timeLeft.minutes !== '00' ? timeLeft.minutes + ' minutes\n' : ''}${timeLeft.seconds !== '00' ? timeLeft.seconds + ' seconds\n\n' : ''}`;
+
+    const pushText = `Time remaining:\n${timeLeft.days !== '00' ? timeLeft.days + ' days\n' : ''}${timeLeft.hours !== '00' ? timeLeft.hours + ' hours\n' : ''}${timeLeft.minutes !== '00' ? timeLeft.minutes + ' minutes\n' : ''}${timeLeft.seconds !== '00' ? timeLeft.seconds + ' seconds' : ''}`;
+
+    this.sendNotification({ discordText, pushText, title, image, tokenId: tokenId.toString() });
   }
 
-  ////////////////////////////////////////////////////////////////////////////////////////
-  // Utils ///////////////////////////////////////////////////////////////////////////////
-  ////////////////////////////////////////////////////////////////////////////////////////
-
-  pad = (tokenId: string) => tokenId.padStart(4, '0');
-
-  shortenAddress(address: string): string {
-    const shortAddress = `${address.slice(0, 5)}...${address.slice(address.length - 5, address.length)}`;
-    if (address.startsWith('0x')) return shortAddress;
-    return address;
-  }
-
-  convertTimeLeft(time: BigNumber): Time {
-    const padWithZero = (n: number, t: number) => String(n).padStart(t, '0');
-
+  getTimeLeft(endTime: bigint) {
     const now = Date.now();
-    const diff = (Number(time) * 1000) - now;
+    const diff = (Number(endTime) * 1000) - now;
+    return diff;
+  }
+
+  convertTimeLeft(time: bigint): AuctionTimer {
+    const padWithZero = (n: number, t: number) => String(n).padStart(t, '0');
+    
+    const diff = this.getTimeLeft(time);
 
     // Time calculations for days, hours, minutes and seconds
     const d = Math.floor(diff / (1000 * 60 * 60 * 24));
@@ -214,6 +208,18 @@ export class AppService {
     const seconds = padWithZero(s, 2);
 
     return { days, hours, minutes, seconds };
+  }
+
+  ////////////////////////////////////////////////////////////////////////////////////////
+  // Utils ///////////////////////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////////////////////////////////
+
+  pad = (tokenId: string) => tokenId.padStart(4, '0');
+
+  shortenAddress(address: string): string {
+    const shortAddress = `${address.slice(0, 5)}...${address.slice(address.length - 5, address.length)}`;
+    if (address.startsWith('0x')) return shortAddress;
+    return address;
   }
 
 }
