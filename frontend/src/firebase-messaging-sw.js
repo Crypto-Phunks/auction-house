@@ -31,8 +31,8 @@ messaging.onBackgroundMessage((payload) => {
   };
 
   // Show the notification
-  self.registration.showNotification(
-    notificationTitle,
-    notificationOptions
-  );
+  // self.registration.showNotification(
+  //   notificationTitle,
+  //   notificationOptions
+  // );
 });

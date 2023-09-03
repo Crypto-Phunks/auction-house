@@ -28,10 +28,11 @@ bootstrapApplication(AppComponent, {
     { provide: MinBidPipe, useClass: MinBidPipe },
     { provide: DecimalPipe, useClass: DecimalPipe },
     provideRouter(routes),
-    provideServiceWorker('firebase-messaging-sw.js', {
-      enabled: environment.production,
-      registrationStrategy: 'registerWhenStable:30000',
-    }),
+    provideServiceWorker('firebase-messaging-sw.js'),
+    // provideServiceWorker('firebase-messaging-sw.js', {
+    //   enabled: environment.production,
+    //   registrationStrategy: 'registerWhenStable:30000',
+    // }),
     importProvidersFrom(HttpClientModule, GraphQLModule),
   ],
 });
