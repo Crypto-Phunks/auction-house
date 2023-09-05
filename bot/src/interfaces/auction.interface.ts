@@ -27,12 +27,12 @@ export interface AuctionLog {
   eventName: string;
 }
 
-export type Auction = [
-  phunkId: bigint,
-  amount: bigint,
-  startTime: bigint,
-  endTime: bigint,
-  address: `0x${string}`,
-  settled: boolean,
-  auctionId: bigint,
-]
+export interface Auction {
+  phunkId: bigint;
+  amount: bigint;
+  startTime: bigint;
+  endTime: bigint;
+  bidder: `0x${string}`;
+  settled: boolean;
+  auctionId: bigint;
+}

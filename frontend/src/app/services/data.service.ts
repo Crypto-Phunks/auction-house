@@ -55,7 +55,6 @@ export class DataService {
   }
 
   getAuctionData(): void {
-
     const watchQuery = (first: number, skip: number): any => ({
       query: GET_AUCTIONS,
       variables: { first, skip },

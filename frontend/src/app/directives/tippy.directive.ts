@@ -40,7 +40,6 @@ export class TippyDirective implements OnInit, OnChanges {
 
     el.style.cursor = 'default';
     const position = el.dataset.tippyPosition as Placement;
-    const hide = el.dataset.tippyKeep;
     const appendTo = el.dataset.appendTo as Element | "parent" | ((ref: Element) => Element);
 
     this.instance = tippy(el, {
@@ -48,7 +47,7 @@ export class TippyDirective implements OnInit, OnChanges {
       // content: el.dataset.tippyContent,
       zIndex: 21474841,
       theme: 'phunks',
-      hideOnClick: hide ? false : true,
+      hideOnClick: false,
       arrow: '<svg height="6" viewBox="0 0 10 6" width="10" xmlns="http://www.w3.org/2000/svg"><path d="m8 2h-2v-2h-2v2h-2v2h-2v2h10v-2h-2z" fill="#ff04b4" fill-rule="evenodd"/></svg>',
       allowHTML: false
     });

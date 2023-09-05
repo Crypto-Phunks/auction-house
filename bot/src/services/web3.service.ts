@@ -47,12 +47,22 @@ export class Web3Service {
   }
 
   async getCurrentAuction(): Promise<Auction> {
-    return await this.client.readContract({
+    const res = await this.client.readContract({
       address: auctionContractAddress as `0x${string}`,
       abi: auctionABI,
       functionName: 'auction',
       args: [],
-    }) as Auction;
+    });
+
+    return {
+      phunkId: res[0] as bigint,
+      amount: res[1],
+      startTime: res[2],
+      endTime: res[3],
+      bidder: res[4],
+      settled: res[5],
+      auctionId: res[6],
+    };
   }
 
   async getPunkImage(phunkId: string): Promise<string> {

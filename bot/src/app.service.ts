@@ -7,17 +7,19 @@ import { PushService } from './services/push.service';
 import { SupabaseService } from './services/supabase.service';
 
 import { format, fromUnixTime } from 'date-fns'
-import { interval, map, switchMap } from 'rxjs';
+import { from, interval, of, switchMap } from 'rxjs';
 
 import { Message } from './interfaces/message.interface';
-import { AuctionLog, BidEvent, NewAuctionEvent } from './interfaces/auction.interface';
 import { AuctionTimer } from './interfaces/timers.interface';
+import { Auction, AuctionLog, BidEvent, NewAuctionEvent } from './interfaces/auction.interface';
 
 import dotenv from 'dotenv';
 dotenv.config();
 
 @Injectable()
 export class AppService {
+
+  completeAuctions = [];
 
   timer24: any;
   timer6: any;
@@ -31,26 +33,50 @@ export class AppService {
     private readonly spbSvc: SupabaseService
   ) {
 
+    // Watch for new auctions
     this.web3Svc.auctionCreated$.subscribe((log) => {
       if (!log) return;
       const { phunkId, auctionId, startTime, endTime } = log.args as NewAuctionEvent;
       this.onAuctionCreated(phunkId, auctionId, startTime, endTime, log);
     });
 
+    // Watch for new bids
     this.web3Svc.auctionBid$.subscribe((log) => {
       if (!log) return;
       const { phunkId, auctionId, sender, value, extended } = log.args as BidEvent;
       this.onAuctionBid(phunkId, auctionId, sender, value, extended, log);
     });
     
-    // interval(1000).pipe(
-    //   switchMap(() => this.web3Svc.getCurrentAuction()),
-    //   map((auction) => this.getTimeLeft(auction[3])),
-      
-    // ).subscribe((res) => {
-    //   Logger.debug('Time Left in Auction: ' + res, 'AppService')
-    // });
+    // Watch for ended auctions
+    // May miss in the 10sec window
+    interval(10000).pipe(
+      switchMap(() => this.web3Svc.getCurrentAuction()),
+      switchMap((auction) => {
+        const timeLeft = this.getTimeLeft(auction.endTime);
+        if (timeLeft < 0 && !this.completeAuctions.includes(auction.auctionId)) return from(this.onAuctionWon(auction));
+        return of(auction);
+      })
+    ).subscribe();
+  }
 
+  async onAuctionWon(auction: Auction): Promise<void> {
+    if (!auction) return;
+
+    const image = await this.imgSvc.createImage(this.pad(auction.phunkId.toString()));
+    const ens = await this.web3Svc.getEnsFromAddress(auction.bidder);
+    
+    const title = `📢 Phunk #${auction.phunkId.toString()} has been sold for Ξ${this.web3Svc.weiToEth(auction.amount)}!`;
+
+    const discordText = `Top Bidder: ${ens ?? this.shortenAddress(auction.bidder)}`;
+    const pushText = `Top Bidder: ${ens ?? this.shortenAddress(auction.bidder)}`;
+
+    this.completeAuctions.push(auction.auctionId);
+    this.sendNotification({ discordText, pushText, title, image, tokenId: auction.phunkId.toString() });
+
+    Logger.log(
+      `Auction ended (won) for Phunk #${auction.phunkId.toString()}`,
+      'onAuctionWon()'
+    );
   }
 
   async onAuctionCreated(
@@ -60,7 +86,6 @@ export class AppService {
     endTime: bigint,
     log: AuctionLog
   ): Promise<void> {
-
     this.setTimers(endTime);
 
     const date = fromUnixTime(Number(endTime));
@@ -171,8 +196,8 @@ export class AppService {
 
   async onTimer(): Promise<void> {
     const auction = await this.web3Svc.getCurrentAuction();
-    const timeLeft = this.convertTimeLeft(auction[3]);
-    const tokenId = auction[0];
+    const timeLeft = this.convertTimeLeft(auction.endTime);
+    const tokenId = auction.phunkId;
 
     const image = await this.imgSvc.createImage(this.pad(tokenId.toString()));
 
