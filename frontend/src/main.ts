@@ -16,7 +16,7 @@ import { routes } from '@/routes';
 
 import { environment } from './environments/environment';
 
-import { provideServiceWorker } from '@angular/service-worker';
+import { SwPush, SwUpdate, provideServiceWorker } from '@angular/service-worker';
 
 if (environment.production) enableProdMode();
 
@@ -28,10 +28,10 @@ bootstrapApplication(AppComponent, {
     { provide: MinBidPipe, useClass: MinBidPipe },
     { provide: DecimalPipe, useClass: DecimalPipe },
     provideRouter(routes),
-    // provideServiceWorker('firebase-messaging-sw.js', {
-    //   enabled: environment.production,
-    //   registrationStrategy: 'registerWhenStable:30000',
-    // }),
+    provideServiceWorker('firebase-messaging-sw.js', {
+      enabled: environment.production,
+      registrationStrategy: 'registerWhenStable:30000',
+    }),
     importProvidersFrom(HttpClientModule, GraphQLModule),
   ],
 });
