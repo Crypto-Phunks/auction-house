@@ -15,6 +15,11 @@ dotenv.config();
 const auctionContractAddress = process.env.AUCTION_CONTRACT_ADDRESS;
 const punkDataAddress = process.env.PUNK_DATA_ADDRESS;
 
+const client = createPublicClient({
+  chain: goerli,
+  transport: http(process.env.RPC_URL),
+});
+
 @Injectable()
 export class Web3Service {
 
@@ -24,21 +29,16 @@ export class Web3Service {
   private auctionCreated = new BehaviorSubject<AuctionLog | null>(null);
   auctionCreated$ = this.auctionCreated.asObservable();
 
-  public client = createPublicClient({
-    chain: goerli,
-    transport: http(process.env.RPC_URL),
-  });
-
   constructor() {
 
-    this.client.watchContractEvent({
+    client.watchContractEvent({
       address: auctionContractAddress as `0x${string}`,
       abi: auctionABI,
       eventName: 'AuctionCreated',
       onLogs: (logs: any[] /* wtf viem */) => this.auctionCreated.next(logs[0] as AuctionLog)
     });
 
-    this.client.watchContractEvent({
+    client.watchContractEvent({
       address: auctionContractAddress as `0x${string}`,
       abi: auctionABI,
       eventName: 'AuctionBid',
@@ -47,7 +47,7 @@ export class Web3Service {
   }
 
   async getCurrentAuction(): Promise<Auction> {
-    const res = await this.client.readContract({
+    const res = await client.readContract({
       address: auctionContractAddress as `0x${string}`,
       abi: auctionABI,
       functionName: 'auction',
@@ -66,7 +66,7 @@ export class Web3Service {
   }
 
   async getPunkImage(phunkId: string): Promise<string> {
-    return await this.client.readContract({
+    return await client.readContract({
       address: punkDataAddress as `0x${string}`,
       abi: punkDataABI,
       functionName: 'punkImage',
@@ -75,7 +75,7 @@ export class Web3Service {
   }
 
   async getPunkAttributes(phunkId: string): Promise<string> {
-    return await this.client.readContract({
+    return await client.readContract({
       address: punkDataAddress as `0x${string}`,
       abi: punkDataABI,
       functionName: 'punkAttributes',
@@ -84,11 +84,11 @@ export class Web3Service {
   }
 
   async getTransactionReceipt(hash: `0x${string}`) {
-    return await this.client.getTransactionReceipt({ hash });
+    return await client.getTransactionReceipt({ hash });
   }
 
   async getEnsFromAddress(address: `0x${string}`): Promise<string> {
-    return await this.client.getEnsName({ address });
+    return await client.getEnsName({ address });
   }
 
   weiToEth(wei: bigint): string {
