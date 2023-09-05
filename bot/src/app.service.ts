@@ -7,7 +7,7 @@ import { PushService } from './services/push.service';
 import { SupabaseService } from './services/supabase.service';
 
 import { format, fromUnixTime } from 'date-fns'
-import { from, interval, of, switchMap } from 'rxjs';
+import { catchError, from, interval, of, switchMap } from 'rxjs';
 
 import { Message } from './interfaces/message.interface';
 import { AuctionTimer } from './interfaces/timers.interface';
@@ -50,11 +50,15 @@ export class AppService {
     // Watch for ended auctions
     // May miss in the 10sec window
     interval(10000).pipe(
-      switchMap(() => this.web3Svc.getCurrentAuction()),
+      switchMap(() => from(this.web3Svc.getCurrentAuction())),
       switchMap((auction) => {
         const timeLeft = this.getTimeLeft(auction.endTime);
         if (timeLeft < 0 && !this.completeAuctions.includes(auction.auctionId)) return from(this.onAuctionWon(auction));
         return of(auction);
+      }),
+      catchError((error) => {
+        Logger.error(error, 'interval()');
+        return of(null);
       })
     ).subscribe();
   }
