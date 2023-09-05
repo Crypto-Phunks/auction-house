@@ -33,14 +33,14 @@ export class MessagingService {
     //   // ...
     // });
 
-    if (this.swUpdate.isEnabled) {
-      this.setInitialPermission();
+    // if (this.swUpdate.isEnabled) {
+    this.setInitialPermission();
 
-      navigator.serviceWorker.ready.then((registration) => {
-        this.registration = registration;
-        this.swUpdate.checkForUpdate();
-      });
-    }
+    //   navigator.serviceWorker.ready.then((registration) => {
+    //     this.registration = registration;
+    //     this.swUpdate.checkForUpdate();
+    //   });
+    // }
   }
 
   setInitialPermission(): void {
@@ -75,11 +75,11 @@ export class MessagingService {
     // If they dont exist (default) request them
     try {
       const token = await getToken(messaging, {
-        serviceWorkerRegistration: this.registration,
+        // serviceWorkerRegistration: this.registration,
         vapidKey: environment.notifications.vapidKey,
       });
-      await firstValueFrom(this.http.post(`${environment.notifications.apiUrl}/subscribe`, { token }));
       if (token) this.setPermission(true);
+      await firstValueFrom(this.http.post(`${environment.notifications.apiUrl}/subscribe`, { token }));
     } catch (error) {
       console.error(error);
       this.setPermission(false);
