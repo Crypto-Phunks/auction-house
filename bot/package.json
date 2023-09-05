@@ -41,7 +41,7 @@
     "svgson": "^5.2.1",
     "tinycolor2": "^1.4.2",
     "twit": "^2.2.11",
-    "viem": "^1.9.5"
+    "viem": "^1.10.3"
   },
   "devDependencies": {
     "@nestjs/cli": "^9.0.0",

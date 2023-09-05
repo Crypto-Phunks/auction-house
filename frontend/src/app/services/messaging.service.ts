@@ -6,6 +6,7 @@ import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
 import { app } from 'src/firebase.config';
+import { SwUpdate } from '@angular/service-worker';
 
 const messaging = getMessaging(app);
 
@@ -13,6 +14,8 @@ const messaging = getMessaging(app);
   providedIn: 'root',
 })
 export class MessagingService {
+
+  registration?: ServiceWorkerRegistration;
 
   private hasPermission = new BehaviorSubject<boolean>(false);
   hasPermission$ = this.hasPermission.asObservable();
@@ -22,13 +25,22 @@ export class MessagingService {
   isSupported = 'Notification' in window && 'serviceWorker' in navigator && 'PushManager' in window;
 
   constructor(
-    private http: HttpClient
+    private http: HttpClient,
+    private swUpdate: SwUpdate,
   ) {
     // onMessage(messaging, (payload) => {
     //   console.log('Message received. ', { payload });
     //   // ...
     // });
-    this.setInitialPermission();
+
+    if (this.swUpdate.isEnabled) {
+      this.setInitialPermission();
+
+      navigator.serviceWorker.ready.then((registration) => {
+        this.registration = registration;
+        this.swUpdate.checkForUpdate();
+      });
+    }
   }
 
   setInitialPermission(): void {
@@ -62,7 +74,10 @@ export class MessagingService {
 
     // If they dont exist (default) request them
     try {
-      const token = await getToken(messaging, { vapidKey: environment.notifications.vapidKey });
+      const token = await getToken(messaging, {
+        serviceWorkerRegistration: this.registration,
+        vapidKey: environment.notifications.vapidKey,
+      });
       await firstValueFrom(this.http.post(`${environment.notifications.apiUrl}/subscribe`, { token }));
       if (token) this.setPermission(true);
     } catch (error) {
