@@ -5,6 +5,9 @@
   "author": "",
   "private": true,
   "license": "UNLICENSED",
+  "engines": {
+    "node": "18.17.1"
+  },
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "nest build && cp -R src/static dist",
