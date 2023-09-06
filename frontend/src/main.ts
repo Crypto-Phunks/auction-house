@@ -16,7 +16,7 @@ import { routes } from '@/routes';
 
 import { environment } from './environments/environment';
 
-import { SwPush, SwUpdate, provideServiceWorker } from '@angular/service-worker';
+import { provideServiceWorker } from '@angular/service-worker';
 
 if (environment.production) enableProdMode();
 

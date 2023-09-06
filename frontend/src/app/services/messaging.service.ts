@@ -63,7 +63,9 @@ export class MessagingService {
     // If they dont exist (default) request them
     try {
       const token = await this.getToken();
-      if (token) this.setPermission(true);
+      if (!token) return this.setPermission(false);
+
+      this.setPermission(true);
       await firstValueFrom(this.http.post(`${environment.notifications.apiUrl}/subscribe`, { token }));
     } catch (error) {
       console.error(error);
