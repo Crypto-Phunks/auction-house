@@ -29,7 +29,10 @@ export class MessagingService {
     private swUpdate: SwUpdate,
   ) {
 
-    this.setInitialPermission();
+    this.setInitialPermission().catch((err) => {
+      console.error(err);
+    });
+
     if (this.swUpdate.isEnabled) {
       navigator.serviceWorker.ready.then((registration) => {
         console.log({ registration })
@@ -44,10 +47,15 @@ export class MessagingService {
     });
   }
 
-  setInitialPermission(): void {
+  async setInitialPermission(): Promise<void> {
     if (!this.isSupported) return this.setPermission(false);
     const permission = Notification.permission;
     this.setPermission(permission === 'granted');
+
+    if (permission === 'granted') {
+      const token = await this.getToken();
+      await firstValueFrom(this.http.post(`${environment.notifications.apiUrl}/subscribe`, { token }));
+    }
   }
 
   async requestPermission(): Promise<void> {

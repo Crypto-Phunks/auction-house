@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { createClient } from '@supabase/supabase-js';
 
 import { Channel } from 'src/interfaces/message.interface';
@@ -109,13 +109,13 @@ export class SupabaseService {
   async addSubscriptionToken(token: string, topic: string): Promise<any> {
     const { data, error } = await supabase
       .from('tokens__auction_house')
-      .insert({ token, topics: [topic] });
+      .upsert({ token, topics: [topic] });
 
-    if (error) {
-      console.log(error);
-      return null;
-    }
-
+    if (error) return null;
+    
+    // Get the first 8 and last 8 characters of the token
+    const tokenShort = `${token.slice(0, 12)}...${token.slice(-12)}`;
+    Logger.log(`Added subscription token ${tokenShort}`);
     return data;
   }
 

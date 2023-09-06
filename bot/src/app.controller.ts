@@ -11,7 +11,6 @@ export class AppController {
 
   @Post('subscribe')
   async refreshMetadata(@Body() body: { token: string, topic: string }): Promise<any> {
-    Logger.log(`Received subscription request from ${body.token}`);
     return this.spbSvc.addSubscriptionToken(body.token, body.topic || 'all');
   }
 
