@@ -5,6 +5,14 @@ import { AppModule } from './app.module';
 
 import { json, urlencoded } from 'express';
 
+import fetch, { Headers, Request } from 'node-fetch';
+
+if (!globalThis.fetch) {
+  globalThis.fetch = fetch as any;
+  globalThis.Headers = Headers as any;
+  globalThis.Request = Request as any;
+}
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.use(json({ limit: '50mb' }));

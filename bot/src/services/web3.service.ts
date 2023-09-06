@@ -53,7 +53,7 @@ export class Web3Service {
     });
 
     return {
-      phunkId: res[0] as bigint,
+      phunkId: res[0],
       amount: res[1],
       startTime: res[2],
       endTime: res[3],
