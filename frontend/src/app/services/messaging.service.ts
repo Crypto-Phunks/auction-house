@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
-import { getMessaging, getToken, onMessage } from 'firebase/messaging';
+import { getMessaging, getToken } from 'firebase/messaging';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
@@ -29,13 +29,14 @@ export class MessagingService {
     private swUpdate: SwUpdate,
   ) {
 
-    this.setInitialPermission().catch((err) => {
-      console.error(err);
-    });
-
     if (this.swUpdate.isEnabled) {
       navigator.serviceWorker.ready.then((registration) => {
         console.log({ registration })
+
+        this.setInitialPermission().catch((err) => {
+          console.error(err);
+        });
+
         this.swUpdate.checkForUpdate();
       });
     }
@@ -43,6 +44,7 @@ export class MessagingService {
 
   async getToken(): Promise<string> {
     return await getToken(messaging, {
+      serviceWorkerRegistration: this.registration,
       vapidKey: environment.notifications.vapidKey,
     });
   }
