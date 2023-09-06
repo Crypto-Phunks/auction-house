@@ -2,6 +2,7 @@ import { enableProdMode, importProvidersFrom } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { provideRouter } from '@angular/router';
 import { HttpClientModule } from '@angular/common/http';
+import { provideServiceWorker } from '@angular/service-worker';
 
 import { TimeagoClock, TimeagoDefaultClock, TimeagoDefaultFormatter, TimeagoFormatter } from 'ngx-timeago';
 
@@ -16,8 +17,6 @@ import { routes } from '@/routes';
 
 import { environment } from './environments/environment';
 
-import { provideServiceWorker } from '@angular/service-worker';
-
 if (environment.production) enableProdMode();
 
 bootstrapApplication(AppComponent, {
@@ -28,7 +27,7 @@ bootstrapApplication(AppComponent, {
     { provide: MinBidPipe, useClass: MinBidPipe },
     { provide: DecimalPipe, useClass: DecimalPipe },
     provideRouter(routes),
-    provideServiceWorker('firebase-messsaging-sw.js', {
+    provideServiceWorker('firebase-messaging-sw.js', {
       enabled: environment.production,
       registrationStrategy: 'registerWhenStable:30000',
     }),
