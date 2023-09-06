@@ -28,60 +28,55 @@ export class MessagingService {
     private http: HttpClient,
     private swUpdate: SwUpdate,
   ) {
-    // onMessage(messaging, (payload) => {
-    //   console.log('Message received. ', { payload });
-    //   // ...
-    // });
-    this.setInitialPermission();
 
+    this.setInitialPermission();
     if (this.swUpdate.isEnabled) {
       navigator.serviceWorker.ready.then((registration) => {
-        this.registration = registration;
+        console.log({ registration })
         this.swUpdate.checkForUpdate();
       });
     }
   }
 
-  setInitialPermission(): void {
-    if (!this.isSupported) {
-      this.setPermission(false);
-      return;
-    }
+  async getToken(): Promise<string> {
+    return await getToken(messaging, {
+      vapidKey: environment.notifications.vapidKey,
+    });
+  }
 
+  setInitialPermission(): void {
+    if (!this.isSupported) return this.setPermission(false);
     const permission = Notification.permission;
     this.setPermission(permission === 'granted');
   }
 
   async requestPermission(): Promise<void> {
-
-    if (!this.isSupported) {
-      this.setPermission(false);
-      return;
-    }
+    if (!this.isSupported) return this.setPermission(false);
 
     this.loadingPermission = true;
 
     // Check permissions if they exist
     const permission = Notification.permission;
-    if (permission === 'granted') {
-      this.setPermission(true);
-      return;
-    } else if (permission === 'denied') {
-      this.setPermission(false);
-      return;
-    }
+    if (permission === 'granted') return this.setPermission(true);
+    else if (permission === 'denied') return this.setPermission(false);
 
     // If they dont exist (default) request them
     try {
-      const token = await getToken(messaging, {
-        vapidKey: environment.notifications.vapidKey,
-      });
-      await firstValueFrom(this.http.post(`${environment.notifications.apiUrl}/subscribe`, { token }));
+      const token = await this.getToken();
       if (token) this.setPermission(true);
+      await firstValueFrom(this.http.post(`${environment.notifications.apiUrl}/subscribe`, { token }));
     } catch (error) {
       console.error(error);
       this.setPermission(false);
     }
+  }
+
+  saveToken(token: string): void {
+    localStorage.setItem('push_token', token);
+  }
+
+  getSavedToken(): string | null {
+    return localStorage.getItem('push_token');
   }
 
   setPermission(value: boolean): void {

@@ -27,7 +27,6 @@ export class TippyDirective implements OnInit, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    console.log({changes})
 
     const el = this.el.nativeElement as HTMLElement;
 
