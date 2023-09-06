@@ -1,12 +1,12 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-
-import { getMessaging, getToken } from 'firebase/messaging';
-import { BehaviorSubject, firstValueFrom } from 'rxjs';
-import { environment } from 'src/environments/environment';
-
-import { app } from 'src/firebase.config';
 import { SwUpdate } from '@angular/service-worker';
+
+import { BehaviorSubject, firstValueFrom } from 'rxjs';
+import { getMessaging, getToken } from 'firebase/messaging';
+
+import { environment } from 'src/environments/environment';
+import { app } from 'src/firebase.config';
 
 const messaging = getMessaging(app);
 

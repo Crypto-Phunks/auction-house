@@ -28,7 +28,7 @@ bootstrapApplication(AppComponent, {
     { provide: MinBidPipe, useClass: MinBidPipe },
     { provide: DecimalPipe, useClass: DecimalPipe },
     provideRouter(routes),
-    provideServiceWorker('ngsw-worker.js', {
+    provideServiceWorker('firebase-messsaging-sw.js', {
       enabled: environment.production,
       registrationStrategy: 'registerWhenStable:30000',
     }),
