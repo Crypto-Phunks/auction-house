@@ -47,6 +47,6 @@ export const environment = {
   notifications: {
     apiUrl: 'https://goerli.phunks.auction/api',
     // apiUrl: 'http://localhost:3200',
-    vapidKey: 'BN_WgIzuLiYO7KGYGhrAtOx6xU_OuOfO2rs4HPqBfBQ7CGP0MNn0lwLWjzPPw0EkCpy5woSQcg0fQgXB54fk4DY',
+    vapidKey: 'BGHr7jzKtdWpY71z907UwcktW3UHz-1ToH5e-J08fzQfKnW7I_sxXUEmltWfd5yaKMr_oQpKYVY6oWZGtwhTjN4',
   },
 };
