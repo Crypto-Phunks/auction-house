@@ -8,7 +8,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 
 export class ThemeService {
 
-  private theme = new BehaviorSubject<any>(localStorage.getItem('mode') || 'light');
+  private theme = new BehaviorSubject<any>(localStorage.getItem('mode') || 'dark');
   theme$ = this.theme.asObservable();
 
   constructor() {

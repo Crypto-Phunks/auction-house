@@ -2,6 +2,9 @@ import { Injectable, Logger } from '@nestjs/common';
 import { createClient } from '@supabase/supabase-js';
 
 import { Channel } from 'src/interfaces/message.interface';
+import { stringToUUID } from 'src/utils/uuid';
+
+import { PushSubscription } from 'web-push';
 
 import dotenv from 'dotenv';
 dotenv.config();
@@ -106,23 +109,30 @@ export class SupabaseService {
     return data.map(d => d.channels).flat() as Channel[];
   }
 
-  async addSubscriptionToken(token: string, topic: string): Promise<any> {
+  async addSubscriptions(body: {
+    subscription: PushSubscription,
+    userId: string,
+  }): Promise<any> {
+
+    const { subscription, userId } = body;
+    const uuid = stringToUUID(userId);
+
     const { data, error } = await supabase
       .from('tokens__auction_house')
-      .upsert({ token, topics: [topic] });
+      .upsert([
+        { userId: uuid, subscription }
+      ], { onConflict: 'userId' });
 
     if (error) return null;
-    
-    // Get the first 8 and last 8 characters of the token
-    const tokenShort = `${token.slice(0, 12)}...${token.slice(-12)}`;
-    Logger.log(`Added subscription token ${tokenShort}`);
+
+    Logger.log(`Added subscription`, uuid);
     return data;
   }
 
-  async getSubscriptionTokens(topic: string): Promise<string[]> {
+  async getSubscriptions(topic: string): Promise<PushSubscription[]> {
     const { data, error } = await supabase
       .from('tokens__auction_house')
-      .select('token')
+      .select('subscription')
       // .contains('topics', [topic]);
 
     if (error) {
@@ -130,6 +140,6 @@ export class SupabaseService {
       return null;
     }
 
-    return data.map(d => d.token);
+    return data.map(d => d.subscription);
   }
 }

@@ -3,12 +3,8 @@ import { HttpClient } from '@angular/common/http';
 import { SwUpdate } from '@angular/service-worker';
 
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
-import { getMessaging, getToken } from 'firebase/messaging';
 
 import { environment } from 'src/environments/environment';
-import { app } from 'src/firebase.config';
-
-const messaging = getMessaging(app);
 
 @Injectable({
   providedIn: 'root',
@@ -28,71 +24,101 @@ export class MessagingService {
     private http: HttpClient,
     private swUpdate: SwUpdate,
   ) {
-
-    if (this.swUpdate.isEnabled) {
-      navigator.serviceWorker.ready.then((registration) => {
-        console.log({ registration })
-
-        this.setInitialPermission().catch((err) => {
-          console.error(err);
-        });
-
-        this.swUpdate.checkForUpdate();
-      });
-    }
+    this.init()
+      .then(() => console.log('Messaging service initialized'))
+      .catch(error => console.error(error));
   }
 
-  async getToken(): Promise<string> {
-    return await getToken(messaging, {
-      serviceWorkerRegistration: this.registration,
-      vapidKey: environment.notifications.vapidKey,
-    });
+  async init(): Promise<void> {
+    this.registration = await navigator.serviceWorker.ready;
+    console.log({ registration: this.registration });
+    await this.setInitialPermission();
+    await this.swUpdate.checkForUpdate();
   }
 
   async setInitialPermission(): Promise<void> {
     if (!this.isSupported) return this.setPermission(false);
+
     const permission = Notification.permission;
-    this.setPermission(permission === 'granted');
+    console.log({ permission })
 
     if (permission === 'granted') {
-      const token = await this.getToken();
-      await firstValueFrom(this.http.post(`${environment.notifications.apiUrl}/subscribe`, { token }));
+      this.setPermission(true);
+      const subscription = await this.getSubscription();
+      if (subscription) await this.sendSubscriptionToServer(subscription);
+    } else if (permission === 'denied') {
+      this.setPermission(false);
+    } else {
+      // Permission is 'default'
     }
+  }
+
+  async getSubscription(): Promise<PushSubscription | null> {
+    if (this.registration) {
+      return await this.registration.pushManager.getSubscription() ||
+             await this.registration.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: this.urlBase64ToUint8Array(environment.notifications.vapidKey),
+             });
+    }
+    return null;
+  }
+
+  async sendSubscriptionToServer(subscription: PushSubscription | null): Promise<any> {
+    if (!subscription) return;
+
+    const userId = this.getOrCreateUserId();
+    return await firstValueFrom(
+      this.http.post(`${environment.notifications.apiUrl}/subscribe`, { subscription, userId })
+    );
   }
 
   async requestPermission(): Promise<void> {
-    if (!this.isSupported) return this.setPermission(false);
-
     this.loadingPermission = true;
 
-    // Check permissions if they exist
-    const permission = Notification.permission;
-    if (permission === 'granted') return this.setPermission(true);
-    else if (permission === 'denied') return this.setPermission(false);
-
-    // If they dont exist (default) request them
     try {
-      const token = await this.getToken();
-      if (!token) return this.setPermission(false);
-
-      this.setPermission(true);
-      await firstValueFrom(this.http.post(`${environment.notifications.apiUrl}/subscribe`, { token }));
+      const permission = await Notification.requestPermission();
+      if (permission === 'granted') {
+        this.setPermission(true);
+        const newSubscription = await this.getSubscription();
+        await this.sendSubscriptionToServer(newSubscription);
+      } else {
+        this.setPermission(false);
+      }
     } catch (error) {
       console.error(error);
       this.setPermission(false);
+    } finally {
+      this.loadingPermission = false;
     }
-  }
-
-  saveToken(token: string): void {
-    localStorage.setItem('push_token', token);
-  }
-
-  getSavedToken(): string | null {
-    return localStorage.getItem('push_token');
   }
 
   setPermission(value: boolean): void {
     this.hasPermission.next(value);
     this.loadingPermission = false;
+  }
+
+  getOrCreateUserId(): string {
+    let userId = localStorage.getItem('app_user');
+    if (!userId) {
+      userId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+      localStorage.setItem('app_user', userId);
+    }
+    return userId;
+  }
+
+  private urlBase64ToUint8Array(base64String: string) {
+    const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+    const base64 = (base64String + padding)
+      .replace(/-/g, '+')
+      .replace(/_/g, '/');
+
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+
+    for (let i = 0; i < rawData.length; ++i) {
+      outputArray[i] = rawData.charCodeAt(i);
+    }
+    return outputArray;
   }
 }

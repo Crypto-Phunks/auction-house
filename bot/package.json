@@ -37,7 +37,8 @@
     "svgson": "^5.2.1",
     "tinycolor2": "^1.4.2",
     "twit": "^2.2.11",
-    "viem": "^1.10.3"
+    "viem": "^1.10.3",
+    "web-push": "^3.6.5"
   },
   "devDependencies": {
     "@nestjs/cli": "^9.0.0",
@@ -48,6 +49,7 @@
     "@types/supertest": "^2.0.11",
     "@types/tinycolor2": "^1.4.3",
     "@types/twit": "^2.2.30",
+    "@types/web-push": "^3.6.0",
     "source-map-support": "^0.5.20",
     "supertest": "^6.1.3",
     "ts-loader": "^9.4.4",

@@ -29,7 +29,8 @@ export const environment = {
   auctionStartBlock: 9610116,
   notifications: {
     apiUrl: 'http://localhost:3200',
-    vapidKey: 'BGMg426N6tLVS6OsWuCxfewDOomVAcPLhi2KkUNGAZiiPQB8XlBZHad9lKsFfrhm5zyKx2sTBWiT5Uxs08Sd0pQ'
+    vapidKey: 'BN_WgIzuLiYO7KGYGhrAtOx6xU_OuOfO2rs4HPqBfBQ7CGP0MNn0lwLWjzPPw0EkCpy5woSQcg0fQgXB54fk4DY',
+    // vapidKey: 'BGMg426N6tLVS6OsWuCxfewDOomVAcPLhi2KkUNGAZiiPQB8XlBZHad9lKsFfrhm5zyKx2sTBWiT5Uxs08Sd0pQ'
   },
 };
 

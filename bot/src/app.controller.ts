@@ -10,8 +10,8 @@ export class AppController {
   ) {}
 
   @Post('subscribe')
-  async refreshMetadata(@Body() body: { token: string, topic: string }): Promise<any> {
-    return this.spbSvc.addSubscriptionToken(body.token, body.topic || 'all');
+  async refreshMetadata(@Body() body: any): Promise<any> {
+    return this.spbSvc.addSubscriptions(body);
   }
 
 }

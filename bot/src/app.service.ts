@@ -149,11 +149,12 @@ export class AppService {
     if (Number(process.env.DISCORD_ENABLED)) this.discordSvc.postMessage(data);
     try {
       if (!Number(process.env.PUSH_ENABLED)) throw new Error('Push notifications are disabled.');
-      const tokens = await this.spbSvc.getSubscriptionTokens('all');
-      const send = await this.pushSvc.sendPushNotification(data, tokens);
+      const subscriptions = await this.spbSvc.getSubscriptions('all');
+      if (!subscriptions.length) throw new Error('No push notification tokens found.');
+      const send = await this.pushSvc.sendPushNotification(data, subscriptions);
 
       Logger.log(
-        `Push notification sent to ${send.successCount} devices and failed on ${send.failureCount} devices.`,
+        `Push notification sent to ${send?.successCount} devices and failed on ${send?.failureCount} devices.`,
         'sendNotification()'
       );
     } catch (error) {
