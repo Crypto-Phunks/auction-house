@@ -29,6 +29,7 @@
     "ethers": "^5.6.9",
     "firebase": "^10.3.1",
     "firebase-admin": "^11.10.1",
+    "jsonwebtoken": "^9.0.2",
     "mongodb": "^6.0.0",
     "node-fetch": "2",
     "reflect-metadata": "^0.1.13",

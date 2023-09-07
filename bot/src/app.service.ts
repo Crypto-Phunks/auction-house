@@ -154,7 +154,7 @@ export class AppService {
       const send = await this.pushSvc.sendPushNotification(data, subscriptions);
 
       Logger.log(
-        `Push notification sent to ${send?.successCount} devices and failed on ${send?.failureCount} devices.`,
+        `Push notification sent to ${send?.success.length} devices and failed on ${send?.failed.length} devices.`,
         'sendNotification()'
       );
     } catch (error) {
