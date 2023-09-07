@@ -28,7 +28,7 @@
       dir="rtl"
       (slideChange)="onSlideChange()">
 
-      <ng-container *ngFor="let auction of auctionData; let i = index">
+      <ng-container *ngFor="let auction of auctionData; trackBy: trackByFn">
         <ng-template swiperSlide>
 
           <div

@@ -6,8 +6,8 @@
 
   <div class="bid-info-item current-bid">
     <div class="label">
-      <ng-container *ngIf="auctionComplete; else winning">Current</ng-container>
-      <ng-template #winning>Winning</ng-template>
+      <ng-container *ngIf="auctionComplete; else current">Winning</ng-container>
+      <ng-template #current>Current</ng-template>
     </div>
     <div class="value"><span class="eth-symbol">Ξ</span>{{ ((currentAuction?.amount | wei) || '0') | number }}</div>
   </div>

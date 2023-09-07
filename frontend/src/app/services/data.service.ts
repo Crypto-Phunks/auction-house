@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 
 import { Apollo, gql } from 'apollo-angular';
-import { BehaviorSubject, map, switchMap, tap } from 'rxjs';
+import { BehaviorSubject, catchError, map, switchMap, tap } from 'rxjs';
 
 import { Auction, Bid } from '../interfaces/auction';
 
@@ -66,22 +66,30 @@ export class DataService {
       variables: { first, skip }
     });
 
-    this.apollo.watchQuery(watchQuery(1, 0)).valueChanges.pipe(
-      map((res: any) => res.data?.auctions || []),
-      map((res: any) => this.transformData(res)),
+    this.apollo.query(query(1, 0)).pipe(
+      map((res: any) => this.transformAuctionData(res)),
       tap((res: Auction[]) => this.setAuctionData(res)),
+
       switchMap(() => this.apollo.query(query(1000, 1))),
-      map((res: any) => res.data?.auctions || []),
-      map((res: any) => this.transformData(res)),
-      tap((res: Auction[]) => {
-        const currentAuctionData = this.auctionData.getValue();
-        const newAuctionData = [ ...currentAuctionData, ...res ];
-        this.setAuctionData(newAuctionData);
-      }),
+      map((res: any) => this.transformAuctionData(res)),
+      tap((res: Auction[]) => this.mergeAuctionData(res)),
+
+      switchMap(() => this.apollo.watchQuery(watchQuery(1, 0)).valueChanges),
+      map((res: any) => this.transformAuctionData(res)),
+      tap((res: Auction[]) => this.mergeAuctionData(res)),
+
+      catchError((err: any) => {
+        console.log(`getAuctionData`, err);
+        this.getAuctionData();
+        return [];
+      })
     ).subscribe();
   }
 
-  transformData(data: any): Auction[] {
+  transformAuctionData(res: any): Auction[] {
+    if (!res || !res.data?.auctions) return [];
+
+    const data = res.data?.auctions;
     const auctions: Auction[] = data.map((auction: any) => {
       const bids: Bid[] = [ ...auction?.bids ].sort((a: Bid, b: Bid) => Number(b?.amount) - Number(a?.amount));
       return {
@@ -100,13 +108,26 @@ export class DataService {
     return auctions;
   }
 
+  mergeAuctionData(newAuctionData: Auction[]) {
+    const currentAuctionData = this.auctionData.getValue();
+    const mergedData: Auction[] = [...currentAuctionData];
+
+    for (const newAuction of newAuctionData) {
+      const index = mergedData.findIndex(auction => auction.id === newAuction.id);
+      if (index !== -1) mergedData[index] = newAuction;
+      else mergedData.unshift(newAuction);
+    }
+
+    mergedData.sort((a: Auction, b: Auction) => Number(b.startTime) - Number(a.startTime));
+    this.setAuctionData(mergedData);
+  }
+
   setAuctionData(auctionData: Auction[]) {
     this.auctionData.next(auctionData);
   }
 
   setActiveIndex(index: number) {
     this.activeIndex.next(index);
-    // console.log(`setActiveIndex`, index);
   }
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

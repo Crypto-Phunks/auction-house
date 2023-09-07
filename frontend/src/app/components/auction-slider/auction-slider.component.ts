@@ -86,4 +86,8 @@ export class AuctionSliderComponent implements OnInit, AfterViewInit, OnChanges 
     // console.log(this.swiper)
   }
 
+  trackByFn(index: number, item: Auction): string {
+    return item.id;
+  }
+
 }
