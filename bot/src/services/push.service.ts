@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 
 import { Message } from 'src/interfaces/message.interface';
 
-import { PushSubscription, RequestOptions, SendResult, sendNotification, setGCMAPIKey, setVapidDetails } from 'web-push';
+import { PushSubscription, RequestOptions, SendResult, sendNotification, setVapidDetails } from 'web-push';
 import jwt from 'jsonwebtoken';
 
 import dotenv from 'dotenv';
@@ -20,12 +20,6 @@ setVapidDetails(
 
 @Injectable()
 export class PushService {
-
-  constructor() {
-
-    console.log('APNS token', apnsKeyContent);
-    
-  }
 
   async sendPushNotification(message: Message, subscriptions: PushSubscription[]): Promise<any> {
 
@@ -71,7 +65,7 @@ export class PushService {
     for (const subscription of subscriptions) {
       
       try {
-        let notification!: SendResult;
+        let notification!: Promise<SendResult>;
 
         if (subscription.endpoint.startsWith('https://web.push.apple.com')) {
           // Set the authorization header with JWT for APNs
@@ -80,9 +74,9 @@ export class PushService {
             'Authorization': `Bearer ${token}`,
           };
 
-          notification = await sendNotification(subscription, JSON.stringify(notifPayload), requestOptions);
+          notification = sendNotification(subscription, JSON.stringify(notifPayload), requestOptions);
         } else {
-          notification = await sendNotification(subscription, JSON.stringify(notifPayload), requestOptions);
+          notification = sendNotification(subscription, JSON.stringify(notifPayload), requestOptions);
         }
 
         res.success.push({ subscription, notification });
@@ -92,7 +86,13 @@ export class PushService {
       }
     }
 
-    console.log('Push notification result', res);
+    res.success = await Promise.all(res.success.map(async (item) => {
+      return {
+        subscription: item.subscription,
+        notification: await item.notification
+      }
+    }));
+
     return res;
   }
 }
