@@ -124,9 +124,9 @@ export class AppService {
   ): Promise<void> {
 
     const auction = await this.web3Svc.getCurrentAuction();
-    const timeLeft = this.convertTimeLeft(auction[3]);
+    const timeLeft = this.convertTimeLeft(auction.endTime);
 
-    this.setTimers(auction[3]);
+    this.setTimers(auction.endTime);
 
     const image = await this.imgSvc.createImage(this.pad(tokenId.toString()));
     const ens = await this.web3Svc.getEnsFromAddress(sender);
