@@ -23,7 +23,7 @@ export class AppController {
     console.log(request.url);
 
     const pathArr = request.url.split('/').filter((x) => x && x !== 'card');
-    const cardImageUrl = await this.metaSvc.getCard(pathArr[1] || '1');
+    const cardImageUrl = await this.metaSvc.getCard(pathArr[1]);
 
     console.log(cardImageUrl);
 
