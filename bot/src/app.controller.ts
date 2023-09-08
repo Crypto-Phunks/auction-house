@@ -19,35 +19,10 @@ export class AppController {
 
   @Get(['card', 'card/*'])
   async getCard(@Req() request: Request, @Res() res: Response): Promise<any> {
-
-    console.log(request.url);
-
     const pathArr = request.url.split('/').filter((x) => x && x !== 'card');
-    const cardImageUrl = await this.metaSvc.getCard(pathArr[1]);
-
-    console.log(cardImageUrl);
-
-    const html = `
-      <!DOCTYPE html>
-      <html lang="en">
-      <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta property="twitter:card" content="summary_large_image">
-        <meta property="twitter:title" content="test123">
-        <meta property="twitter:description" content="test">
-        <meta property="twitter:image" content="${cardImageUrl}">
-        <title></title>
-      </head>
-      <body>
-        <!-- Your body content here -->
-      </body>
-      </html>
-    `;
-
-    res.send(html);
+    const cardData = await this.metaSvc.getCard(pathArr[1]);
+    res.send(cardData);
   }
-
 }
 
 

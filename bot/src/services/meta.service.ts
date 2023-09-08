@@ -24,7 +24,7 @@ export class MetaService {
     });
   }
 
-  async getCard(auctionId?: string): Promise<any> {
+  async getCard(auctionId?: string): Promise<string> {
 
     if (!auctionId) {
       const current = await this.web3Svc.getCurrentAuction();
@@ -35,6 +35,25 @@ export class MetaService {
     const image = await this.imageSvc.createCard(auction);
 
     await writeFile(`./cards/${auctionId}.png`, image.base64, 'base64');
-    return `${process.env.IMAGE_URL}/${auctionId}.png`;
+
+    const imageUrl = `${process.env.IMAGE_URL}/${auctionId}.png`;
+
+    const html = `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta property="twitter:card" content="summary_large_image">
+        <meta property="twitter:title" content="CryptoPhunks Auction #${auction.id}">
+        <meta property="twitter:description" content="CryptoPhunks Auction House was built with the purpose of facilitating perpetual auctions for CryptoPhunks held in the Treasury Vault.">
+        <meta property="twitter:image" content="${imageUrl}">
+        <title></title>
+      </head>
+      <body></body>
+      </html>
+    `;
+
+    return html;
   }
 }

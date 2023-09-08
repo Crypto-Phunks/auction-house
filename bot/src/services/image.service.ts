@@ -413,9 +413,7 @@ export class ImageService {
     phreePhunkyImg.src = Buffer.from(phreePhunky);
 
     const buffer = canvas.toBuffer('image/png');
-
-    await writeFile(`./test-${phunkId}.png`, buffer);
-    // await writeFile(`./cards/${auctionId}.png`, image.base64, 'base64');
+ 
     return { base64: buffer.toString('base64'), color: tinyColor(color).toHex() };
   }
 
