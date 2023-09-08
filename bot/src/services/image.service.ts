@@ -328,9 +328,10 @@ export class ImageService {
     ctx.stroke();
     ctx.globalAlpha = 1;
 
+    const auctionComplete = (Number(auction.endTime) * 1000) - Date.now() < 0;
     // Line 4
     const line4Pos = line3Pos + 140;
-    const line4_1 = `Current Bid`;
+    const line4_1 = `${auctionComplete ? 'Winning' : 'Current'} Bid`;
     ctx.font = 'normal 24px RetroComputer';
     ctx.textAlign = 'left';
     ctx.fillStyle = '#FFFFFF';
@@ -341,16 +342,18 @@ export class ImageService {
       line4Pos
     );
 
-    const line4_2 = `Time Remaining`;
-    ctx.font = 'normal 24px RetroComputer';
-    ctx.textAlign = 'right';
-    ctx.fillStyle = '#FFFFFF';
-    ctx.globalAlpha = 0.5;
-    ctx.fillText(
-      line4_2,
-      canvasWidth - bleed,
-      line4Pos
-    );
+    if (!auctionComplete) {
+      const line4_2 = `Time Remaining`;
+      ctx.font = 'normal 24px RetroComputer';
+      ctx.textAlign = 'right';
+      ctx.fillStyle = '#FFFFFF';
+      ctx.globalAlpha = 0.5;
+      ctx.fillText(
+        line4_2,
+        canvasWidth - bleed,
+        line4Pos
+      );
+    }
 
     ctx.globalAlpha = 1;
 
@@ -377,17 +380,18 @@ export class ImageService {
       line5Pos + 40
     );
 
-    const timeRemaining = this.millisecondsToTimeFormat((Number(auction.endTime) * 1000) - Date.now());
-
-    const line5_3 = timeRemaining;
-    ctx.font = 'normal 56px RetroComputer';
-    ctx.textAlign = 'right';
-    ctx.fillStyle = '#ffffff';
-    ctx.fillText(
-      line5_3,
-      canvasWidth - bleed,
-      line5Pos
-    );
+    if (!auctionComplete) {
+      const timeRemaining = this.millisecondsToTimeFormat((Number(auction.endTime) * 1000) - Date.now());
+      const line5_3 = timeRemaining;
+      ctx.font = 'normal 56px RetroComputer';
+      ctx.textAlign = 'right';
+      ctx.fillStyle = '#ffffff';
+      ctx.fillText(
+        line5_3,
+        canvasWidth - bleed,
+        line5Pos
+      );
+    }
 
     // Site link
     const website_link = 'phunks.auction';
