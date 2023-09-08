@@ -22,6 +22,6 @@ export class MetaService {
     const image = await this.imageSvc.createImage(auctionId);
     await writeFile(`./cards/${auctionId}.png`, image.base64, 'base64');
 
-    return `https://goerli.phunks.auction/${auctionId}.png`;
+    return `https://goerli.phunks.auction/api/${auctionId}.png`;
   }
 }

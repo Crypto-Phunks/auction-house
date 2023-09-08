@@ -25,7 +25,7 @@ import { join } from 'path';
         cacheControl: true,
         dotfiles: 'ignore',
         etag: true,
-        fallthrough: false,
+        fallthrough: true,
         immutable: true,
         index: false,
         lastModified: true,
