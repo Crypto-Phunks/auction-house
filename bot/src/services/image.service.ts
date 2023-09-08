@@ -2,12 +2,13 @@ import { Injectable } from '@nestjs/common';
 
 import { Web3Service } from './web3.service';
 
-import { readFile } from 'fs/promises';
+import { AuctionData } from 'src/interfaces/gql.interface';
 
+import { readFile, writeFile } from 'fs/promises';
 import { createCanvas, Image, registerFont } from 'canvas';
 import { stringify } from 'svgson';
-import tinyColor from 'tinycolor2';
 
+import tinyColor from 'tinycolor2';
 import path from 'path';
 
 @Injectable()
@@ -185,6 +186,239 @@ export class ImageService {
     return { base64: buffer.toString('base64'), color: tinyColor(color).toHex() };
   }
 
+  async createCard(auction: AuctionData): Promise<any> {
+
+    const phunkId = auction.phunk.id;
+
+    registerFont(path.join(__dirname, '../static/retro-computer.ttf'), { family: 'RetroComputer' });
+
+    const canvasWidth = 800 * 2;
+    const canvasHeight = 418 * 2;
+    const bleed = 30 * 2;
+
+    const phunkWidth = canvasWidth / 1.5;
+    const phunkHeight = canvasHeight / 1.5;
+
+    const rightSide = (canvasWidth / 2) + bleed;
+
+    const canvas = createCanvas(canvasWidth, canvasHeight);
+    const ctx = canvas.getContext('2d');
+
+    ctx.fillStyle = '#131415';
+    ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+
+    // const punkData = await this.web3Svc.punkDataContract['punkImage'](parseInt(phunkId).toString());
+    const punkData = await this.web3Svc.getPunkImage(phunkId);
+    const svg = await this.createPhunkSvg(punkData, phunkWidth, phunkHeight);
+    const color = this.getColor(punkData);
+
+    ctx.fillStyle = color;
+    ctx.fillRect(
+      bleed,
+      bleed,
+      rightSide - (bleed * 2),
+      canvasHeight - (bleed * 2)
+    );
+    
+    // ctx.fillStyle = color;
+    // ctx.fillRect(
+    //   rightSide,
+    //   bleed,
+    //   rightSide - (bleed * 3),
+    //   canvasHeight - (bleed * 2)
+    // );
+
+    const img = new Image();
+    img.onload = () => ctx.drawImage(
+      img,
+      (rightSide / 2) - (phunkWidth / 2) - (bleed / 2),
+      canvasHeight - phunkHeight - bleed
+    );
+    img.onerror = err => { throw err };
+    img.src = Buffer.from(svg);
+
+    // Line 1 (left side)
+    const line1 = 'CryptoPhunk';
+    ctx.textBaseline = 'top';
+    ctx.font = 'normal 40px RetroComputer';
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillText(
+      line1,
+      rightSide,
+      bleed - 10
+    );
+
+    // Line 2 (left side)
+    ctx.font = 'normal 132px RetroComputer';
+    ctx.fillStyle = '#FF04B4';
+    ctx.fillText(
+      phunkId,
+      rightSide - 6,
+      bleed + 10
+    );
+
+    const punkTraits = await this.web3Svc.getPunkAttributes(parseInt(phunkId).toString());
+    const phunkData = this.getTraits(punkTraits);
+    const sex = phunkData.traits.filter((tr) => tr.label === phunkData.sex)[0];
+
+    // Line 2
+    const line2Pos = (bleed * 4.5);
+    const line2_1 = `One of`;
+    ctx.font = 'normal 28px RetroComputer';
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillText(
+      line2_1,
+      rightSide,
+      line2Pos
+    );
+
+    const line2_1Width = (ctx.measureText(line2_1).width + 8);
+    const line2_2 = `${sex.value}`;
+    ctx.font = 'normal 28px RetroComputer';
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#ff04b4';
+    ctx.fillText(
+      line2_2,
+      rightSide + line2_1Width,
+      line2Pos
+    );
+
+    const line2_2Width = (ctx.measureText(line2_2).width + 8);
+    const line2_3 = `${phunkData.sex} phunks`;
+    ctx.font = 'normal 28px RetroComputer';
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillText(
+      line2_3,
+      rightSide + line2_1Width + line2_2Width,
+      line2Pos
+    );
+
+    // Line 3
+    const line3Pos = line2Pos + 50;
+    const line3_1 = `${phunkData.traitCount}`;
+    ctx.font = 'normal 28px RetroComputer';
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#ff04b4';
+    ctx.fillText(
+      line3_1,
+      rightSide,
+      line3Pos
+    );
+
+    const line3_1Width = (ctx.measureText(line3_1).width + 8);
+    const line3_2 = `Trait${phunkData.traits?.length > 2 ? 's' : ''}`
+    ctx.font = 'normal 28px RetroComputer';
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillText(
+      line3_2,
+      rightSide + line3_1Width,
+      line3Pos
+    );
+
+    // Draw a line under the text
+    ctx.beginPath();
+    ctx.moveTo(rightSide, line3Pos + bleed + 30);
+    ctx.lineTo(canvasWidth - bleed, line3Pos + bleed + 30);
+    ctx.strokeStyle = '#FFFFFF';
+    ctx.globalAlpha = 0.1;
+    ctx.lineWidth = 6;
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+
+    // Line 4
+    const line4Pos = line3Pos + 140;
+    const line4_1 = `Current Bid`;
+    ctx.font = 'normal 24px RetroComputer';
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#FFFFFF';
+    ctx.globalAlpha = 0.5;
+    ctx.fillText(
+      line4_1,
+      rightSide,
+      line4Pos
+    );
+
+    const line4_2 = `Time Remaining`;
+    ctx.font = 'normal 24px RetroComputer';
+    ctx.textAlign = 'right';
+    ctx.fillStyle = '#FFFFFF';
+    ctx.globalAlpha = 0.5;
+    ctx.fillText(
+      line4_2,
+      canvasWidth - bleed,
+      line4Pos
+    );
+
+    ctx.globalAlpha = 1;
+
+    // Line 5
+    const line5Pos = line4Pos + 30;
+    const line5_1 = Number(this.web3Svc.weiToEth(BigInt(auction.amount))).toFixed(3);
+    ctx.font = 'normal 56px RetroComputer';
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#ff04b4';
+    ctx.fillText(
+      line5_1,
+      rightSide,
+      line5Pos
+    );
+
+    const line5_1Width = (ctx.measureText(line5_1).width + 8);
+    const line5_2 = `ETH`;
+    ctx.font = 'normal 20px RetroComputer';
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText(
+      line5_2,
+      rightSide + line5_1Width,
+      line5Pos + 40
+    );
+
+    const timeRemaining = this.millisecondsToTimeFormat((Number(auction.endTime) * 1000) - Date.now());
+
+    const line5_3 = timeRemaining;
+    ctx.font = 'normal 56px RetroComputer';
+    ctx.textAlign = 'right';
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText(
+      line5_3,
+      canvasWidth - bleed,
+      line5Pos
+    );
+
+    // Site link
+    const website_link = 'phunks.auction';
+    ctx.font = 'normal 16px RetroComputer';
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#ffffff';
+    ctx.globalAlpha = 0.25;
+    ctx.fillText(
+      website_link,
+      rightSide,
+      canvasHeight - bleed - 20
+    );
+    ctx.globalAlpha = 1;
+
+    const phreePhunky = await readFile(path.join(__dirname, '../static/phree-phunky.svg'), { encoding: 'utf8' });
+    const phreePhunkyImg = new Image();
+    phreePhunkyImg.onload = () => ctx.drawImage(
+      phreePhunkyImg,
+      rightSide,
+      canvasHeight - (bleed * 2)
+    );
+    phreePhunkyImg.onerror = err => { throw err };
+    phreePhunkyImg.src = Buffer.from(phreePhunky);
+
+    const buffer = canvas.toBuffer('image/png');
+
+    await writeFile(`./test-${phunkId}.png`, buffer);
+    // await writeFile(`./cards/${auctionId}.png`, image.base64, 'base64');
+    return { base64: buffer.toString('base64'), color: tinyColor(color).toHex() };
+  }
+
   // Get the "brightest" color from the punk data
   getColor(punkData: string): string {
     const colorGroups: any = {};
@@ -260,5 +494,14 @@ export class ImageService {
       traits: traits.map((trait) => ({ label: trait, value: values[trait] })),
       traitCount: traits.length - 1,
     };
+  }
+
+  millisecondsToTimeFormat(ms: number): string {
+    if (ms < 0) ms = 0;
+    const hours = Math.floor(ms / (1000 * 60 * 60));
+    const minutes = Math.floor((ms % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((ms % (1000 * 60)) / 1000);
+
+    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
   }
 }

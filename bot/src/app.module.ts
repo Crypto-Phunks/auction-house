@@ -12,6 +12,7 @@ import { DiscordService } from './services/discord.service';
 import { SupabaseService } from './services/supabase.service';
 import { PushService } from './services/push.service';
 import { MetaService } from './services/meta.service';
+import { GraphQLService } from './services/gql.service';
 
 import { join } from 'path';
 
@@ -46,7 +47,8 @@ import { join } from 'path';
     DiscordService,
     SupabaseService,
     PushService,
-    MetaService
+    MetaService,
+    GraphQLService
   ],
 })
 export class AppModule {}
