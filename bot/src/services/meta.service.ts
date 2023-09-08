@@ -21,6 +21,7 @@ export class MetaService {
   async getCard(auctionId?: string): Promise<any> {
     const image = await this.imageSvc.createImage(auctionId);
     await writeFile(`./cards/${auctionId}.png`, image.base64, 'base64');
-    return `http://localhost:3200/${auctionId}.png`;
+
+    return `https://goerli.phunks.auction/${auctionId}.png`;
   }
 }
