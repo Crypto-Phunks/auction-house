@@ -44,21 +44,30 @@ export class DataService {
 
   constructor(
     private apollo: Apollo
-  ) {
-    // this.getAuctionData();
-  }
+  ) {}
 
-  fetchAuctionData(): Observable<Auction[]> {
-    const watchQuery = (first: number, skip: number): any => ({
+  watchAuctionData(first: number, skip: number): Observable<Auction[]> {
+    const watchQuery = (): any => ({
       query: GET_AUCTIONS,
       variables: { first, skip },
       pollInterval: 5000
     });
 
-    return this.apollo.watchQuery(watchQuery(365, 0)).valueChanges.pipe(
+    return this.apollo.watchQuery(watchQuery()).valueChanges.pipe(
       map((res) => this.transformAuctionData(res))
     );
   }
+
+  // fetchNextAuctionData(first: number, skip: number): Observable<Auction[]> {
+  //   const query = (): any => ({
+  //     query: GET_AUCTIONS,
+  //     variables: { first, skip }
+  //   });
+
+  //   return this.apollo.query(query()).pipe(
+  //     map((res) => this.transformAuctionData(res))
+  //   );
+  // }
 
   transformAuctionData(res: any): Auction[] {
     if (!res || !res.data?.auctions) return [];
@@ -81,23 +90,6 @@ export class DataService {
     });
     return auctions;
   }
-
-  // mergeAuctionData(newAuctionData: Auction[]) {
-  //   const currentAuctionData = this.auctionData.getValue();
-  //   const mergedData: Auction[] = [...currentAuctionData];
-
-  //   for (const newAuction of newAuctionData) {
-  //     const index = mergedData.findIndex(auction => auction.id === newAuction.id);
-  //     if (index !== -1) mergedData[index] = newAuction;
-  //     else mergedData.unshift(newAuction);
-  //   }
-
-  //   mergedData.sort((a: Auction, b: Auction) => Number(b.startTime) - Number(a.startTime));
-  // }
-
-  // setActiveIndex(index: number) {
-  //   this.activeIndex.next(index);
-  // }
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   // Util //////////////////////////////////////////////////////////////////////////////////////////////////////////////

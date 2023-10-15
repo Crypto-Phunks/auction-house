@@ -16,7 +16,7 @@ import { GlobalState } from '@/interfaces/global-state';
 import { Subject, tap, withLatestFrom } from 'rxjs';
 
 import * as selectors from '@/state/selectors/app-state.selector';
-import { setTheme } from '@/state/actions/app-state.action';
+import * as actions from '@/state/actions/app-state.action';
 
 @Component({
   standalone: true,
@@ -53,7 +53,7 @@ export class HeaderComponent {
 
     this.setModeClick$.pipe(
       withLatestFrom(this.theme$),
-      tap(([_, theme]) => this.store.dispatch(setTheme({ theme: theme === 'dark' ? 'light' : 'dark' })))
+      tap(([_, theme]) => this.store.dispatch(actions.setTheme({ theme: theme === 'dark' ? 'light' : 'dark' })))
     ).subscribe();
   }
 

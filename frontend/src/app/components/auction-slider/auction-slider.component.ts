@@ -1,6 +1,7 @@
-import { AfterViewInit, Component, ElementRef, Input, OnChanges, OnInit, SimpleChanges, ViewChild } from '@angular/core';
+import { Component, ElementRef, Input, OnChanges, SimpleChanges, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { Store } from '@ngrx/store';
 
 import SwiperCore, { Virtual, Navigation, SwiperOptions } from 'swiper';
 import { SwiperComponent, SwiperModule } from 'swiper/angular';
@@ -10,7 +11,10 @@ import { DataService } from '@/services/data.service';
 
 import { PhunkImageDirective } from '@/directives/phunk-image.directive';
 
+import { GlobalState } from '@/interfaces/global-state';
 import { Auction } from '@/interfaces/auction';
+
+import * as actions from '@/state/actions/app-state.action';
 
 SwiperCore.use([Virtual, Navigation]);
 @Component({
@@ -27,7 +31,7 @@ SwiperCore.use([Virtual, Navigation]);
   styleUrls: ['./auction-slider.component.scss']
 })
 
-export class AuctionSliderComponent implements OnInit, AfterViewInit, OnChanges {
+export class AuctionSliderComponent implements OnChanges {
 
   @Input() auctionData!: Auction[] | null;
   @Input() currentAuction!: Auction | null;
@@ -46,17 +50,19 @@ export class AuctionSliderComponent implements OnInit, AfterViewInit, OnChanges 
       1040: { slidesPerView: 3 },
       1130: { slidesPerView: 4 },
       1250: { slidesPerView: 5 }
-    }
+    },
+    on: {
+      slideChange: (swiper) => {
+        this.store.dispatch(actions.slideChanged({ activeIndex: swiper.realIndex }));
+      }
+    },
   }
 
   constructor(
+    private store: Store<GlobalState>,
     public dataSvc: DataService,
     private router: Router
   ) {}
-
-  ngOnInit(): void {}
-
-  ngAfterViewInit(): void {}
 
   ngOnChanges(changes: SimpleChanges): void {
     const current = changes['currentAuction']?.currentValue;
@@ -77,7 +83,8 @@ export class AuctionSliderComponent implements OnInit, AfterViewInit, OnChanges 
   }
 
   onSlideChange() {
-    // console.log(this.swiper)
+    // console.log(this.swiper);
+    // console.log(this.swiper?.activeSlides)
   }
 
   trackByFn(index: number, item: Auction): string {

@@ -224,16 +224,16 @@ contract PhunksAuctionHouse is IPhunksAuctionHouse, Pausable, ReentrancyGuard, O
      */
 
     function _createAuction() internal {
-        uint treasuryBalance = phunks.balanceOf(treasuryWallet);
-        require(treasuryBalance > 0, "No Phunks available for auction.");
+        uint treasuryValues = phunks.balanceOf(treasuryWallet);
+        require(treasuryValues > 0, "No Phunks available for auction.");
 
-        uint randomIndex = _getRand() % treasuryBalance;
+        uint randomIndex = _getRand() % treasuryValues;
         uint phunkId = phunks.tokenOfOwnerByIndex(treasuryWallet, randomIndex);
         //removes 7-trait phunk from random selection
         if (phunkId == 8348) {
-            require(treasuryBalance > 1, "No Phunks available for auction.");
+            require(treasuryValues > 1, "No Phunks available for auction.");
 
-            uint nextIndex = (randomIndex + 1) % treasuryBalance;
+            uint nextIndex = (randomIndex + 1) % treasuryValues;
             phunkId = phunks.tokenOfOwnerByIndex(treasuryWallet, nextIndex);
             
         }

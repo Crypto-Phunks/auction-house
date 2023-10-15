@@ -24,9 +24,11 @@ export class MessagingService {
     private http: HttpClient,
     private swUpdate: SwUpdate,
   ) {
-    this.init()
-      .then(() => console.log('Messaging service initialized'))
-      .catch(error => console.error(error));
+    this.init().then(() => {
+      console.log('Messaging service initialized');
+    }).catch(error => {
+      console.error(error);
+    });
   }
 
   async init(): Promise<void> {
@@ -40,7 +42,6 @@ export class MessagingService {
     if (!this.isSupported) return this.setPermission(false);
 
     const permission = Notification.permission;
-    console.log({ permission })
 
     if (permission === 'granted') {
       this.setPermission(true);
@@ -56,10 +57,10 @@ export class MessagingService {
   async getSubscription(): Promise<PushSubscription | null> {
     if (this.registration) {
       return await this.registration.pushManager.getSubscription() ||
-             await this.registration.pushManager.subscribe({
-                userVisibleOnly: true,
-                applicationServerKey: this.urlBase64ToUint8Array(environment.notifications.vapidKey),
-             });
+      await this.registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: this.urlBase64ToUint8Array(environment.notifications.vapidKey),
+      });
     }
     return null;
   }

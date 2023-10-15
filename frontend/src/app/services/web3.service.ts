@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { Store } from '@ngrx/store';
 
 import { environment } from 'src/environments/environment';
 
@@ -12,7 +13,7 @@ import { Chain, Config, PublicClient, WebSocketPublicClient, configureChains, cr
 import { jsonRpcProvider } from '@wagmi/core/providers/jsonRpc';
 import { EthereumClient, w3mConnectors } from '@web3modal/ethereum';
 import { Web3Modal } from '@web3modal/html';
-import { Store } from '@ngrx/store';
+
 import { GlobalState } from '@/interfaces/global-state';
 import { Treasury } from '@/interfaces/treasury';
 import { Auction } from '@/interfaces/auction';

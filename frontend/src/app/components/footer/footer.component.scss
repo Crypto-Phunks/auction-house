@@ -1,0 +1,16 @@
+:host {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 5rem;
+
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: rgba(var(--text-color), .5);
+}
+
+svg {
+  width: 2.5rem;
+  height: 2.5rem;
+  margin-right: 1rem;
+}

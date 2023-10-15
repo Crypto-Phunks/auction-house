@@ -11,6 +11,7 @@ export const initialState: AppState = {
 
   activeAuction: null,
   activeColor: null,
+  activeIndex: 0,
 
   auctions: null,
   logs: [],

@@ -13,7 +13,7 @@ import { DecimalPipe } from '@angular/common';
 import { WeiPipe } from '@/pipes/wei.pipe';
 import { MinBidPipe } from '@/pipes/min-bid.pipe';
 
-import { routes } from '@/routes';
+import { routes } from '@/routes/routes';
 
 import { environment } from './environments/environment';
 

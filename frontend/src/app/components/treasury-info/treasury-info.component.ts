@@ -6,7 +6,6 @@ import { Store } from '@ngrx/store';
 import { FormatCashPipe } from '@/pipes/format-cash.pipe';
 
 import { GlobalState } from '@/interfaces/global-state';
-
 import * as selectors from '@/state/selectors/app-state.selector';
 
 @Component({

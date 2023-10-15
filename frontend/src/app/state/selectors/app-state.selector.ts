@@ -38,3 +38,8 @@ export const selectActiveColor = createSelector(
   selectAppState,
   (appState: AppState) => appState.activeColor
 );
+
+export const selectActiveIndex = createSelector(
+  selectAppState,
+  (appState: AppState) => appState.activeIndex
+);

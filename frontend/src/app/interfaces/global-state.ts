@@ -3,8 +3,6 @@ import { Log } from 'viem';
 import { Auction } from './auction';
 import { Treasury } from './treasury';
 
-import tinycolor from 'tinycolor2';
-
 export type Theme = 'dark' | 'light';
 
 export interface GlobalState {
@@ -19,6 +17,7 @@ export interface AppState {
 
   activeAuction: Auction | null;
   activeColor: string | null;
+  activeIndex: number;
 
   auctions: Auction[] | null;
   logs: Log[];

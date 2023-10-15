@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 
 import { Store } from '@ngrx/store';
-import { ROUTER_NAVIGATION, RouterNavigatedAction, RouterNavigationPayload, getRouterSelectors } from '@ngrx/router-store';
+import { ROUTER_NAVIGATION, RouterNavigatedAction } from '@ngrx/router-store';
 
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 
@@ -48,9 +48,30 @@ export class AppStateEffects {
 
   fetchAuctionData$ = createEffect(() => this.actions$.pipe(
     ofType(actions.fetchAuctions),
-    switchMap(() => this.dataSvc.fetchAuctionData()),
-    map((auctions) => actions.setAuctions({ auctions }))
+    switchMap(() => this.dataSvc.watchAuctionData(500, 0)),
+    map((auctions) => actions.setAuctions({ auctions })),
   ));
+
+  // An attempt at pagination for the auctions
+  // TODO: Fetch 10 Auctions at a time -- and listen to
+  // router & pagination events to fetch more auctions
+  // need to merge and handle stupid fucking slider (replace this trash)
+  // slideChanged$ = createEffect(() => this.actions$.pipe(
+  //   ofType(actions.slideChanged),
+  //   withLatestFrom(this.store.select(selectors.selectAuctions)),
+  //   filter(([action, auctions]) => {
+  //     if (!auctions?.length) return false;
+  //     if (action.activeIndex > auctions.length / 2) return true;
+  //     return false;
+  //   }),
+  //   switchMap(([action, auctions]) => {
+  //     const offset = auctions?.length!;
+  //     return this.dataSvc.fetchNextAuctionData(10, offset).pipe(
+  //       map((nextAuctions) => [...auctions!, ...nextAuctions])
+  //     );
+  //   }),
+  //   map((auctions) => actions.setAuctions({ auctions })),
+  // ));
 
   addressChanged$ = createEffect(() => this.actions$.pipe(
     ofType(actions.setWalletAddress),

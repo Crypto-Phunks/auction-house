@@ -2,8 +2,6 @@ export interface Auction {
   id: string
   phunkId: string
   amount: string
-  // attributes: Array<string>
-  // image: string
   startTime: number
   endTime: number
   bidder: string | undefined | null

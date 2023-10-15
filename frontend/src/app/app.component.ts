@@ -3,6 +3,7 @@ import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 
 import { HeaderComponent } from '@/components/header/header.component';
+import { FooterComponent } from './components/footer/footer.component';
 
 import { GlobalState, Theme } from './interfaces/global-state';
 import { Store } from '@ngrx/store';
@@ -15,7 +16,8 @@ import * as actions from './state/actions/app-state.action';
     CommonModule,
     RouterModule,
 
-    HeaderComponent
+    HeaderComponent,
+    FooterComponent
   ],
   selector: 'app-root',
   templateUrl: './app.component.html',

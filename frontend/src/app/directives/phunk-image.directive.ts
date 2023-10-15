@@ -1,4 +1,4 @@
-import { Directive, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { Directive, ElementRef, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import tinyColor from 'tinycolor2';
@@ -21,7 +21,6 @@ import * as actions from '@/state/actions/app-state.action';
 export class PhunkImageDirective implements OnChanges {
 
   @Input() currentAuction!: Auction | null;
-  @Input() animate: boolean = false;
   @Input() dimensions!: { width: number, height: number };
   @Input() addBackground: boolean = false;
   @Input() setActiveColor: boolean = false;
@@ -138,14 +137,20 @@ export class PhunkImageDirective implements OnChanges {
     const hslColors = Object.keys(colorGroups).map((key: any) => tinyColor(key).toHsl());
 
     // Use both saturation and lightness to sort and get the most vibrant color.
-    const vibrant = hslColors.sort((a: any, b: any) => (b.s * b.l - a.s * a.l))[0];
-    const rgb = tinyColor(vibrant).toRgb();
+    const vibrant1 = hslColors.sort((a: any, b: any) => (b.s * b.l - a.s * a.l))[0];
+    const vibrant2 = hslColors.sort((a: any, b: any) => (b.s * b.l - a.s * a.l))[1];
+    const chosenVibrant = vibrant1.l > .75 ? vibrant2 : vibrant1;
 
-    if (this.setActiveColor) this.store.dispatch(actions.setActiveColor({ color: `${rgb.r}, ${rgb.g}, ${rgb.b}` }));
+    const rgb = tinyColor(chosenVibrant).toRgb();
+
+    if (this.setActiveColor) {
+      console.log(vibrant1.l, vibrant2.l);
+      this.store.dispatch(actions.setActiveColor({ color: `${rgb.r}, ${rgb.g}, ${rgb.b}` }));
+    }
 
     if (this.addBackground) {
       const element = this.el.nativeElement as HTMLElement;
-      element.style.backgroundColor = tinyColor(vibrant).setAlpha(.15).toRgbString();
+      element.style.backgroundColor = tinyColor(chosenVibrant).setAlpha(.15).toRgbString();
     }
   }
 

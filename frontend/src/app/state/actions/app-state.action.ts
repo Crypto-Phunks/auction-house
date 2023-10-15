@@ -53,3 +53,12 @@ export const setActiveColor = createAction(
   '[App State] Set Active Color',
   props<{ color: AppState['activeColor'] }>()
 );
+
+export const slideChanged = createAction(
+  '[App State] Slide Changed',
+  props<{ activeIndex: AppState['activeIndex'] }>()
+);
+
+export const fetchTenMoreAuctions = createAction(
+  '[App State] Fetch Ten More Auctions'
+);
