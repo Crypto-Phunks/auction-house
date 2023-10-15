@@ -26,6 +26,7 @@ export const environment = {
     phunkTokenAddress: '0x5B452c76D51e5ab02805477F3Aaf1b612f045dD6'
   },
   chainId: 5,
+  projectId: '260e2bfb25e604e64f4ebd6eec1bb3d8',
   auctionStartBlock: 9610116,
   notifications: {
     apiUrl: 'http://localhost:3200',

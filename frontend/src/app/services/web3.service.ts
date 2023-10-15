@@ -20,7 +20,7 @@ import { Auction } from '@/interfaces/auction';
 
 import * as actions from '@/state/actions/app-state.action';
 
-const projectId = '260e2bfb25e604e64f4ebd6eec1bb3d8';
+const projectId = environment.projectId;
 
 @Injectable({
   providedIn: 'root'

@@ -23,6 +23,7 @@ export const environment = {
     phunkTokenAddress: '0xf07468ead8cf26c752c676e43c814fee9c8cf402'
   },
   chainId: 1,
+  projectId: '260e2bfb25e604e64f4ebd6eec1bb3d8',
   auctionStartBlock: 15225534,
   // httpRpc: 'https://eth-goerli.g.alchemy.com/v2/yPJzT7r3rcFmI4ekjA9S7S1SP688b-au',
   // // httpRpc: 'http://goerli-geth.dappnode:8545',
