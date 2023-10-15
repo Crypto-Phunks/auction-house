@@ -34,6 +34,10 @@ h3 {
   text-decoration: none;
 }
 
+.colored {
+  color: rgba(var(--active-color), 1);
+}
+
 .bold {
   font-weight: 700;
 }

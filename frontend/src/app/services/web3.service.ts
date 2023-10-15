@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 
 import { environment } from 'src/environments/environment';
-import { StateService } from './state.service';
 
 import { catchError, filter, Observable, of, tap } from 'rxjs';
 
@@ -13,6 +12,12 @@ import { Chain, Config, PublicClient, WebSocketPublicClient, configureChains, cr
 import { jsonRpcProvider } from '@wagmi/core/providers/jsonRpc';
 import { EthereumClient, w3mConnectors } from '@web3modal/ethereum';
 import { Web3Modal } from '@web3modal/html';
+import { Store } from '@ngrx/store';
+import { GlobalState } from '@/interfaces/global-state';
+import { Treasury } from '@/interfaces/treasury';
+import { Auction } from '@/interfaces/auction';
+
+import * as actions from '@/state/actions/app-state.action';
 
 const projectId = '260e2bfb25e604e64f4ebd6eec1bb3d8';
 
@@ -30,7 +35,7 @@ export class Web3Service {
   minBidIncrementPercentage: number = 5;
 
   constructor(
-    private stateSvc: StateService
+    private store: Store<GlobalState>,
   ) {
 
     const { chains, publicClient, webSocketPublicClient } = configureChains(
@@ -57,7 +62,7 @@ export class Web3Service {
         projectId,
         themeVariables: {
           '--w3m-font-family': 'Montserrat, sans-serif',
-          '--w3m-accent-color': 'rgba(var(--pink), 1)',
+          '--w3m-accent-color': 'rgba(var(--active-color), 1)',
           '--w3m-accent-fill-color': 'rgba(var(--text-color), 1)',
           '--w3m-background-color': 'rgba(var(--background), 1)',
           '--w3m-overlay-background-color': 'rgba(var(--background), .5)',
@@ -75,7 +80,6 @@ export class Web3Service {
     );
 
     this.createListeners();
-    this.getTreasuryValues();
     this.getAuctionDetails();
   }
 
@@ -92,6 +96,13 @@ export class Web3Service {
         return of(err);
       }),
     ).subscribe();
+
+    getPublicClient().watchContractEvent({
+      address: environment.addresses.auctionHouseAddress as `0x${string}`,
+      abi: [...environment.abis.auctionHouseAbi] as const,
+      onLogs: logs => this.store.dispatch(actions.contractEvent({ logs })),
+      onError: error => console.log(error),
+    });
   }
 
   async connect(): Promise<void> {
@@ -107,15 +118,16 @@ export class Web3Service {
     if (!address) return;
     address = address.toLowerCase();
 
-    this.stateSvc.setWeb3Connected(true);
-    this.setWalletAddress(address);
+    this.store.dispatch(actions.setConnected({ connected: true }));
+    this.store.dispatch(actions.setWalletAddress({ walletAddress: address }));
   }
 
   async disconnectWeb3(): Promise<void> {
     if (getAccount().isConnected) {
       await disconnect();
-      this.stateSvc.setWeb3Connected(false);
-      this.stateSvc.setWalletAddress(null);
+
+      this.store.dispatch(actions.setConnected({ connected: false }));
+      this.store.dispatch(actions.setWalletAddress({ walletAddress: '' }));
     }
   }
 
@@ -126,16 +138,8 @@ export class Web3Service {
     }
   }
 
-  setWeb3Connected(val: boolean): void {
-    this.stateSvc.setWeb3Connected(val);
-  }
-
-  setWalletAddress(val: string | null): void {
-    this.stateSvc.setWalletAddress(val);
-  }
-
-  async getTreasuryValues(): Promise<void> {
-    const usdcAbi: any = [{"inputs": [{ "internalType": "address", "name": "account", "type": "address" }],"name": "balanceOf","outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],"stateMutability": "view","type": "function"},{"inputs": [],"name": "decimals","outputs": [{ "internalType": "uint8", "name": "", "type": "uint8" }],"stateMutability": "view","type": "function"}];
+  async fetchTreasuryValues(): Promise<Treasury> {
+    const usdcAbi: any = [{"inputs": [{ "internalType": "address", "name": "account", "type": "address" }],"name": "balanceOf","outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],"stateMutability": "view","type": "function"},{"inputs": [],"name": "decimals","outputs": [{ "internalType": "uint8", "name": "", "type": "uint8" }],"stateMutability": "view","type": "function"}] as const;
 
     try {
       const publicClient = getPublicClient();
@@ -162,12 +166,12 @@ export class Web3Service {
         usdcValue.result as unknown as bigint || BigInt(0),
         decimals.result as unknown as number || 0
       );
-
-      this.stateSvc.updateTreasuryBalance({ usdc: formattedUsdcValue, eth: formatEther(balance) });
+      return { usdc: formattedUsdcValue, eth: formatEther(balance) };
     } catch (error) {
       console.log(error);
-      this.stateSvc.updateTreasuryBalance({ usdc: '0', eth: '0' });
     }
+
+    return { usdc: '0', eth: '0' };
   }
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -178,7 +182,7 @@ export class Web3Service {
     const publicClient = getPublicClient();
     const punkImage = await publicClient?.readContract({
       address: environment.addresses.punkDataAddress as `0x${string}`,
-      abi: environment.abis.punkDataABI,
+      abi: [ ...environment.abis.punkDataAbi ] as const,
       functionName: 'punkImage',
       args: [tokenId],
     });
@@ -189,7 +193,7 @@ export class Web3Service {
     const publicClient = getPublicClient();
     const punkAttributes = await publicClient?.readContract({
       address: environment.addresses.punkDataAddress as `0x${string}`,
-      abi: environment.abis.punkDataABI,
+      abi: [ ...environment.abis.punkDataAbi ] as const,
       functionName: 'punkAttributes',
       args: [tokenId],
     });
@@ -204,7 +208,7 @@ export class Web3Service {
     const publicClient = getPublicClient();
     const res = await publicClient?.readContract({
       address: environment.addresses.auctionHouseAddress as `0x${string}`,
-      abi: environment.abis.auctionHouseABI,
+      abi: [...environment.abis.auctionHouseAbi] as const,
       functionName: 'minBidIncrementPercentage',
       args: [],
     });
@@ -215,10 +219,23 @@ export class Web3Service {
     const publicClient = getPublicClient();
     return await publicClient?.readContract({
       address: environment.addresses.auctionHouseAddress as `0x${string}`,
-      abi: environment.abis.auctionHouseABI,
+      abi: [...environment.abis.auctionHouseAbi] as const,
       functionName: 'auction',
       args: [],
     });
+  }
+
+  typedAuction(auction: any[]): Auction {
+    return {
+      phunkId: Number(auction[0]).toString(),
+      amount: auction[1],
+      startTime: Number(auction[2]) * 1000,
+      endTime: Number(auction[3]) * 1000,
+      bidder: auction[4],
+      settled: auction[5],
+      id: Number(auction[6]).toString(),
+      bids: []
+    };
   }
 
   async setBid(tokenId: bigint, bidAmount: number): Promise<`0x${string}` | undefined> {
@@ -228,7 +245,7 @@ export class Web3Service {
 
     const tx: any = {
       address: environment.addresses.auctionHouseAddress as `0x${string}`,
-      abi: environment.abis.auctionHouseABI,
+      abi: [...environment.abis.auctionHouseAbi] as const,
       functionName: 'createBid',
       args: [tokenId]
     };
@@ -243,7 +260,7 @@ export class Web3Service {
 
     const tx: any = {
       address: environment.addresses.auctionHouseAddress as `0x${string}`,
-      abi: environment.abis.auctionHouseABI,
+      abi: [...environment.abis.auctionHouseAbi] as const,
       functionName: 'settleCurrentAndCreateNewAuction',
       args: []
     };

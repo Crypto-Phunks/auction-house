@@ -1,4 +1,4 @@
-import { enableProdMode, importProvidersFrom } from '@angular/core';
+import { enableProdMode, importProvidersFrom, isDevMode } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { provideRouter } from '@angular/router';
 import { HttpClientModule } from '@angular/common/http';
@@ -17,6 +17,14 @@ import { routes } from '@/routes';
 
 import { environment } from './environments/environment';
 
+import { provideStore } from '@ngrx/store';
+import { provideEffects } from '@ngrx/effects';
+import { provideRouterStore, routerReducer } from '@ngrx/router-store';
+import { provideStoreDevtools } from '@ngrx/store-devtools';
+
+import { appStateReducer } from '@/state/reducers/app-state.reducer';
+import { AppStateEffects } from '@/state/effects/app-state.effect';
+
 if (environment.production) enableProdMode();
 
 bootstrapApplication(AppComponent, {
@@ -31,6 +39,21 @@ bootstrapApplication(AppComponent, {
       enabled: environment.production,
       registrationStrategy: 'registerWhenStable:30000',
     }),
+
+    provideRouterStore(),
+    provideStore({
+      appState: appStateReducer,
+      router: routerReducer
+    }),
+    provideEffects([
+      AppStateEffects,
+    ]),
+    provideStoreDevtools({
+      maxAge: 25,
+      logOnly: !isDevMode(),
+      trace: true,
+    }),
+
     importProvidersFrom(HttpClientModule, GraphQLModule),
   ],
 });

@@ -7,7 +7,6 @@ import { SwiperComponent, SwiperModule } from 'swiper/angular';
 import { TimeagoModule } from 'ngx-timeago';
 
 import { DataService } from '@/services/data.service';
-import { StateService } from '@/services/state.service';
 
 import { PhunkImageDirective } from '@/directives/phunk-image.directive';
 
@@ -51,7 +50,6 @@ export class AuctionSliderComponent implements OnInit, AfterViewInit, OnChanges 
   }
 
   constructor(
-    private stateSvc: StateService,
     public dataSvc: DataService,
     private router: Router
   ) {}
@@ -67,11 +65,7 @@ export class AuctionSliderComponent implements OnInit, AfterViewInit, OnChanges 
   }
 
   async goToAuction(auctionId: string): Promise<void> {
-    const auctionIdBN = BigInt(auctionId);
-    const { auctionIndex } = await this.stateSvc.getAuctionIndexAndData(auctionIdBN);
-    if (auctionIndex === 0) this.router.navigate(['/']);
-    else if (auctionIndex > -1) this.router.navigate(['/auction', auctionId]);
-    else this.router.navigate(['/']);
+    this.router.navigate(['/auction', auctionId]);
   }
 
   nextSlide(): void {

@@ -69,7 +69,7 @@ h2 {
   align-items: center;
 
   font-size: 9.8rem;
-  color: rgba(var(--pink), 1);
+  color: rgba(var(--active-color), 1);
 
   @media (max-width: $small) {
     font-size: 5rem;
@@ -81,12 +81,7 @@ h2 {
 .trait-wrapper {
   font-family: $secondary-font-stack;
   font-size: 1.4rem;
-
   padding-top: 2rem;
-
-  .pink {
-    color: rgba(var(--pink), 1);
-  }
 }
 
 .trait-count-label {

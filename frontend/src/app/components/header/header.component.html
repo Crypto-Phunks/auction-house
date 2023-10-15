@@ -30,14 +30,14 @@
 
     <button
       class="mode"
-      [class]="themeSvc.theme$ | async"
-      (click)="setMode()">
+      [class]="theme$ | async"
+      (click)="setModeClick$.next()">
 
       <ng-template [ngTemplateOutlet]="modeIcon"></ng-template>
     </button>
 
-    <button class="connect" (click)="connect()">
-      {{ (stateSvc.web3Connected$ | async) ? 'Disconnect' : 'Connect' }}
+    <button class="connect" (click)="connectClick$.next()">
+      {{ (web3Connected$ | async) ? 'Disconnect' : 'Connect' }}
     </button>
   </nav>
 </div>

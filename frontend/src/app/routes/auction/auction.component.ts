@@ -14,7 +14,12 @@ import { environment } from 'src/environments/environment';
 
 import { combineLatest, map, Subscription } from 'rxjs';
 
+import { Store } from '@ngrx/store';
+
 import tinyColor from 'tinycolor2';
+
+import { GlobalState } from '@/interfaces/global-state';
+import * as selectors from '@/state/selectors/app-state.selector';
 
 @Component({
   standalone: true,
@@ -32,7 +37,7 @@ import tinyColor from 'tinycolor2';
   styleUrls: ['./auction.component.scss']
 })
 
-export class AuctionComponent implements OnInit, AfterViewInit, OnDestroy {
+export class AuctionComponent {
 
   env = environment;
 
@@ -40,37 +45,20 @@ export class AuctionComponent implements OnInit, AfterViewInit, OnDestroy {
   subscription!: Subscription;
 
   // Visuals
-  backgroundColor: string = '0, 0, 0';
+  color: string = '0, 0, 0';
   expanded: boolean = false;
 
+  auctions$ = this.store.select(selectors.selectAuctions);
+  activeAuction$ = this.store.select(selectors.selectActiveAuction);
+  color$ = this.store.select(selectors.selectActiveColor);
+
   constructor(
+    private store: Store<GlobalState>,
     public dataSvc: DataService
   ) {}
 
-  ngOnInit(): void {
-    console.log('AuctionComponent', 'ngOnInit');
-
-    this.subscription = combineLatest([
-      this.dataSvc.auctionData$,
-      this.dataSvc.activeIndex$
-    ]).pipe(
-      map(([ data, index ]) => data[index])
-    ).subscribe((res) => {
-      this.currentAuction = res;
-    });
-  }
-
-  ngAfterViewInit(): void {
-    console.log('AuctionComponent', 'ngAfterViewInit');
-  }
-
-  ngOnDestroy(): void {
-    this.subscription?.unsubscribe();
-    console.log('AuctionComponent', 'ngOnDestroy');
-  }
-
   async setBackgroundColor($event: tinyColor.ColorFormats.RGBA) {
-    this.backgroundColor = `${$event.r}, ${$event.g}, ${$event.b}`;
+    this.color = `${$event.r}, ${$event.g}, ${$event.b}`;
   }
 
 }

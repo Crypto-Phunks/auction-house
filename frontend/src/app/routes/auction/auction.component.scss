@@ -13,6 +13,8 @@
   align-items: flex-end;
   justify-content: space-between;
 
+  background-color: rgba(var(--active-color), .1);
+
   @include trans();
 
   .inner {
@@ -69,7 +71,7 @@
 
       a {
         font-weight: 600;
-        color: rgba(var(--pink), 1);
+        color: rgba(var(--active-color), 1);
         text-decoration: none;
       }
 
@@ -83,7 +85,7 @@
           float: left;
 
           font-family: $secondary-font-stack;
-          color: rgba(var(--pink), 1);
+          color: rgba(var(--active-color), 1);
           line-height: .9;
           margin-right: 1rem;
           font-size: 8rem;
@@ -111,7 +113,7 @@
         a {
           font-family: $secondary-font-stack;
           font-size: 1.2rem;
-          color: rgba(var(--pink), 1);
+          color: rgba(var(--active-color), 1);
           font-weight: normal;
           text-decoration: none;
 

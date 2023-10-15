@@ -1,19 +1,23 @@
-import { AfterViewInit, Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 
-import { DataService } from '@/services/data.service';
-import { ThemeService } from '@/services/theme.service';
+import { Store } from '@ngrx/store';
+
 import { Web3Service } from '@/services/web3.service';
-import { StateService } from '@/services/state.service';
 
 import { TimerComponent } from '@/components/timer/timer.component';
 import { BidHistoryComponent } from '@/components/bid-history/bid-history.component';
 
 import { WeiPipe } from '@/pipes/wei.pipe';
 import { MinBidPipe } from '@/pipes/min-bid.pipe';
+
 import { TippyDirective } from '@/directives/tippy.directive';
+
+import { GlobalState } from '@/interfaces/global-state';
+
+import * as selectors from '@/state/selectors/app-state.selector';
 
 @Component({
   standalone: true,
@@ -38,7 +42,6 @@ import { TippyDirective } from '@/directives/tippy.directive';
 export class BidComponent {
 
   @Input() currentAuction!: any;
-  @Input() backgroundColor!: string;
 
   bidValue = new FormControl<number | null>(null);
 
@@ -49,11 +52,12 @@ export class BidComponent {
   errorMessage!: string | null;
   txHash!: `0x${string}` | string | null | undefined;
 
+  web3Connected$ = this.store.select(selectors.selectConnected);
+  theme$ = this.store.select(selectors.selectTheme);
+
   constructor(
-    public dataSvc: DataService,
+    private store: Store<GlobalState>,
     public web3Svc: Web3Service,
-    public stateSvc: StateService,
-    public themeSvc: ThemeService
   ) {}
 
   async startNewAuction(): Promise<void> {

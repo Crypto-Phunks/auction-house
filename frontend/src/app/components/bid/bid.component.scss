@@ -118,7 +118,7 @@
     button,
     a {
       padding: 1rem;
-      color: rgba(var(--pink), 1);
+      color: rgba(var(--active-color), 1);
       font-weight: 700;
       text-decoration: none;
     }
@@ -149,6 +149,8 @@
         padding: 0 1.5rem;
         font-size: 1.8rem;
         text-align: left;
+
+        background-color: rgba(var(--active-color), .2);
       }
 
       .info {
@@ -228,7 +230,7 @@
 
   text-align: center;
   font-size: 1.4rem;
-  color: rgba(var(--pink), 1);
+  color: rgba(var(--active-color), 1);
   font-weight: 700;
   line-height: 1.5;
   word-break: break-all;
@@ -250,7 +252,7 @@
     align-items: center;
     padding: .5rem;
 
-    color: rgba(var(--pink), 1);
+    color: rgba(var(--active-color), 1);
 
     svg {
       margin-left: .5rem;

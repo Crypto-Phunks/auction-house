@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 
 import { Apollo, gql } from 'apollo-angular';
-import { BehaviorSubject, catchError, map, switchMap, tap } from 'rxjs';
+import { BehaviorSubject, Observable, catchError, map, switchMap, tap } from 'rxjs';
 
 import { Auction, Bid } from '../interfaces/auction';
 
@@ -42,48 +42,22 @@ const GET_AUCTIONS = gql`
 
 export class DataService {
 
-  private auctionData = new BehaviorSubject<Auction[]>([]);
-  public auctionData$ = this.auctionData.asObservable();
-
-  private activeIndex = new BehaviorSubject<number>(0);
-  public activeIndex$ = this.activeIndex.asObservable();
-
   constructor(
     private apollo: Apollo
   ) {
-    this.getAuctionData();
+    // this.getAuctionData();
   }
 
-  getAuctionData(): void {
+  fetchAuctionData(): Observable<Auction[]> {
     const watchQuery = (first: number, skip: number): any => ({
       query: GET_AUCTIONS,
       variables: { first, skip },
-      pollInterval: 2000
+      pollInterval: 5000
     });
 
-    const query = (first: number, skip: number): any => ({
-      query: GET_AUCTIONS,
-      variables: { first, skip }
-    });
-
-    this.apollo.query(query(1, 0)).pipe(
-      map((res: any) => this.transformAuctionData(res)),
-      tap((res: Auction[]) => this.setAuctionData(res)),
-
-      switchMap(() => this.apollo.query(query(1000, 1))),
-      map((res: any) => this.transformAuctionData(res)),
-      tap((res: Auction[]) => this.mergeAuctionData(res)),
-
-      switchMap(() => this.apollo.watchQuery(watchQuery(1, 0)).valueChanges),
-      map((res: any) => this.transformAuctionData(res)),
-      tap((res: Auction[]) => this.mergeAuctionData(res)),
-
-      catchError((err: any) => {
-        console.log(`getAuctionData`, err);
-        this.getAuctionData();
-        return [];
-      })
-    ).subscribe();
+    return this.apollo.watchQuery(watchQuery(365, 0)).valueChanges.pipe(
+      map((res) => this.transformAuctionData(res))
+    );
   }
 
   transformAuctionData(res: any): Auction[] {
@@ -108,27 +82,22 @@ export class DataService {
     return auctions;
   }
 
-  mergeAuctionData(newAuctionData: Auction[]) {
-    const currentAuctionData = this.auctionData.getValue();
-    const mergedData: Auction[] = [...currentAuctionData];
+  // mergeAuctionData(newAuctionData: Auction[]) {
+  //   const currentAuctionData = this.auctionData.getValue();
+  //   const mergedData: Auction[] = [...currentAuctionData];
 
-    for (const newAuction of newAuctionData) {
-      const index = mergedData.findIndex(auction => auction.id === newAuction.id);
-      if (index !== -1) mergedData[index] = newAuction;
-      else mergedData.unshift(newAuction);
-    }
+  //   for (const newAuction of newAuctionData) {
+  //     const index = mergedData.findIndex(auction => auction.id === newAuction.id);
+  //     if (index !== -1) mergedData[index] = newAuction;
+  //     else mergedData.unshift(newAuction);
+  //   }
 
-    mergedData.sort((a: Auction, b: Auction) => Number(b.startTime) - Number(a.startTime));
-    this.setAuctionData(mergedData);
-  }
+  //   mergedData.sort((a: Auction, b: Auction) => Number(b.startTime) - Number(a.startTime));
+  // }
 
-  setAuctionData(auctionData: Auction[]) {
-    this.auctionData.next(auctionData);
-  }
-
-  setActiveIndex(index: number) {
-    this.activeIndex.next(index);
-  }
+  // setActiveIndex(index: number) {
+  //   this.activeIndex.next(index);
+  // }
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   // Util //////////////////////////////////////////////////////////////////////////////////////////////////////////////

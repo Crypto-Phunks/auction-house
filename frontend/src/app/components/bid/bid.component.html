@@ -26,8 +26,8 @@
 
 <div
   class="form-wrapper"
-  [class]="themeSvc.theme$ | async"
-  [class.connect-active]="!(stateSvc.web3Connected$ | async) && !currentAuction?.settled"
+  [class]="theme$ | async"
+  [class.connect-active]="!(web3Connected$ | async) && !currentAuction?.settled"
   [class.complete-active]="auctionComplete">
 
   <div class="connect">
@@ -57,7 +57,6 @@
       <input
         type="number"
         [formControl]="bidValue"
-        [style.backgroundColor]="'rgba(' + backgroundColor + ', .2)'"
         [placeholder]="currentAuction?.amount | minBid : web3Svc.minBidIncrementPercentage"
       />
 

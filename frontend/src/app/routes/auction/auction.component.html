@@ -1,31 +1,27 @@
-<div
-  class="head-wrapper"
-  [style.backgroundColor]="'rgba(' + backgroundColor + ', .15)'">
+<div class="head-wrapper">
 
   <div class="inner">
-
     <app-bid
-      [currentAuction]="currentAuction"
-      [backgroundColor]="backgroundColor">
+      [currentAuction]="(activeAuction$ | async)">
     </app-bid>
 
     <phunk-image
-      [currentAuction]="currentAuction"
-      [dimensions]="{width: 600, height: 600}"
-      (backgroundColor)="setBackgroundColor($event)"
+      [currentAuction]="(activeAuction$ | async)"
+      [dimensions]="{ width: 600, height: 600 }"
+      [setActiveColor]="true"
       [animate]="true">
     </phunk-image>
 
     <app-phunk-info
-      [currentAuction]="currentAuction">
+      [currentAuction]="(activeAuction$ | async)">
     </app-phunk-info>
   </div>
 </div>
 
 <app-auction-slider
-  *ngIf="(dataSvc.auctionData$ | async)?.length"
-  [auctionData]="dataSvc.auctionData$ | async"
-  [currentAuction]="currentAuction">
+  *ngIf="auctions$ | async as auctions"
+  [auctionData]="auctions"
+  [currentAuction]="(activeAuction$ | async)">
 </app-auction-slider>
 
 <div class="copy-wrapper">
@@ -38,7 +34,7 @@
     <p>If you hold a Phunk, you actually own it, without fear that your Phunks' ownership can be resold from one corporation to another. That's the beauty of Web3; removing power from corporations and giving power back to the People.</p>
 
     <button
-      class="pink"
+      class="colored"
       *ngIf="!expanded"
       (click)="expanded = !expanded">
 
@@ -56,7 +52,7 @@
 
       <p><strong>CryptoPhunks Auction House was built by Chopper and Kenobi with the purpose of facilitating perpetual auctions for CryptoPhunks held in the Treasury Vault. All Ethereum collected from settled auctions will remain in the treasury under direction of the community.</strong></p>
 
-      <p class="pink"><strong>No fees, no royalties. Phree. Phunky.</strong></p>
+      <p class="colored"><strong>No fees, no royalties. Phree. Phunky.</strong></p>
     </ng-container>
   </div>
 

@@ -1,6 +1,14 @@
 import { Injectable } from '@angular/core';
+import { Theme } from '@/interfaces/global-state';
 
-import { BehaviorSubject, Observable } from 'rxjs';
+interface ThemeConfig {
+  '--background': string;
+  '--text-color': string;
+};
+
+export type ThemesConfig = {
+  [key in Theme]: ThemeConfig;
+};
 
 @Injectable({
   providedIn: 'root'
@@ -8,41 +16,33 @@ import { BehaviorSubject, Observable } from 'rxjs';
 
 export class ThemeService {
 
-  private theme = new BehaviorSubject<any>(localStorage.getItem('mode') || 'dark');
-  theme$ = this.theme.asObservable();
+  themeStyles: ThemesConfig = {
+    dark: {
+      '--background': '19, 20, 21',
+      '--text-color': '255, 255, 255',
+    },
+    light: {
+      '--background': '255, 255, 255',
+      '--text-color': '0, 0, 0',
+    }
+  };
 
-  constructor() {
-
-    const themeStyles: any = {
-      dark: {
-        '--background': '19, 20, 21',
-        '--text-color': '255, 255, 255',
-      },
-      light: {
-        '--background': '255, 255, 255',
-        '--text-color': '0, 0, 0',
-      }
+  setTheme(theme: Theme | null) {
+    if (!theme) {
+      console.warn('No theme provided');
+      return;
     }
 
-    this.theme$.subscribe((res: any) => {
-      // console.log(res);
-      this.setThemeStyles(res, themeStyles[res]);
-    });
-  }
-
-  setThemeStyles(theme: string, themeStyles: any) {
-    Object.keys(themeStyles).map((property) => {
+    const styles = this.themeStyles[theme];
+    (Object.keys(styles) as Array<keyof ThemeConfig>).forEach((property: keyof ThemeConfig) => {
       document.documentElement.style.setProperty(
         property,
-        themeStyles[property]
+        styles[property]
       );
     });
-    document.body.dataset['theme'] = theme;
-  }
 
-  setTheme(value: string, temporary?: boolean) {
-    this.theme.next(value);
-    if (!temporary) localStorage.setItem('mode', value);
+    document.body.dataset['theme'] = theme;
+    localStorage.setItem('mode', theme);
   }
 
 }

@@ -1,8 +1,13 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-import { StateService } from '@/services/state.service';
+import { Store } from '@ngrx/store';
+
 import { FormatCashPipe } from '@/pipes/format-cash.pipe';
+
+import { GlobalState } from '@/interfaces/global-state';
+
+import * as selectors from '@/state/selectors/app-state.selector';
 
 @Component({
   selector: 'app-treasury-info',
@@ -17,10 +22,10 @@ import { FormatCashPipe } from '@/pipes/format-cash.pipe';
 })
 export class TreasuryInfoComponent {
 
-  constructor(
-    public stateSvc: StateService
-  ) {
+  treasuryValues$ = this.store.select(selectors.selectTreasuryValues);
 
-  }
+  constructor(
+    private store: Store<GlobalState>,
+  ) {}
 
 }

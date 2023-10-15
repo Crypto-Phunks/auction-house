@@ -1,6 +1,6 @@
-import auctionHouseABI from '../app/abi/AuctionHouse.json';
-import punkDataABI from '../app/abi/PunkData.json';
-import phunkTokenABI from '../app/abi/PhunkToken.json';
+import { auctionHouseAbi } from '../app/abi/AuctionHouse';
+import { punkDataAbi } from '../app/abi/PunkData';
+import { phunkTokenAbi } from '../app/abi/PhunkToken';
 
 export const environment = {
   production: true,
@@ -28,9 +28,9 @@ export const environment = {
   // httpRpc: 'http://goerli-geth.dappnode:8545',
   graphURI: 'https://api.studio.thegraph.com/query/4302/crypto-phunks-auction-goerli/version/latest',
   abis: {
-    auctionHouseABI,
-    punkDataABI,
-    phunkTokenABI
+    auctionHouseAbi,
+    punkDataAbi,
+    phunkTokenAbi
   },
   addresses: {
     // Auction house contract

@@ -1,12 +1,17 @@
 import { Directive, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { Store } from '@ngrx/store';
 
 import tinyColor from 'tinycolor2';
 import { axisBottom, axisLeft, scaleBand, select } from 'd3';
 
-import { Auction } from '../interfaces/auction';
-import { Web3Service } from '../services/web3.service';
+import { Web3Service } from '@/services/web3.service';
 
 import { placeholderPunkData } from './placeholderPunkData';
+
+import { Auction } from '@/interfaces/auction';
+import { GlobalState } from '@/interfaces/global-state';
+
+import * as actions from '@/state/actions/app-state.action';
 
 @Directive({
   standalone: true,
@@ -15,12 +20,11 @@ import { placeholderPunkData } from './placeholderPunkData';
 
 export class PhunkImageDirective implements OnChanges {
 
-  @Input() currentAuction!: Auction;
+  @Input() currentAuction!: Auction | null;
   @Input() animate: boolean = false;
   @Input() dimensions!: { width: number, height: number };
-  @Input() addBackground?: boolean;
-
-  @Output() backgroundColor: EventEmitter<tinyColor.ColorFormats.RGBA> = new EventEmitter();
+  @Input() addBackground: boolean = false;
+  @Input() setActiveColor: boolean = false;
 
   // SVG Chart Element
   svg!: d3.Selection<SVGGElement, unknown, null, undefined>;
@@ -38,6 +42,7 @@ export class PhunkImageDirective implements OnChanges {
   dataArr: Array<any> = [];
 
   constructor(
+    private store: Store<GlobalState>,
     private el: ElementRef,
     private web3Svc: Web3Service
   ) {}
@@ -131,13 +136,16 @@ export class PhunkImageDirective implements OnChanges {
     });
 
     const hslColors = Object.keys(colorGroups).map((key: any) => tinyColor(key).toHsl());
-    const brightest = hslColors.sort((a: any, b: any) => (`${b.s}`.localeCompare(`${a.s}`) || b.l - a.l))[2];
-    const rgb = tinyColor(brightest).toRgb();
-    this.backgroundColor.emit(rgb);
+
+    // Use both saturation and lightness to sort and get the most vibrant color.
+    const vibrant = hslColors.sort((a: any, b: any) => (b.s * b.l - a.s * a.l))[0];
+    const rgb = tinyColor(vibrant).toRgb();
+
+    if (this.setActiveColor) this.store.dispatch(actions.setActiveColor({ color: `${rgb.r}, ${rgb.g}, ${rgb.b}` }));
 
     if (this.addBackground) {
       const element = this.el.nativeElement as HTMLElement;
-      element.style.backgroundColor = tinyColor(brightest).setAlpha(.15).toRgbString();
+      element.style.backgroundColor = tinyColor(vibrant).setAlpha(.15).toRgbString();
     }
   }
 

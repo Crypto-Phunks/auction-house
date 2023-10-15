@@ -1,6 +1,6 @@
-import auctionHouseABI from '../app/abi/AuctionHouse.json';
-import punkDataABI from '../app/abi/PunkData.json';
-import phunkTokenABI from '../app/abi/PhunkToken.json';
+import { auctionHouseAbi } from '../app/abi/AuctionHouse';
+import { punkDataAbi } from '../app/abi/PunkData';
+import { phunkTokenAbi } from '../app/abi/PhunkToken';
 
 // // This file can be replaced during build by using the `fileReplacements` array.
 // // `ng build` replaces `environment.ts` with `environment.prod.ts`.
@@ -11,9 +11,9 @@ export const environment = {
   httpRpc: 'http://goerli-geth.dappnode:8545',
   graphURI: 'https://api.studio.thegraph.com/query/4302/crypto-phunks-auction-goerli/version/latest',
   abis: {
-    auctionHouseABI,
-    punkDataABI,
-    phunkTokenABI
+    auctionHouseAbi,
+    punkDataAbi,
+    phunkTokenAbi
   },
   addresses: {
     // Auction house contract
@@ -32,6 +32,32 @@ export const environment = {
     vapidKey: 'BGHr7jzKtdWpY71z907UwcktW3UHz-1ToH5e-J08fzQfKnW7I_sxXUEmltWfd5yaKMr_oQpKYVY6oWZGtwhTjN4',
     // vapidKey: 'BGMg426N6tLVS6OsWuCxfewDOomVAcPLhi2KkUNGAZiiPQB8XlBZHad9lKsFfrhm5zyKx2sTBWiT5Uxs08Sd0pQ'
   },
+
+  // httpRpc: 'http://geth.dappnode:8545',
+  // wssRpc: 'wss://geth.dappnode:8546',
+  // graphURI: 'https://gateway.thegraph.com/api/7209a22e64c7ef1706183bd515b9d15c/subgraphs/id/B58L1YUzPKRZ8GSkizgGDtH1vdtvem76jDVK4LipFTbi',
+  // abis: {
+  //   auctionHouseAbi,
+  //   punkDataAbi,
+  //   phunkTokenAbi
+  // },
+  // addresses: {
+  //   // Auction house contract
+  //   auctionHouseAddress: '0x0E7f7d8007C0FCcAc2a813a25f205b9030697856',
+  //   // Punk Data Contract
+  //   punkDataAddress: '0x16F5A35647D6F03D5D3da7b35409D65ba03aF3B2',
+  //   // Treasurey Address (Where the phunks live)
+  //   treasuryWalletAddress: '0x61f874551c69f0E40c9f55219107B408C989aDEc',
+  //   // CryptoPhunks Token Contract
+  //   phunkTokenAddress: '0xf07468ead8cf26c752c676e43c814fee9c8cf402'
+  // },
+  // chainId: 1,
+  // auctionStartBlock: 15225534,
+  // notifications: {
+  //   apiUrl: 'https://goerli.phunks.auction/api',
+  //   // apiUrl: 'http://localhost:3200',
+  //   vapidKey: 'BGHr7jzKtdWpY71z907UwcktW3UHz-1ToH5e-J08fzQfKnW7I_sxXUEmltWfd5yaKMr_oQpKYVY6oWZGtwhTjN4',
+  // },
 };
 
 // /*

@@ -1,7 +1,7 @@
 <button
   class="prev-auction"
   [class.active]="currentAuction?.id !== '1'"
-  (click)="prevAuction()">
+  (click)="navAuction$.next('prev')">
 
   &#60;
 </button>
@@ -9,7 +9,7 @@
 <button
   class="next-auction"
   [class.active]="currentAuction?.settled"
-  (click)="nextAuction()">
+  (click)="navAuction$.next('next')">
 
   &#62;
 </button>
@@ -22,11 +22,11 @@
 
 <ng-container *ngIf="phunkAttributes?.length">
   <div class="one-of-label">
-    One of <span class="pink">{{ traits[phunkAttributes[0]] || 0 }}</span> {{ phunkAttributes[0] || '????' }} phunks
+    One of <span class="colored">{{ traits[phunkAttributes[0]] || 0 }}</span> {{ phunkAttributes[0] || '????' }} phunks
   </div>
 
   <div class="trait-count-label">
-    <span class="pink">
+    <span class="colored">
       {{ phunkAttributes.length ? phunkAttributes.length - 1 : 0 }}
     </span> trait{{ phunkAttributes.length - 1 > 1 ? 's' : '' }}
   </div>
@@ -40,7 +40,7 @@
       class="trait"
       *ngIf="i">
 
-      <span class="pink">{{ trait }} </span>{{ ((traits[trait]) / 10000) | percent : '1.1-1' }}
+      <span class="colored">{{ trait }} </span>{{ ((traits[trait]) / 10000) | percent : '1.1-1' }}
     </div>
   </ng-container>
 </div>
