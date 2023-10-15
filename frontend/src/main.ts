@@ -37,7 +37,7 @@ bootstrapApplication(AppComponent, {
     provideRouter(routes),
     provideServiceWorker('ngsw-worker.js', {
       enabled: environment.production,
-      registrationStrategy: 'registerWhenStable:30000',
+      registrationStrategy: 'registerImmediately',
     }),
 
     provideRouterStore(),
