@@ -196,8 +196,8 @@ export class ImageService {
     const canvasHeight = 418 * 2;
     const bleed = 30 * 2;
 
-    const phunkWidth = canvasWidth / 1.5;
-    const phunkHeight = canvasHeight / 1.5;
+    const phunkWidth = canvasHeight * .85;
+    const phunkHeight = canvasHeight * .85;
 
     const rightSide = (canvasWidth / 2) + bleed;
 
@@ -211,6 +211,7 @@ export class ImageService {
     const punkData = await this.web3Svc.getPunkImage(phunkId);
     const svg = await this.createPhunkSvg(punkData, phunkWidth, phunkHeight);
     const color = this.getColor(punkData);
+    const textColor = tinyColor(color).setAlpha(1).toRgbString();
 
     ctx.fillStyle = color;
     ctx.fillRect(
@@ -228,16 +229,22 @@ export class ImageService {
     //   canvasHeight - (bleed * 2)
     // );
 
-    const img = new Image();
-    img.onload = () => ctx.drawImage(
-      img,
-      (rightSide / 2) - (phunkWidth / 2) - (bleed / 2),
-      canvasHeight - phunkHeight - bleed
-    );
-    img.onerror = err => { throw err };
-    img.src = Buffer.from(svg);
+    await new Promise<void>((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        ctx.drawImage(
+          img,
+          (rightSide / 2) - (phunkWidth / 2) - (bleed / 2),
+          canvasHeight - phunkHeight - bleed
+        );
+        resolve();
+      };
+      img.onerror = err => { throw err };
+      img.src = Buffer.from(svg);
+    });
 
     // Line 1 (left side)
+    const line1Pos = bleed;
     const line1 = 'CryptoPhunk';
     ctx.textBaseline = 'top';
     ctx.font = 'normal 40px RetroComputer';
@@ -245,16 +252,16 @@ export class ImageService {
     ctx.fillText(
       line1,
       rightSide,
-      bleed - 10
+      line1Pos
     );
 
     // Line 2 (left side)
     ctx.font = 'normal 132px RetroComputer';
-    ctx.fillStyle = '#FF04B4';
+    ctx.fillStyle = textColor;
     ctx.fillText(
-      phunkId,
+      ('0000' + phunkId).slice(-4),
       rightSide - 6,
-      bleed + 10
+      line1Pos + 20
     );
 
     const punkTraits = await this.web3Svc.getPunkAttributes(parseInt(phunkId).toString());
@@ -262,7 +269,7 @@ export class ImageService {
     const sex = phunkData.traits.filter((tr) => tr.label === phunkData.sex)[0];
 
     // Line 2
-    const line2Pos = (bleed * 4.5);
+    const line2Pos = line1Pos + 220;
     const line2_1 = `One of`;
     ctx.font = 'normal 28px RetroComputer';
     ctx.textAlign = 'left';
@@ -277,7 +284,7 @@ export class ImageService {
     const line2_2 = `${sex.value}`;
     ctx.font = 'normal 28px RetroComputer';
     ctx.textAlign = 'left';
-    ctx.fillStyle = '#ff04b4';
+    ctx.fillStyle = textColor;
     ctx.fillText(
       line2_2,
       rightSide + line2_1Width,
@@ -300,7 +307,7 @@ export class ImageService {
     const line3_1 = `${phunkData.traitCount}`;
     ctx.font = 'normal 28px RetroComputer';
     ctx.textAlign = 'left';
-    ctx.fillStyle = '#ff04b4';
+    ctx.fillStyle = textColor;
     ctx.fillText(
       line3_1,
       rightSide,
@@ -342,7 +349,7 @@ export class ImageService {
       line4Pos
     );
 
-    if (!auctionComplete) {
+    // if (!auctionComplete) {
       const line4_2 = `Time Remaining`;
       ctx.font = 'normal 24px RetroComputer';
       ctx.textAlign = 'right';
@@ -353,16 +360,16 @@ export class ImageService {
         canvasWidth - bleed,
         line4Pos
       );
-    }
+    // }
 
     ctx.globalAlpha = 1;
 
     // Line 5
     const line5Pos = line4Pos + 30;
-    const line5_1 = Number(this.web3Svc.weiToEth(BigInt(auction.amount))).toFixed(3);
+    const line5_1 = this.web3Svc.weiToEth(BigInt(auction.amount));
     ctx.font = 'normal 56px RetroComputer';
     ctx.textAlign = 'left';
-    ctx.fillStyle = '#ff04b4';
+    ctx.fillStyle = textColor;
     ctx.fillText(
       line5_1,
       rightSide,
@@ -380,7 +387,7 @@ export class ImageService {
       line5Pos + 40
     );
 
-    if (!auctionComplete) {
+    // if (!auctionComplete) {
       const timeRemaining = this.millisecondsToTimeFormat((Number(auction.endTime) * 1000) - Date.now());
       const line5_3 = timeRemaining;
       ctx.font = 'normal 56px RetroComputer';
@@ -391,7 +398,7 @@ export class ImageService {
         canvasWidth - bleed,
         line5Pos
       );
-    }
+    // }
 
     // Site link
     const website_link = 'phunks.auction';
@@ -407,17 +414,25 @@ export class ImageService {
     ctx.globalAlpha = 1;
 
     const phreePhunky = await readFile(path.join(__dirname, '../static/phree-phunky.svg'), { encoding: 'utf8' });
-    const phreePhunkyImg = new Image();
-    phreePhunkyImg.onload = () => ctx.drawImage(
-      phreePhunkyImg,
-      rightSide,
-      canvasHeight - (bleed * 2)
-    );
-    phreePhunkyImg.onerror = err => { throw err };
-    phreePhunkyImg.src = Buffer.from(phreePhunky);
+
+    await new Promise<void>((resolve) => {
+      const phreePhunkyImg = new Image();
+      phreePhunkyImg.onload = () => {
+        ctx.drawImage(
+          phreePhunkyImg,
+          rightSide,
+          canvasHeight - (bleed + 50),
+          369 / 1.5,
+          24 / 1.5
+        );
+        resolve();
+      };
+      phreePhunkyImg.onerror = err => { throw err };
+      phreePhunkyImg.src = Buffer.from(phreePhunky);
+    });
 
     const buffer = canvas.toBuffer('image/png');
- 
+    // await writeFile(path.join(__dirname, `../../cards/${phunkId}.png`), buffer);
     return { base64: buffer.toString('base64'), color: tinyColor(color).toHex() };
   }
 
@@ -432,10 +447,11 @@ export class ImageService {
     });
   
     const hslColors = Object.keys(colorGroups).map((key: any) => tinyColor(key).toHsl());
-    const brightest = hslColors.sort((a: any, b: any) => {
-      if (b.s !== a.s) return b.s - a.s;
-      return b.l - a.l;
-    })[0];
+
+    // Use both saturation and lightness to sort and get the most vibrant color.
+    const vibrant1 = hslColors.sort((a: any, b: any) => (b.s * b.l - a.s * a.l))[0];
+    const vibrant2 = hslColors.sort((a: any, b: any) => (b.s * b.l - a.s * a.l))[1];
+    const brightest = vibrant1.l > .75 ? vibrant2 : vibrant1;
   
     return tinyColor(brightest).setAlpha(.15).toRgbString();
   }

@@ -33,6 +33,23 @@ export class AppService {
     private readonly spbSvc: SupabaseService
   ) {
 
+    this.imgSvc.createCard({
+      id: '1',
+      amount: '100000000000000000',
+      endTime: Math.floor((new Date().getTime() + 10000) / 1000).toString(),
+      startTime: Math.floor((new Date().getTime() - 100000) / 1000).toString(),
+      settled: false,
+      bidder: {
+        id: '0xf1Aa941d56041d47a9a18e99609A047707Fe96c7',
+      },
+      phunk: {
+        id: '3',
+      },
+      bids: [
+        { amount: '10000000000000000', }
+      ]
+    });
+
     // Watch for new auctions
     this.web3Svc.auctionCreated$.subscribe((log) => {
       if (!log) return;

@@ -45,7 +45,6 @@ export class PhunkInfoComponent implements OnChanges {
     this.store.dispatch(actions.navigateAuctions({ direction }));
   }
 
-
   async getAttributes(phunkId: string): Promise<void> {
     const rawAttributes = phunkId ? await this.web3Svc.getPunkAttributes(phunkId) : null;
     this.phunkAttributes = rawAttributes ? this.dataSvc.transformAttributes(rawAttributes) : [];
