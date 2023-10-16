@@ -121,3 +121,33 @@
 <app-footer />
 
 <div class="loading" [class.active]="!(loaded$ | async)"></div>
+
+<!-- <div class="add-to-homescreen">
+
+  <button>x</button>
+</div> -->
+
+<div
+  *ngIf="showInstallPrompt"
+  class="add-to-homescreen"
+  [class]="promptType">
+
+  <div class="copy">
+    <h3>Get Notified</h3>
+    <p>{{ installMessage }}</p>
+  </div>
+
+  <div class="instruction">
+    <div class="left">
+      <ng-template [ngTemplateOutlet]="shareIcon"></ng-template>
+    </div>
+
+    <p>{{ installInstructions }}</p>
+  </div>
+  <button (click)="dismissPrompt()">x</button>
+</div>
+
+
+<ng-template #shareIcon>
+  <svg height="18" viewBox="0 0 14 18" width="14" xmlns="http://www.w3.org/2000/svg"><g fill="rgba(var(--background), 1)"><path d="m6 0h2v2h-2z"/><path d="m8 2h2v2h-2z"/><path d="m4 2h2v2h-2z"/><path d="m2 4h2v2h-2z"/><path d="m10 4h2v2h-2z"/><path d="m6 6h2v2h-2z"/><path d="m6 4h2v2h-2z"/><path d="m6 2h2v2h-2z"/><path d="m6 8h2v2h-2z"/><path d="m6 10h2v2h-2z"/><path d="m6 12h2v2h-2z"/><path d="m10 8h2v2h-2z"/><path d="m12 8h2v2h-2z"/><path d="m12 10h2v2h-2z"/><path d="m12 12h2v2h-2z"/><path d="m12 14h2v2h-2z"/><path d="m12 16h2v2h-2z"/><path d="m10 16h2v2h-2z"/><path d="m8 16h2v2h-2z"/><path d="m6 16h2v2h-2z"/><path d="m4 16h2v2h-2z"/><path d="m2 16h2v2h-2z"/><path d="m0 16h2v2h-2z"/><path d="m0 14h2v2h-2z"/><path d="m0 12h2v2h-2z"/><path d="m0 10h2v2h-2z"/><path d="m0 8h2v2h-2z"/><path d="m2 8h2v2h-2z"/></g></svg>
+</ng-template>

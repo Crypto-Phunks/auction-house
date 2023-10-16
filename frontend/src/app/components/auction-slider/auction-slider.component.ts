@@ -43,6 +43,10 @@ export class AuctionSliderComponent implements OnChanges {
   sliderConfig: SwiperOptions = {
     slidesPerView: 2,
     virtual: true,
+    freeMode: {
+      enabled: true,
+      sticky: true,
+    },
     breakpoints: {
       500: { slidesPerView: 3 },
       650: { slidesPerView: 4 },

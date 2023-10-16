@@ -8,7 +8,7 @@ export const initialState: AppState = {
 
   connected: false,
   walletAddress: '',
-  theme: null,
+  theme: 'light',
   treasuryValues: null,
 
   activeAuction: null,
