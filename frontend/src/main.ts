@@ -1,5 +1,5 @@
 import { enableProdMode, importProvidersFrom, isDevMode } from '@angular/core';
-import { HammerModule, bootstrapApplication } from '@angular/platform-browser';
+import { HAMMER_GESTURE_CONFIG, HammerModule, bootstrapApplication } from '@angular/platform-browser';
 import { DecimalPipe } from '@angular/common';
 import { provideRouter } from '@angular/router';
 import { HttpClientModule } from '@angular/common/http';

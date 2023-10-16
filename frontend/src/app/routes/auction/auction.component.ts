@@ -63,6 +63,13 @@ export class AuctionComponent {
     this.color = `${$event.r}, ${$event.g}, ${$event.b}`;
   }
 
+  swipe($event: any) {
+    console.log($event);
+    $event.preventDefault();
+    if ($event.direction === 2) this.onSwipeLeft();
+    if ($event.direction === 4) this.onSwipeRight();
+  }
+
   onSwipeLeft() {
     this.store.dispatch(actions.navigateAuctions({ direction: 'next' }));
   }

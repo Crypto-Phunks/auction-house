@@ -12,6 +12,8 @@
   align-items: flex-end;
   justify-content: space-between;
 
+  touch-action: pan-y !important;
+
   // padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
   background-color: rgba(var(--active-color), .1);
   @include trans();
