@@ -126,10 +126,14 @@
   height: 100%;
 
   opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
 
   background-color: rgba(var(--background), 1);
 
   &.active {
     opacity: 1;
+    pointer-events: all;
+    visibility: visible;
   }
 }
