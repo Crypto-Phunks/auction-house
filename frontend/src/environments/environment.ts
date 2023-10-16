@@ -42,7 +42,7 @@ export const environment = {
   // projectId: '260e2bfb25e604e64f4ebd6eec1bb3d8',
   // auctionStartBlock: 15225534,
   // notifications: {
-  //   apiUrl: 'https://goerli.phunks.auction/api',
+  //   apiUrl: 'https://staging.phunks.auction/api',
   //   // apiUrl: 'http://localhost:3200',
   //   vapidKey: 'BGHr7jzKtdWpY71z907UwcktW3UHz-1ToH5e-J08fzQfKnW7I_sxXUEmltWfd5yaKMr_oQpKYVY6oWZGtwhTjN4',
   // },
