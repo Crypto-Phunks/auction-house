@@ -43,7 +43,7 @@ export class AppService {
         id: '0xf1Aa941d56041d47a9a18e99609A047707Fe96c7',
       },
       phunk: {
-        id: '3',
+        id: '1060',
       },
       bids: [
         { amount: '10000000000000000', }

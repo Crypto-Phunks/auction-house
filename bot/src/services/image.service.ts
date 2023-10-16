@@ -194,26 +194,27 @@ export class ImageService {
 
     const canvasWidth = 800 * 2;
     const canvasHeight = 418 * 2;
-    const bleed = 30 * 2;
-
-    const phunkWidth = canvasHeight * .85;
-    const phunkHeight = canvasHeight * .85;
+    const bleed = 35 * 2;
 
     const rightSide = (canvasWidth / 2) + bleed;
+
+    const phunkSize = canvasHeight - (bleed * 2);
 
     const canvas = createCanvas(canvasWidth, canvasHeight);
     const ctx = canvas.getContext('2d');
 
+    // const punkData = await this.web3Svc.punkDataContract['punkImage'](parseInt(phunkId).toString());
+    const punkData = await this.web3Svc.getPunkImage(phunkId);
+    const svg = await this.createPhunkSvg(punkData, phunkSize, phunkSize);
+    const color = this.getColor(punkData);
+
+    const bgColor = tinyColor(color).setAlpha(.1).toRgbString();
+    const textColor = tinyColor(color).setAlpha(.75).toRgbString();
+
     ctx.fillStyle = '#131415';
     ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
-    // const punkData = await this.web3Svc.punkDataContract['punkImage'](parseInt(phunkId).toString());
-    const punkData = await this.web3Svc.getPunkImage(phunkId);
-    const svg = await this.createPhunkSvg(punkData, phunkWidth, phunkHeight);
-    const color = this.getColor(punkData);
-    const textColor = tinyColor(color).setAlpha(1).toRgbString();
-
-    ctx.fillStyle = color;
+    ctx.fillStyle = bgColor;
     ctx.fillRect(
       bleed,
       bleed,
@@ -234,8 +235,8 @@ export class ImageService {
       img.onload = () => {
         ctx.drawImage(
           img,
-          (rightSide / 2) - (phunkWidth / 2) - (bleed / 2),
-          canvasHeight - phunkHeight - bleed
+          (rightSide / 2) - (phunkSize / 2) - (bleed / 2),
+          canvasHeight - phunkSize - bleed
         );
         resolve();
       };
@@ -432,7 +433,7 @@ export class ImageService {
     });
 
     const buffer = canvas.toBuffer('image/png');
-    // await writeFile(path.join(__dirname, `../../cards/${phunkId}.png`), buffer);
+    await writeFile(path.join(__dirname, `../../cards/${phunkId}.png`), buffer);
     return { base64: buffer.toString('base64'), color: tinyColor(color).toHex() };
   }
 
@@ -453,7 +454,7 @@ export class ImageService {
     const vibrant2 = hslColors.sort((a: any, b: any) => (b.s * b.l - a.s * a.l))[1];
     const brightest = vibrant1.l > .75 ? vibrant2 : vibrant1;
   
-    return tinyColor(brightest).setAlpha(.15).toRgbString();
+    return tinyColor(brightest).toRgbString();
   }
   
   // Create SVG from punk data
