@@ -9,6 +9,9 @@ import { GlobalState, Theme } from './interfaces/global-state';
 import { Store } from '@ngrx/store';
 
 import * as actions from './state/actions/app-state.action';
+import * as selectors from './state/selectors/app-state.selector';
+
+import { environment } from 'src/environments/environment';
 
 @Component({
   standalone: true,
@@ -26,6 +29,11 @@ import * as actions from './state/actions/app-state.action';
 
 export class AppComponent {
 
+  env = environment;
+  expanded: boolean = false;
+
+  loaded$ = this.store.select(selectors.selectLoaded);
+
   constructor(
     private store: Store<GlobalState>,
   ) {
@@ -35,5 +43,4 @@ export class AppComponent {
     this.store.dispatch(actions.fetchAuctions());
     this.store.dispatch(actions.fetchTreasuryValues());
   }
-
 }

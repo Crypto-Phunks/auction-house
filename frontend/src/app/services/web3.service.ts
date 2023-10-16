@@ -6,13 +6,17 @@ import { environment } from 'src/environments/environment';
 import { catchError, filter, Observable, of, tap } from 'rxjs';
 
 import { FallbackTransport, TransactionReceipt, formatEther, formatUnits, parseEther } from 'viem';
+
 import { mainnet, goerli } from 'viem/chains';
 
-import { Chain, Config, PublicClient, WebSocketPublicClient, configureChains, createConfig, disconnect, getAccount, getNetwork, getPublicClient, getWalletClient, switchNetwork, watchAccount } from '@wagmi/core';
+import { Chain, Config, InjectedConnector, PublicClient, WebSocketPublicClient, configureChains, createConfig, disconnect, getAccount, getNetwork, getPublicClient, getWalletClient, switchNetwork, watchAccount } from '@wagmi/core';
 
+import { WalletConnectConnector } from '@wagmi/core/connectors/walletConnect';
+import { CoinbaseWalletConnector } from '@wagmi/core/connectors/coinbaseWallet';
+
+import { createWeb3Modal, EIP6963Connector } from '@web3modal/wagmi';
+import { Web3Modal } from '@web3modal/wagmi/dist/types/src/client';
 import { jsonRpcProvider } from '@wagmi/core/providers/jsonRpc';
-import { EthereumClient, w3mConnectors } from '@web3modal/ethereum';
-import { Web3Modal } from '@web3modal/html';
 
 import { GlobalState } from '@/interfaces/global-state';
 import { Treasury } from '@/interfaces/treasury';
@@ -30,7 +34,9 @@ export class Web3Service {
 
   config!: Config<PublicClient<FallbackTransport, Chain>, WebSocketPublicClient<FallbackTransport, Chain>>;
   connectors: any[] = [];
+
   web3modal!: Web3Modal;
+
   connectedState!: Observable<any>;
 
   minBidIncrementPercentage: number = 5;
@@ -39,7 +45,13 @@ export class Web3Service {
     private store: Store<GlobalState>,
   ) {
 
-    const { chains, publicClient, webSocketPublicClient } = configureChains(
+    const metadata = {
+      name: 'CryptoPunks Auction House',
+      description: '',
+      url: 'https://phunks.auction',
+    };
+
+    const { chains, publicClient } = configureChains(
       [mainnet, goerli],
       [
         jsonRpcProvider({
@@ -48,37 +60,30 @@ export class Web3Service {
       ],
     );
 
-    this.connectors = [ ...w3mConnectors({ projectId, chains }) ];
-
-    this.config = createConfig({
+    const wagmiConfig = createConfig({
       autoConnect: true,
-      publicClient,
-      webSocketPublicClient,
-      connectors: this.connectors
+      connectors: [
+        new WalletConnectConnector({ chains, options: { projectId, showQrModal: false }}),
+        new EIP6963Connector({ chains }),
+        new InjectedConnector({ chains, options: { shimDisconnect: true } }),
+        new CoinbaseWalletConnector({ chains, options: { appName: metadata.name }}),
+      ],
+      publicClient
     });
 
-    const ethereumClient = new EthereumClient(this.config, chains);
-    this.web3modal = new Web3Modal(
-      {
-        projectId,
-        themeVariables: {
-          '--w3m-font-family': 'Montserrat, sans-serif',
-          '--w3m-accent-color': 'rgba(var(--active-color), 1)',
-          '--w3m-accent-fill-color': 'rgba(var(--text-color), 1)',
-          '--w3m-background-color': 'rgba(var(--background), 1)',
-          '--w3m-overlay-background-color': 'rgba(var(--background), .5)',
-          '--w3m-z-index': '2000',
-          '--w3m-wallet-icon-border-radius': '0',
-          '--w3m-background-border-radius': '0',
-          '--w3m-button-border-radius': '0',
-          '--w3m-button-hover-highlight-border-radius': '0',
-          '--w3m-container-border-radius': '0',
-          '--w3m-icon-button-border-radius': '0',
-          '--w3m-secondary-button-border-radius': '0',
-        }
+    this.web3modal = createWeb3Modal({
+      wagmiConfig,
+      projectId,
+      chains,
+      themeVariables: {
+        '--w3m-font-family': 'Montserrat, sans-serif',
+        '--w3m-accent': 'rgba(var(--active-color), 1)',
+        '--w3m-color-mix': 'rgba(var(--active-color), 1)',
+        '--w3m-color-mix-strength': 0,
+        '--w3m-border-radius-master': '0',
+        '--w3m-z-index': 2000,
       },
-      ethereumClient
-    );
+    });
 
     this.createListeners();
     this.getAuctionDetails();
@@ -97,18 +102,11 @@ export class Web3Service {
         return of(err);
       }),
     ).subscribe();
-
-    getPublicClient().watchContractEvent({
-      address: environment.addresses.auctionHouseAddress as `0x${string}`,
-      abi: [...environment.abis.auctionHouseAbi] as const,
-      onLogs: logs => this.store.dispatch(actions.contractEvent({ logs })),
-      onError: error => console.log(error),
-    });
   }
 
   async connect(): Promise<void> {
     try {
-      await this.web3modal.openModal();
+      await this.web3modal.open();
     } catch (error) {
       console.log(error);
       this.disconnectWeb3();
@@ -163,10 +161,13 @@ export class Web3Service {
         })
       ]);
 
+      if (!decimals.result || !usdcValue.result) throw new Error('No balance found');
+
       const formattedUsdcValue = formatUnits(
-        usdcValue.result as unknown as bigint || BigInt(0),
-        decimals.result as unknown as number || 0
+        usdcValue.result as any, // String (bigint)
+        decimals.result as any, // Number
       );
+
       return { usdc: formattedUsdcValue, eth: formatEther(balance) };
     } catch (error) {
       console.log(error);
@@ -183,9 +184,15 @@ export class Web3Service {
     const publicClient = getPublicClient();
     const punkImage = await publicClient?.readContract({
       address: environment.addresses.punkDataAddress as `0x${string}`,
-      abi: [ ...environment.abis.punkDataAbi ] as const,
+      abi: [{
+        inputs: [{ internalType: 'uint16', name: 'index', type: 'uint16' }],
+        name: 'punkImage',
+        outputs: [{ internalType: 'bytes', name: '', type: 'bytes' }],
+        stateMutability: 'view',
+        type: 'function',
+      }],
       functionName: 'punkImage',
-      args: [tokenId],
+      args: [Number(tokenId)],
     });
     return punkImage as string;
   }
@@ -194,9 +201,15 @@ export class Web3Service {
     const publicClient = getPublicClient();
     const punkAttributes = await publicClient?.readContract({
       address: environment.addresses.punkDataAddress as `0x${string}`,
-      abi: [ ...environment.abis.punkDataAbi ] as const,
+      abi: [{
+        inputs: [{ internalType: 'uint16', name: 'index', type: 'uint16' }],
+        name: 'punkAttributes',
+        outputs: [{ internalType: 'string', name: 'text', type: 'string' }],
+        stateMutability: 'view',
+        type: 'function',
+      }],
       functionName: 'punkAttributes',
-      args: [tokenId],
+      args: [Number(tokenId)],
     });
     return punkAttributes as string;
   }
@@ -209,9 +222,14 @@ export class Web3Service {
     const publicClient = getPublicClient();
     const res = await publicClient?.readContract({
       address: environment.addresses.auctionHouseAddress as `0x${string}`,
-      abi: [...environment.abis.auctionHouseAbi] as const,
+      abi: [{
+        inputs: [],
+        name: 'minBidIncrementPercentage',
+        outputs: [{ internalType: 'uint8', name: '', type: 'uint8' }],
+        stateMutability: 'view',
+        type: 'function',
+      }],
       functionName: 'minBidIncrementPercentage',
-      args: [],
     });
     this.minBidIncrementPercentage = res as number;
   }
@@ -220,9 +238,22 @@ export class Web3Service {
     const publicClient = getPublicClient();
     return await publicClient?.readContract({
       address: environment.addresses.auctionHouseAddress as `0x${string}`,
-      abi: [...environment.abis.auctionHouseAbi] as const,
+      abi: [{
+        inputs: [],
+        name: 'auction',
+        outputs: [
+          { internalType: 'uint256', name: 'phunkId', type: 'uint256' },
+          { internalType: 'uint256', name: 'amount', type: 'uint256' },
+          { internalType: 'uint256', name: 'startTime', type: 'uint256' },
+          { internalType: 'uint256', name: 'endTime', type: 'uint256' },
+          { internalType: 'address payable', name: 'bidder', type: 'address' },
+          { internalType: 'bool', name: 'settled', type: 'bool' },
+          { internalType: 'uint256', name: 'auctionId', type: 'uint256' },
+        ],
+        stateMutability: 'view',
+        type: 'function',
+      }],
       functionName: 'auction',
-      args: [],
     });
   }
 
@@ -246,7 +277,13 @@ export class Web3Service {
 
     const tx: any = {
       address: environment.addresses.auctionHouseAddress as `0x${string}`,
-      abi: [...environment.abis.auctionHouseAbi] as const,
+      abi: [{
+        inputs: [{ internalType: 'uint256', name: 'phunkId', type: 'uint256' }],
+        name: 'createBid',
+        outputs: [],
+        stateMutability: 'payable',
+        type: 'function',
+      }],
       functionName: 'createBid',
       args: [tokenId]
     };
@@ -261,7 +298,13 @@ export class Web3Service {
 
     const tx: any = {
       address: environment.addresses.auctionHouseAddress as `0x${string}`,
-      abi: [...environment.abis.auctionHouseAbi] as const,
+      abi: [{
+        inputs: [],
+        name: 'settleCurrentAndCreateNewAuction',
+        outputs: [],
+        stateMutability: 'nonpayable',
+        type: 'function',
+      }],
       functionName: 'settleCurrentAndCreateNewAuction',
       args: []
     };
@@ -279,8 +322,8 @@ export class Web3Service {
   // UTILS /////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-  weiToEth(wei: bigint): string {
-    return formatEther(wei);
+  weiToEth(wei: string): string {
+    return formatEther(BigInt(wei));
   }
 
   async getEnsOwner(name: string) {

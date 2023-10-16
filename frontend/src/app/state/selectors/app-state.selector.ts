@@ -4,6 +4,11 @@ import { GlobalState, AppState } from '@/interfaces/global-state';
 
 export const selectAppState = (state: GlobalState) => state.appState;
 
+export const selectLoaded = createSelector(
+  selectAppState,
+  (appState: AppState) => appState.loaded
+);
+
 export const selectConnected = createSelector(
   selectAppState,
   (appState: AppState) => appState.connected

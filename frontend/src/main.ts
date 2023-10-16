@@ -1,5 +1,6 @@
 import { enableProdMode, importProvidersFrom, isDevMode } from '@angular/core';
-import { bootstrapApplication } from '@angular/platform-browser';
+import { HammerModule, bootstrapApplication } from '@angular/platform-browser';
+import { DecimalPipe } from '@angular/common';
 import { provideRouter } from '@angular/router';
 import { HttpClientModule } from '@angular/common/http';
 import { provideServiceWorker } from '@angular/service-worker';
@@ -9,7 +10,6 @@ import { TimeagoClock, TimeagoDefaultClock, TimeagoDefaultFormatter, TimeagoForm
 import { GraphQLModule } from '@/graphql.module';
 import { AppComponent } from '@/app.component';
 
-import { DecimalPipe } from '@angular/common';
 import { WeiPipe } from '@/pipes/wei.pipe';
 import { MinBidPipe } from '@/pipes/min-bid.pipe';
 
@@ -25,6 +25,8 @@ import { provideStoreDevtools } from '@ngrx/store-devtools';
 import { appStateReducer } from '@/state/reducers/app-state.reducer';
 import { AppStateEffects } from '@/state/effects/app-state.effect';
 
+import 'hammerjs';
+
 if (environment.production) enableProdMode();
 
 bootstrapApplication(AppComponent, {
@@ -34,6 +36,7 @@ bootstrapApplication(AppComponent, {
     { provide: WeiPipe, useClass: WeiPipe },
     { provide: MinBidPipe, useClass: MinBidPipe },
     { provide: DecimalPipe, useClass: DecimalPipe },
+
     provideRouter(routes),
     provideServiceWorker('ngsw-worker.js', {
       enabled: environment.production,
@@ -54,6 +57,10 @@ bootstrapApplication(AppComponent, {
       trace: true,
     }),
 
-    importProvidersFrom(HttpClientModule, GraphQLModule),
+    importProvidersFrom(
+      HttpClientModule,
+      GraphQLModule,
+      HammerModule,
+    ),
   ],
 });

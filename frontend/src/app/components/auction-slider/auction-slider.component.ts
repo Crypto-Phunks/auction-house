@@ -51,11 +51,9 @@ export class AuctionSliderComponent implements OnChanges {
       1130: { slidesPerView: 4 },
       1250: { slidesPerView: 5 }
     },
-    on: {
-      slideChange: (swiper) => {
-        this.store.dispatch(actions.slideChanged({ activeIndex: swiper.realIndex }));
-      }
-    },
+    // on: {
+    //   slideChange: (swiper) => {}
+    // },
   }
 
   constructor(

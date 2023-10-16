@@ -1,4 +1,4 @@
-import { Directive, ElementRef, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { Directive, ElementRef, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import tinyColor from 'tinycolor2';
@@ -17,7 +17,6 @@ import * as actions from '@/state/actions/app-state.action';
   standalone: true,
   selector: 'phunk-image'
 })
-
 export class PhunkImageDirective implements OnChanges {
 
   @Input() currentAuction!: Auction | null;
@@ -49,10 +48,10 @@ export class PhunkImageDirective implements OnChanges {
   async ngOnChanges(changes: SimpleChanges): Promise<void> {
     if (!this.svg) await this.buildChart();
 
-    const auction = changes['currentAuction'];
+    const auction = changes.currentAuction;
     if (
-      auction?.currentValue?.phunkId !== auction?.previousValue?.phunkId &&
-      changes['currentAuction']?.currentValue
+      auction?.currentValue &&
+      auction?.currentValue?.phunkId !== auction?.previousValue?.phunkId
     ) {
       this.buildPhunk(auction.currentValue.phunkId);
     }
@@ -144,7 +143,6 @@ export class PhunkImageDirective implements OnChanges {
     const rgb = tinyColor(chosenVibrant).toRgb();
 
     if (this.setActiveColor) {
-      console.log(vibrant1.l, vibrant2.l);
       this.store.dispatch(actions.setActiveColor({ color: `${rgb.r}, ${rgb.g}, ${rgb.b}` }));
     }
 
@@ -153,5 +151,4 @@ export class PhunkImageDirective implements OnChanges {
       element.style.backgroundColor = tinyColor(chosenVibrant).setAlpha(.15).toRgbString();
     }
   }
-
 }

@@ -16,10 +16,11 @@ export class MinBidPipe implements PipeTransform {
   ) {}
 
   transform(value: string, percentage: number): any {
+    if (!value) return '0';
+
     const increment = Number(value) / (100 / percentage);
     const minBid = Number(value) + increment;
-    const minBidBigint = BigInt(minBid);
-    const ether = this.web3Svc.weiToEth(minBidBigint);
+    const ether = this.web3Svc.weiToEth(minBid.toString());
 
     return `Ξ${this.decimal.transform(ether, '0.1-4')} +`;
   }

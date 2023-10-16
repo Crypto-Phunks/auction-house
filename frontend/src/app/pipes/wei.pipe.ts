@@ -13,8 +13,8 @@ export class WeiPipe implements PipeTransform {
 
   transform(value: string): string {
     if (!value) return '0';
-    const bigIntVal = BigInt(value);
-    const eth = this.web3Svc.weiToEth(bigIntVal);
+
+    const eth = this.web3Svc.weiToEth(value);
     return Number(eth).toFixed(3);
   }
 }

@@ -1,7 +1,3 @@
-import { auctionHouseAbi } from '../app/abi/AuctionHouse';
-import { punkDataAbi } from '../app/abi/PunkData';
-import { phunkTokenAbi } from '../app/abi/PhunkToken';
-
 // // This file can be replaced during build by using the `fileReplacements` array.
 // // `ng build` replaces `environment.ts` with `environment.prod.ts`.
 // // The list of file replacements can be found in `angular.json`.
@@ -10,11 +6,6 @@ export const environment = {
   production: false,
   httpRpc: 'http://goerli-geth.dappnode:8545',
   graphURI: 'https://api.studio.thegraph.com/query/4302/crypto-phunks-auction-goerli/version/latest',
-  abis: {
-    auctionHouseAbi,
-    punkDataAbi,
-    phunkTokenAbi
-  },
   addresses: {
     // Auction house contract
     auctionHouseAddress: '0x1CCf05242C20c82B0f8d7C2E80679dEc4f484325',
@@ -37,11 +28,6 @@ export const environment = {
   // httpRpc: 'http://geth.dappnode:8545',
   // wssRpc: 'wss://geth.dappnode:8546',
   // graphURI: 'https://gateway.thegraph.com/api/7209a22e64c7ef1706183bd515b9d15c/subgraphs/id/B58L1YUzPKRZ8GSkizgGDtH1vdtvem76jDVK4LipFTbi',
-  // abis: {
-  //   auctionHouseAbi,
-  //   punkDataAbi,
-  //   phunkTokenAbi
-  // },
   // addresses: {
   //   // Auction house contract
   //   auctionHouseAddress: '0x0E7f7d8007C0FCcAc2a813a25f205b9030697856',
@@ -53,6 +39,7 @@ export const environment = {
   //   phunkTokenAddress: '0xf07468ead8cf26c752c676e43c814fee9c8cf402'
   // },
   // chainId: 1,
+  // projectId: '260e2bfb25e604e64f4ebd6eec1bb3d8',
   // auctionStartBlock: 15225534,
   // notifications: {
   //   apiUrl: 'https://goerli.phunks.auction/api',

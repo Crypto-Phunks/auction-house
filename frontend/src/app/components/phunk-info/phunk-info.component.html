@@ -1,7 +1,7 @@
 <button
   class="prev-auction"
   [class.active]="currentAuction?.id !== '1'"
-  (click)="navAuction$.next('prev')">
+  (click)="navigateAuctions('prev')">
 
   &#60;
 </button>
@@ -9,7 +9,7 @@
 <button
   class="next-auction"
   [class.active]="currentAuction?.settled"
-  (click)="navAuction$.next('next')">
+  (click)="navigateAuctions('next')">
 
   &#62;
 </button>

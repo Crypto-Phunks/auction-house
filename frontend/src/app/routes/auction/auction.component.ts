@@ -1,8 +1,12 @@
-import { AfterViewInit, Component, OnDestroy, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { HammerModule } from '@angular/platform-browser';
+import { Store } from '@ngrx/store';
 
 import { DataService } from '@/services/data.service';
+
 import { Auction } from '@/interfaces/auction';
+import { GlobalState } from '@/interfaces/global-state';
 
 import { BidComponent } from '@/components/bid/bid.component';
 import { PhunkInfoComponent } from '@/components/phunk-info/phunk-info.component';
@@ -10,21 +14,20 @@ import { AuctionSliderComponent } from '@/components/auction-slider/auction-slid
 
 import { PhunkImageDirective } from '@/directives/phunk-image.directive';
 
-import { environment } from 'src/environments/environment';
-
-import { combineLatest, map, Subscription } from 'rxjs';
-
-import { Store } from '@ngrx/store';
+import { Subscription } from 'rxjs';
 
 import tinyColor from 'tinycolor2';
 
-import { GlobalState } from '@/interfaces/global-state';
+import { environment } from 'src/environments/environment';
+
 import * as selectors from '@/state/selectors/app-state.selector';
+import * as actions from '@/state/actions/app-state.action';
 
 @Component({
   standalone: true,
   imports: [
     CommonModule,
+    HammerModule,
 
     BidComponent,
     PhunkInfoComponent,
@@ -46,7 +49,6 @@ export class AuctionComponent {
 
   // Visuals
   color: string = '0, 0, 0';
-  expanded: boolean = false;
 
   auctions$ = this.store.select(selectors.selectAuctions);
   activeAuction$ = this.store.select(selectors.selectActiveAuction);
@@ -59,6 +61,14 @@ export class AuctionComponent {
 
   async setBackgroundColor($event: tinyColor.ColorFormats.RGBA) {
     this.color = `${$event.r}, ${$event.g}, ${$event.b}`;
+  }
+
+  onSwipeLeft() {
+    this.store.dispatch(actions.navigateAuctions({ direction: 'next' }));
+  }
+
+  onSwipeRight() {
+    this.store.dispatch(actions.navigateAuctions({ direction: 'prev' }));
   }
 
 }

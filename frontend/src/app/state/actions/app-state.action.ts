@@ -2,6 +2,11 @@ import { createAction, props } from '@ngrx/store';
 
 import { AppState } from '@/interfaces/global-state';
 
+export const setLoaded = createAction(
+  '[App State] Set Loaded',
+  props<{ loaded: boolean }>()
+);
+
 export const setConnected = createAction(
   '[App State] Set Wallet Connected',
   props<{ connected: boolean }>()
@@ -54,11 +59,11 @@ export const setActiveColor = createAction(
   props<{ color: AppState['activeColor'] }>()
 );
 
-export const slideChanged = createAction(
-  '[App State] Slide Changed',
-  props<{ activeIndex: AppState['activeIndex'] }>()
-);
-
 export const fetchTenMoreAuctions = createAction(
   '[App State] Fetch Ten More Auctions'
+);
+
+export const navigateAuctions = createAction(
+  '[App State] Navigate Auctions',
+  props<{ direction: 'next' | 'prev' }>()
 );

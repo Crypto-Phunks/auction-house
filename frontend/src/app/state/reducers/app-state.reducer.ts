@@ -4,6 +4,8 @@ import { Action, ActionReducer, createReducer, on } from '@ngrx/store';
 import * as AppStateActions from '../actions/app-state.action';
 
 export const initialState: AppState = {
+  loaded: false,
+
   connected: false,
   walletAddress: '',
   theme: null,
@@ -20,6 +22,15 @@ export const initialState: AppState = {
 export const appStateReducer: ActionReducer<AppState, Action> = createReducer(
   initialState,
   on(AppStateActions.resetAppState, () => initialState),
+  // Set the loaded state
+  on(AppStateActions.setLoaded, (state, { loaded }) => {
+    const setLoaded = {
+      ...state,
+      loaded,
+    };
+    // console.log('setLoaded', setLoaded);
+    return setLoaded;
+  }),
   // Set the wallet connected
   on(AppStateActions.setConnected, (state, { connected }) => {
     const setConnected = {

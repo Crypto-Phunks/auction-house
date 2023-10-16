@@ -1,3 +1,124 @@
 <app-header />
 <router-outlet />
+
+<div class="copy-wrapper">
+
+  <div class="left">
+    <p><span class="first-letter">C</span>ryptoPhunks (Phunks) is a Non-Fungible Token (NFT) collection on the Ethereum blockchain.  Phunks are free-use, public domain Art, run entirely by a decentralized community of artists and builders.  An important part of NFT history, Phunks raise fundamental questions and discussions around ownership, copyright, conceptual art, CC0, and blockchain provenance.</p>
+
+    <p>As a community, Phunks challenge the status quo and power structures. For many, Phunks symbolize anti-establishment counter-culture, and are known for their rebel Spirit - constantly pushing the boundaries.</p>
+
+    <p>If you hold a Phunk, you actually own it, without fear that your Phunks' ownership can be resold from one corporation to another. That's the beauty of Web3; removing power from corporations and giving power back to the People.</p>
+
+    <button
+      class="colored"
+      *ngIf="!expanded"
+      (click)="expanded = !expanded">
+
+      Read More
+    </button>
+
+    <ng-container *ngIf="expanded">
+      <p>In July 2021, the anonymous devs went out for a pack of smokes and never came back, completely abandoning the Phunks community. They did not transfer the smart contract, social media accounts, or the 496 CryptoPhunks NFTs held in the dev wallet.</p>
+
+      <p>In May 2022, Azuki developer under pseudonym ZAGABOND revealed himself as the original creator of CryptoPhunks followed by an apology and transfer of smart contract ownership, <strong>496 CryptoPhunks NFTs</strong> and <strong>$1.44M royalties</strong> to the Phunks community.</p>
+
+      <p>This was the result of excessive research done by Phunks community members <a href="https://twitter.com/Kiosko_eth" target="_blank">Kiosko</a>, <a href="https://twitter.com/NFTnetworking" target="_blank">Jpeg Papi</a>, <a href="https://twitter.com/hWonderofWorld" target="_blank">hwonder</a>, and <a href="https://twitter.com/Pauly0x" target="_blank">Pauly</a>.</p>
+
+      <p>Thus, a community-owned Treasury Vault was created and is represented by <a href="https://twitter.com/EggBoisNFT" target="_blank">Eggboi</a>, <a href="https://twitter.com/0xMort_" target="_blank">Mort0x</a>, <a href="https://twitter.com/NFTnetworking" target="_blank">Jpeg Papi</a>, <a href="https://twitter.com/chopper__dad" target="_blank">Chopper</a> and <a href="https://twitter.com/OG_Kenobi_Hello" target="_blank">Kenobi</a> as multisig signers.</p>
+
+      <p><strong>CryptoPhunks Auction House was built by Chopper and Kenobi with the purpose of facilitating perpetual auctions for CryptoPhunks held in the Treasury Vault. All Ethereum collected from settled auctions will remain in the treasury under direction of the community.</strong></p>
+
+      <p class="colored"><strong>No fees, no royalties. Phree. Phunky.</strong></p>
+    </ng-container>
+  </div>
+
+  <div class="right">
+    <h3>Auction House Info</h3>
+
+    <ul>
+      <li>
+        <a [href]="'https://etherscan.io/address/' + env.addresses.auctionHouseAddress" target="_blank">
+          Auction House Smart Contract
+          <svg height="12" viewBox="0 0 12 12" width="12" xmlns="http://www.w3.org/2000/svg"><path fill="rgba(var(--text-color), .5)" d="m4 0v2h-2v8h8v-2h2v4h-12v-12zm2 6v2h-2v-2zm2 0h-2v-2h2v-2h-2v-2h6v6h-2v-2h-2z" fill-rule="evenodd"/></svg>
+        </a>
+      </li>
+
+      <li>
+        <a [href]="'https://etherscan.io/address/' + env.addresses.treasuryWalletAddress" target="_blank">
+          Treasury Vault
+          <svg height="12" viewBox="0 0 12 12" width="12" xmlns="http://www.w3.org/2000/svg"><path fill="rgba(var(--text-color), .5)" d="m4 0v2h-2v8h8v-2h2v4h-12v-12zm2 6v2h-2v-2zm2 0h-2v-2h2v-2h-2v-2h6v6h-2v-2h-2z" fill-rule="evenodd"/></svg>
+        </a>
+      </li>
+    </ul>
+
+    <h3>CryptoPhunk Resources</h3>
+
+    <ul>
+      <li>
+        <a href="https://phunks.gitbook.io/knowledge-base/" target="_blank">
+          CryptoPhunks Knowledge Base
+          <svg height="12" viewBox="0 0 12 12" width="12" xmlns="http://www.w3.org/2000/svg"><path fill="rgba(var(--text-color), .5)" d="m4 0v2h-2v8h8v-2h2v4h-12v-12zm2 6v2h-2v-2zm2 0h-2v-2h2v-2h-2v-2h6v6h-2v-2h-2z" fill-rule="evenodd"/></svg>
+        </a>
+      </li>
+
+      <li>
+        <a href="https://notlarvalabs.com" target="_blank">
+          NotLarvaLabs Royalty Phree Market
+          <svg height="12" viewBox="0 0 12 12" width="12" xmlns="http://www.w3.org/2000/svg"><path fill="rgba(var(--text-color), .5)" d="m4 0v2h-2v8h8v-2h2v4h-12v-12zm2 6v2h-2v-2zm2 0h-2v-2h2v-2h-2v-2h6v6h-2v-2h-2z" fill-rule="evenodd"/></svg>
+        </a>
+      </li>
+
+      <li>
+        <a href="https://medium.com/@eggphunk" target="_blank">
+          Sup Phunks! Newsletter
+          <svg height="12" viewBox="0 0 12 12" width="12" xmlns="http://www.w3.org/2000/svg"><path fill="rgba(var(--text-color), .5)" d="m4 0v2h-2v8h8v-2h2v4h-12v-12zm2 6v2h-2v-2zm2 0h-2v-2h2v-2h-2v-2h6v6h-2v-2h-2z" fill-rule="evenodd"/></svg>
+        </a>
+      </li>
+
+      <li>
+        <a href="https://phunks.gitbook.io/knowledge-base/resources/links" target="_blank">
+          View All
+          <svg height="12" viewBox="0 0 12 12" width="12" xmlns="http://www.w3.org/2000/svg"><path fill="rgba(var(--text-color), .5)" d="m4 0v2h-2v8h8v-2h2v4h-12v-12zm2 6v2h-2v-2zm2 0h-2v-2h2v-2h-2v-2h6v6h-2v-2h-2z" fill-rule="evenodd"/></svg>
+        </a>
+      </li>
+    </ul>
+
+    <h3>Open Source Projects</h3>
+
+    <ul>
+      <li>
+        <a href="https://github.com/Crypto-Phunks/auction-house" target="_blank">
+          CryptoPhunks Auction House
+          <svg height="12" viewBox="0 0 12 12" width="12" xmlns="http://www.w3.org/2000/svg"><path fill="rgba(var(--text-color), .5)" d="m4 0v2h-2v8h8v-2h2v4h-12v-12zm2 6v2h-2v-2zm2 0h-2v-2h2v-2h-2v-2h6v6h-2v-2h-2z" fill-rule="evenodd"/></svg>
+        </a>
+      </li>
+
+      <li>
+        <a href="https://github.com/Crypto-Phunks/CryptoPhunksMarket" target="_blank">
+          NotLarvaLabs Market
+          <svg height="12" viewBox="0 0 12 12" width="12" xmlns="http://www.w3.org/2000/svg"><path fill="rgba(var(--text-color), .5)" d="m4 0v2h-2v8h8v-2h2v4h-12v-12zm2 6v2h-2v-2zm2 0h-2v-2h2v-2h-2v-2h6v6h-2v-2h-2z" fill-rule="evenodd"/></svg>
+        </a>
+      </li>
+
+      <li>
+        <a href="https://github.com/Crypto-Phunks/nft-sales-twitter-bot" target="_blank">
+          NFT sales Twitter bot
+          <svg height="12" viewBox="0 0 12 12" width="12" xmlns="http://www.w3.org/2000/svg"><path fill="rgba(var(--text-color), .5)" d="m4 0v2h-2v8h8v-2h2v4h-12v-12zm2 6v2h-2v-2zm2 0h-2v-2h2v-2h-2v-2h6v6h-2v-2h-2z" fill-rule="evenodd"/></svg>
+        </a>
+      </li>
+
+      <li>
+        <a href="https://phunks.gitbook.io/knowledge-base/resources/open-sourced" target="_blank">
+          View All
+          <svg height="12" viewBox="0 0 12 12" width="12" xmlns="http://www.w3.org/2000/svg"><path fill="rgba(var(--text-color), .5)" d="m4 0v2h-2v8h8v-2h2v4h-12v-12zm2 6v2h-2v-2zm2 0h-2v-2h2v-2h-2v-2h6v6h-2v-2h-2z" fill-rule="evenodd"/></svg>
+        </a>
+      </li>
+    </ul>
+  </div>
+</div>
+
 <app-footer />
+
+<!-- {{ (loaded$ | async) }} -->
+<!-- <div class="loading" [class.active]="!(loaded$ | async)"></div> -->

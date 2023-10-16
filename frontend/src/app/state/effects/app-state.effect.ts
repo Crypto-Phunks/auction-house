@@ -8,13 +8,14 @@ import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { GlobalState } from '@/interfaces/global-state';
 
 import * as actions from '@/state/actions/app-state.action';
-import * as selectors from '../selectors/app-state.selector';
+import * as selectors from '@/state/selectors/app-state.selector';
 
 import { catchError, from, map, of, switchMap, tap, withLatestFrom } from 'rxjs';
 import { ThemeService } from '@/services/theme.service';
 import { Web3Service } from '@/services/web3.service';
 import { DataService } from '@/services/data.service';
-import { Auction, Bid } from '@/interfaces/auction';
+import { Auction } from '@/interfaces/auction';
+import { Router } from '@angular/router';
 
 @Injectable()
 export class AppStateEffects {
@@ -50,28 +51,8 @@ export class AppStateEffects {
     ofType(actions.fetchAuctions),
     switchMap(() => this.dataSvc.watchAuctionData(500, 0)),
     map((auctions) => actions.setAuctions({ auctions })),
+    tap(() => this.store.dispatch(actions.setLoaded({ loaded: true }))),
   ));
-
-  // An attempt at pagination for the auctions
-  // TODO: Fetch 10 Auctions at a time -- and listen to
-  // router & pagination events to fetch more auctions
-  // need to merge and handle stupid fucking slider (replace this trash)
-  // slideChanged$ = createEffect(() => this.actions$.pipe(
-  //   ofType(actions.slideChanged),
-  //   withLatestFrom(this.store.select(selectors.selectAuctions)),
-  //   filter(([action, auctions]) => {
-  //     if (!auctions?.length) return false;
-  //     if (action.activeIndex > auctions.length / 2) return true;
-  //     return false;
-  //   }),
-  //   switchMap(([action, auctions]) => {
-  //     const offset = auctions?.length!;
-  //     return this.dataSvc.fetchNextAuctionData(10, offset).pipe(
-  //       map((nextAuctions) => [...auctions!, ...nextAuctions])
-  //     );
-  //   }),
-  //   map((auctions) => actions.setAuctions({ auctions })),
-  // ));
 
   addressChanged$ = createEffect(() => this.actions$.pipe(
     ofType(actions.setWalletAddress),
@@ -134,9 +115,33 @@ export class AppStateEffects {
     tap(({ color }) => document.documentElement.style.setProperty('--active-color', color))
   ), { dispatch: false });
 
+  navigateAuctions$ = createEffect(() => this.actions$.pipe(
+    ofType(actions.navigateAuctions),
+    withLatestFrom(
+      this.store.select(selectors.selectAuctions),
+      this.store.select(selectors.selectActiveAuction),
+    ),
+    tap(([action, auctions, activeAuction]) => console.log('action', action.direction)),
+    tap(([action, auctions, activeAuctions]) => {
+      if (!auctions?.length) return;
+
+      const activeIndex = auctions.findIndex((a) => a.id === activeAuctions?.id);
+      const nav = action.direction;
+
+      if (nav === 'prev' && activeIndex + 1 < auctions?.length) {
+        this.router.navigate(['/auction', auctions[activeIndex + 1]?.id]);
+      } else if (nav === 'next' && activeIndex > 1) {
+        this.router.navigate(['/auction', auctions[activeIndex - 1]?.id]);
+      } else if (nav === 'next' && activeIndex === 1) {
+        this.router.navigate(['/']);
+      }
+    }),
+  ), { dispatch: false });
+
   constructor(
     private store: Store<GlobalState>,
     private actions$: Actions,
+    private router: Router,
     private themeSvc: ThemeService,
     private web3Svc: Web3Service,
     private dataSvc: DataService,

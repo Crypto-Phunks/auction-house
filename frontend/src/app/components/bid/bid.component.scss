@@ -1,5 +1,5 @@
-@import '../../../scss/abstracts/variables';
-@import '../../../scss/abstracts/mixins';
+@import 'abstracts/variables';
+@import 'abstracts/mixins';
 
 :host {
   display: block;
@@ -220,6 +220,7 @@
 .error,
 .transaction {
   position: relative;
+  z-index: 99;
 
   display: none;
   flex-direction: column;
@@ -239,7 +240,7 @@
 
   button {
     position: absolute;
-    top: -1rem;
+    top: -.5rem;
     right: -1rem;
 
     font-family: $secondary-font-stack;
@@ -260,7 +261,6 @@
   }
 
   &.active {
-
     display: flex;
   }
 }

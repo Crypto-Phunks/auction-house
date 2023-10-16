@@ -10,6 +10,8 @@ export interface GlobalState {
 }
 
 export interface AppState {
+  loaded: boolean;
+
   walletAddress: string;
   connected: boolean;
   theme: Theme | null;
