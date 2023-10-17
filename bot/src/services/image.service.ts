@@ -433,7 +433,7 @@ export class ImageService {
     });
 
     const buffer = canvas.toBuffer('image/png');
-    await writeFile(path.join(__dirname, `../../cards/${phunkId}.png`), buffer);
+    // await writeFile(path.join(__dirname, `../../cards/${phunkId}.png`), buffer);
     return { base64: buffer.toString('base64'), color: tinyColor(color).toHex() };
   }
 

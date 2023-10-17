@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 
 import { Web3Service } from './web3.service';
 import { ImageService } from './image.service';
@@ -37,6 +37,8 @@ export class MetaService {
     await writeFile(`./cards/${auctionId}.png`, image.base64, 'base64');
 
     const imageUrl = `${process.env.IMAGE_URL}/${auctionId}.png`;
+
+    Logger.log(`Card created for auction #${auctionId}`, 'MetaService');
 
     const html = `
       <!DOCTYPE html>

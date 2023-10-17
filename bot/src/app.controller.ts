@@ -14,11 +14,13 @@ export class AppController {
 
   @Post('subscribe')
   async refreshMetadata(@Body() body: any): Promise<any> {
+    console.log('body', body);
     return this.spbSvc.addSubscriptions(body);
   }
 
   @Get(['card', 'card/*'])
   async getCard(@Req() request: Request, @Res() res: Response): Promise<any> {
+    console.log('request.url', request.url);
     const pathArr = request.url.split('/').filter((x) => x && x !== 'card');
     const cardData = await this.metaSvc.getCard(pathArr[1]);
     res.send(cardData);
