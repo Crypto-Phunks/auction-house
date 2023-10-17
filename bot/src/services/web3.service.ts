@@ -23,7 +23,7 @@ export class Web3Service {
   auctionCreated$ = this.auctionCreated.asObservable();
 
   client = createPublicClient({
-    chain: goerli,
+    chain: mainnet,
     transport: http(process.env.RPC_URL),
   });
 
