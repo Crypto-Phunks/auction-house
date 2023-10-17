@@ -43,7 +43,7 @@ export class ImageService {
     const svg = await this.createPhunkSvg(punkData, phunkWidth, phunkHeight);
     const color = this.getColor(punkData);
     const bgColor = tinyColor(color).setAlpha(.1).toRgbString();
-    const textColor = tinyColor(color).setAlpha(.75).toRgbString();
+    const textColor = tinyColor(color).setAlpha(1).toRgbString();
 
     ctx.fillStyle = bgColor;
     ctx.fillRect(bleed, bleed, canvasWidth - (bleed * 2), lowerThird);
@@ -162,7 +162,7 @@ export class ImageService {
         const lineTrait_2 = `${trait.label}`;
         ctx.font = 'normal 20px RetroComputer';
         ctx.textAlign = 'right';
-        ctx.fillStyle = '#FF04B4';
+        ctx.fillStyle = textColor;
         ctx.fillText(
           lineTrait_2,
           canvasWidth - bleed - lineTrait_1Width,
@@ -211,7 +211,7 @@ export class ImageService {
     const color = this.getColor(punkData);
 
     const bgColor = tinyColor(color).setAlpha(.1).toRgbString();
-    const textColor = tinyColor(color).setAlpha(.75).toRgbString();
+    const textColor = tinyColor(color).setAlpha(1).toRgbString();
 
     ctx.fillStyle = '#131415';
     ctx.fillRect(0, 0, canvasWidth, canvasHeight);
@@ -387,7 +387,7 @@ export class ImageService {
     ctx.fillText(
       line5_2,
       rightSide + line5_1Width,
-      line5Pos + 40
+      line5Pos + 38
     );
 
     // if (!auctionComplete) {
