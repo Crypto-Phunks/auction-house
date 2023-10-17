@@ -42,8 +42,10 @@ export class ImageService {
     const punkData = await this.web3Svc.getPunkImage(phunkId);
     const svg = await this.createPhunkSvg(punkData, phunkWidth, phunkHeight);
     const color = this.getColor(punkData);
+    const bgColor = tinyColor(color).setAlpha(.1).toRgbString();
+    const textColor = tinyColor(color).setAlpha(.75).toRgbString();
 
-    ctx.fillStyle = color;
+    ctx.fillStyle = bgColor;
     ctx.fillRect(bleed, bleed, canvasWidth - (bleed * 2), lowerThird);
 
     const img = new Image();
@@ -70,7 +72,7 @@ export class ImageService {
     // Line 2 (left side)
     ctx.textBaseline = 'top';
     ctx.font = 'normal 120px RetroComputer';
-    ctx.fillStyle = '#FF04B4';
+    ctx.fillStyle = textColor;
     ctx.fillText(
       phunkId,
       bleed - 5,
@@ -98,7 +100,7 @@ export class ImageService {
     const line3_2 = `${sex.value}`;
     ctx.font = 'normal 24px RetroComputer';
     ctx.textAlign = 'right';
-    ctx.fillStyle = '#ff04b4';
+    ctx.fillStyle = textColor;
     ctx.fillText(
       line3_2,
       canvasWidth - bleed - line3_1Width,
@@ -133,7 +135,7 @@ export class ImageService {
     const line4_2 = `${phunkData.traitCount}`;
     ctx.font = 'normal 24px RetroComputer';
     ctx.textAlign = 'right';
-    ctx.fillStyle = '#ff04b4';
+    ctx.fillStyle = textColor;
     ctx.fillText(
       line4_2,
       canvasWidth - bleed - line4_1Width,
