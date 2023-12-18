@@ -15,7 +15,7 @@ export class AppController {
   @Post('subscribe')
   async refreshMetadata(@Body() body: any): Promise<any> {
     // console.log('body', body);
-    return this.spbSvc.addSubscriptions(body);
+    return await this.spbSvc.addSubscriptions(body);
   }
 
   @Get(['card', 'card/*'])

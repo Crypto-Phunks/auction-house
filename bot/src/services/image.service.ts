@@ -74,7 +74,7 @@ export class ImageService {
     ctx.font = 'normal 120px RetroComputer';
     ctx.fillStyle = textColor;
     ctx.fillText(
-      phunkId,
+      ('0000' + phunkId).slice(-4),
       bleed - 5,
       line1Pos + 20
     );
@@ -387,7 +387,7 @@ export class ImageService {
     ctx.fillText(
       line5_2,
       rightSide + line5_1Width,
-      line5Pos + 38
+      line5Pos + 39
     );
 
     // if (!auctionComplete) {
