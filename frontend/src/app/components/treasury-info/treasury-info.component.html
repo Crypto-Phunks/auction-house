@@ -1,10 +1,10 @@
 <div *ngIf="(treasuryValues$ | async) as treasury">
   <h4>Treasury</h4>
   <div class="values">
-    <div class="usdc">
+    <!-- <div class="usdc">
       <ng-template [ngTemplateOutlet]="usdcIcon"></ng-template>
       <div class="value">{{ +treasury.usdc | formatCash }} USDC</div>
-    </div>
+    </div> -->
     <div class="eth">
       <ng-template [ngTemplateOutlet]="ethIcon"></ng-template>
       <div class="value">{{ treasury.eth | number }} ETH</div>

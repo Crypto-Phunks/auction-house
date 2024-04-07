@@ -142,38 +142,16 @@ export class Web3Service {
 
     try {
       const publicClient = getPublicClient();
-      const [balance, [usdcValue, decimals]] = await Promise.all([
-        publicClient.getBalance({
-          address: environment.addresses.treasuryWalletAddress as `0x${string}`,
-        }),
-        publicClient.multicall({
-          contracts: [{
-            address: `0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48` as `0x${string}`,
-            abi: usdcAbi,
-            functionName: 'balanceOf',
-            args: [environment.addresses.treasuryWalletAddress],
-          }, {
-            address: `0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48` as `0x${string}`,
-            abi: usdcAbi,
-            functionName: 'decimals',
-            args: [],
-          }],
-        })
-      ]);
+      const balance = await publicClient.getBalance({
+        address: environment.addresses.treasuryWalletAddress as `0x${string}`,
+      });
 
-      if (!decimals.result || !usdcValue.result) throw new Error('No balance found');
-
-      const formattedUsdcValue = formatUnits(
-        usdcValue.result as any, // String (bigint)
-        decimals.result as any, // Number
-      );
-
-      return { usdc: formattedUsdcValue, eth: formatEther(balance) };
+      return { eth: formatEther(balance) };
     } catch (error) {
       console.log(error);
     }
 
-    return { usdc: '0', eth: '0' };
+    return { eth: '0' };
   }
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
