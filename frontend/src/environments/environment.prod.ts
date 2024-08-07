@@ -2,7 +2,7 @@ export const environment = {
   production: true,
   httpRpc: 'https://eth-mainnet.g.alchemy.com/v2/tBFG98iJPUBA1DUzkXDLlgaW8ms5qoqR',
   wssRpc: 'wss://eth-mainnet.g.alchemy.com/v2/tBFG98iJPUBA1DUzkXDLlgaW8ms5qoqR',
-  graphURI: 'https://gateway.thegraph.com/api/7209a22e64c7ef1706183bd515b9d15c/subgraphs/id/B58L1YUzPKRZ8GSkizgGDtH1vdtvem76jDVK4LipFTbi',
+  graphURI: 'https://gateway-arbitrum.network.thegraph.com/api/7209a22e64c7ef1706183bd515b9d15c/subgraphs/id/CDkJ2KXjaMEtt91EWsnH3aVYgWYf9usVPYCspnmexGdj',
   addresses: {
     // Auction house contract
     auctionHouseAddress: '0x0E7f7d8007C0FCcAc2a813a25f205b9030697856',
